@@ -72,9 +72,9 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     int numsectors = 1;
     int numpaddles = 68 * 10000 + 62 * 100 + 62;
     
-    private String inputFileName = "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-500k.evio";
+    private String inputFileName = "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-3M-s2.evio";
     private int RunNumber = 4284;
-    private int CurrentSector = 5;
+    private int CurrentSector = 2;
     private static int iteration = 0;
     
     TDirectory mondirectory = new TDirectory();
@@ -1146,6 +1146,8 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
         String name;
         String namedir;
         H1D h1, hsum = null;
+        F1D gaus = null;
+        F1D exp = null;
         GraphErrors g1;
         
         
@@ -1196,7 +1198,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	        canvas.cd(5);
 	        canvas.draw(h1);
         }
-        if(desc.getLayer() == 3)
+        if(desc.getLayer() == 3) //UW
         {
         	//this.canvas = new EmbeddedCanvas();
         	//this.canvas.update();
@@ -1206,103 +1208,111 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	    	uvwnum -= u*100;
 	    	w = uvwnum;
 	    	v = 61;
-	    	int count = 0;
 	    	
-	    	for(v = 0; v < 62; ++v)
-	    	{
-	    		if(hit[u][v][w] == 1)
-	    		{
-		    		name = String.format("adu_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-		    		h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
-		    		if(count == 0){
-		    			hsum = h1;
-		    			++count;
-		    		}
-		    		else hsum.add(h1);
-	    		}
-	    	}
+	    	
+			//Draw U strip shape ADC value with gaussian fit
+			namedir = String.format("Projection%02d", iteration);
+			name = String.format("ProjHistU%02d_W%02d", u + 1, w + 1);
+		    h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
+		    namedir = String.format("GaussFit%02d", iteration);
+			name = String.format("gaussU%02d_%02d", u + 1, w + 1);
+			gaus  = (F1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(0);
-	        canvas.draw(hsum);
+	        canvas.draw(h1);
+	        canvas.draw(gaus,"same");
 	        
-	        for(v = 0; v < 62; ++v)
-	    	{
-	        	if(hit[u][v][w] == 1)
-	    		{
-		    		name = String.format("adw_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-		    		h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
-		    		if(count == 0){
-		    			hsum = h1;
-		    			++count;
-		    		}
-		    		else hsum.add(h1);
-	    		}
-	    	}
+	        
+	        //Draw W strip shape ADC value with gaussian fit
+	        namedir = String.format("Projection%02d", iteration);
+			name = String.format("ProjHistW%02d_U%02d", w + 1, u + 1);
+		    h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
+		    namedir = String.format("GaussFit%02d", iteration);
+			name = String.format("gaussW%02d_%02d", w + 1, u + 1);
+			gaus  = (F1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(1);
-	        canvas.draw(hsum);
+	        canvas.draw(h1);
+	        canvas.draw(gaus,"same");
 	        
-	        name = String.format("attu_%02d", u + 1);
-		    g1  = (GraphErrors)getDir().getDirectory("attendir").getObject(name);
+	        
+	        //Draw U attenuation with exponential
+	        namedir = String.format("GraphE%02d", iteration);
+			name = String.format("graphU_%02d", u + 1);
+		    g1  = (GraphErrors)getDir().getDirectory(namedir).getObject(name);
+		    namedir = String.format("ExpoFit%02d", iteration);
+			name = String.format("expU_%02d", u + 1);
+		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
 		    canvas.cd(2);
 		    canvas.draw(g1);
+		    canvas.draw(exp,"same");
 	        
-	        name = String.format("attw_%02d", w + 1);
-	        g1  = (GraphErrors)getDir().getDirectory("attendir").getObject(name);
+		    
+		    //Draw W attenuation with exponential
+	        namedir = String.format("GraphE%02d", iteration);
+			name = String.format("graphW_%02d", w + 1);
+		    g1  = (GraphErrors)getDir().getDirectory(namedir).getObject(name);
+		    namedir = String.format("ExpoFit%02d", iteration);
+			name = String.format("expW_%02d", w + 1);
+		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(3);
 	        canvas.draw(g1);
+	        canvas.draw(exp,"same");
 	          
         }
         if(desc.getLayer() == 4)
         {
-	        canvas.divide(2,2);
+	        canvas.divide(2,1);
 	        uvwnum = (int)desc.getComponent();
 	    	u = (int)(uvwnum/100.0);
 	    	uvwnum -= u*100;
 	    	v = uvwnum;
 	    	w = 61;
-	    	int count = 0;
 	    	
-	    	for(w = 0; w < 62; ++w)
-	    	{
-	    		if(hit[u][v][w] == 1)
-	    		{
-		    		name = String.format("adu_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-		    		h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
-		    		if(count == 0){
-		    			hsum = h1;
-		    			++count;
-		    		}
-		    		else hsum.add(h1);
-	    		}
-	    	}
+//	    	//Draw U strip shape ADC value with gaussian fit
+//			namedir = String.format("Projection%02d", iteration);
+//			name = String.format("ProjHistU%02d_W%02d", u + 1, w + 1);
+//		    h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
+//		    namedir = String.format("GaussFit%02d", iteration);
+//			name = String.format("gaussU%02d_%02d", u + 1, w + 1);
+//			gaus  = (F1D)getDir().getDirectory(namedir).getObject(name);
+//	        canvas.cd(0);
+//	        canvas.draw(h1);
+//	        canvas.draw(gaus,"same");
+	        
+	        
+	        //Draw V strip shape ADC value with gaussian fit
+	        namedir = String.format("Projection%02d", iteration);
+			name = String.format("ProjHistV%02d_U%02d", v + 1, u + 1);
+		    h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
+		    namedir = String.format("GaussFit%02d", iteration);
+			name = String.format("gaussV%02d_%02d", v + 1, u + 1);
+			gaus  = (F1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(0);
-	        canvas.draw(hsum);
+	        canvas.draw(h1);
+	        canvas.draw(gaus,"same");
 	        
-	        for(w = 0; w < 62; ++w)
-	    	{
-	        	if(hit[u][v][w] == 1)
-	    		{
-		    		name = String.format("adv_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-		    		h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
-		    		if(count == 0){
-		    			hsum = h1;
-		    			++count;
-		    		}
-		    		else hsum.add(h1);
-	    		}
-	    	}
+	        
+//	        //Draw U attenuation with exponential
+//	        namedir = String.format("GraphE%02d", iteration);
+//			name = String.format("graphU_%02d", u + 1);
+//		    g1  = (GraphErrors)getDir().getDirectory(namedir).getObject(name);
+//		    namedir = String.format("ExpoFit%02d", iteration);
+//			name = String.format("expU_%02d", u + 1);
+//		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
+//		    canvas.cd(2);
+//		    canvas.draw(g1);
+//		    canvas.draw(exp,"same");
+	        
+		    
+		    //Draw V attenuation with exponential
+	        namedir = String.format("GraphE%02d", iteration);
+			name = String.format("graphV_%02d", v + 1);
+		    g1  = (GraphErrors)getDir().getDirectory(namedir).getObject(name);
+		    namedir = String.format("ExpoFit%02d", iteration);
+			name = String.format("expV_%02d", v + 1);
+		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(1);
-	        canvas.draw(hsum);
-	        
-	        name = String.format("attu_%02d", u + 1);
-		    g1  = (GraphErrors)getDir().getDirectory("attendir").getObject(name);
-		    canvas.cd(2);
-		    canvas.draw(g1);
-	        
-	        name = String.format("attv_%02d", v + 1);
-	        g1  = (GraphErrors)getDir().getDirectory("attendir").getObject(name);
-	        canvas.cd(3);
 	        canvas.draw(g1);
-	        
+	        canvas.draw(exp,"same");
 	        
         }
 	        
@@ -1364,27 +1374,22 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		int adcutuw[]      = {70,5,5};
 		int adcutvw[]      = {70,5,5};
 		int adcutwu[]      = {70,5,5};
-		
-		int tid            = 100000;
-		int cid            = 10000;
-		int lid            = 100;		
 
-		int thr            = 15;
-		int iis            = CurrentSector;	//Sector 5 hardwired for now
+		//int tid            = 100000;
+		//int cid            = 10000;
+		int thr            = 10; //threshold count
+		int iis            = CurrentSector;	//Sector 2 hardwired for now
 		
-		int hid,hidd;
-
+		float uvw=0;
 		
-		
-		H2D hadc,htdc;
-		H1D hpix, whatever;
+		H2D histadu;
+		H1D hDalitz, hDalitzMCut;
+		H2D HnumhitsUV, HnumhitsUW, HnumhitsVW;
 		String name;
 		String namedir;
-		//H1D usig[] = new H1D[6000];
-		//H1D vsig[] = new H1D[6000];
-		//H1D wsig[] = new H1D[6000];
+		H1D pixelfilling;
 		
-		for (int is=0 ; is<6 ; is++) 
+		for (int is=0 ; is<6 ; is++) //initialization
 		{
 			for (int il=0 ; il<9 ; il++) 
 			{
@@ -1410,7 +1415,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		if(event.hasBank("PCAL::dgtz")==true)
 		{
 			int ic=0;	// ic=0,1,2 -> PCAL,ECinner,ECouter
-			float uvw=0;
+			uvw=0;
 			float tdcmax=100000;
             EvioDataBank bank = (EvioDataBank) event.getBank("PCAL::dgtz");
             
@@ -1429,98 +1434,27 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
             	float tdc =(float)(bank.getInt("TDC",i));
             	tdc=((tdc-(float)mc_t*1000)-tdcmax+1340000)/1000;
             	
-                if(is==iis)
+                if(is==iis)//whatever sector mentioned
                 {
             	   if (adc>thr) 
             	   {
             	     nh[is-1][il-1]++;
             	     int inh = nh[is-1][il-1];
             	     adcr[is-1][il-1][inh-1] = adc;
-            	     tdcr[is-1][il-1][inh-1] = tdc;
+            	     //tdcr[is-1][il-1][inh-1] = tdc;
             	     strr[is-1][il-1][inh-1] = ip;
             	     uvw=uvw+uvw_dalitz(ic,ip,il);
             	   }
-            	   
-               	   hid = (int) (1e7*is+10*tid+ic*cid+il*lid);
-               	   namedir = String.format(laba[ic]+ "%02d", iteration);
-            	   hadc = (H2D) getDir().getDirectory(namedir).getObject("A"+hid);
-            	   namedir = String.format(labt[ic]+ "%02d", iteration);
-            	   htdc = (H2D) getDir().getDirectory(namedir).getObject("T"+hid);
-                   hadc.fill(adc,ip);
-                   htdc.fill(tdc,ip);
-            	   hid = (int) (1e7*is+11*tid+ic*cid);
-            	   namedir = String.format(laba[ic]+ "%02d", iteration);
-            	   hpix = (H1D) getDir().getDirectory(namedir).getObject("A"+hid);
-                   hpix.fill(uvw);
-               }
-            }
-         }		
-		
-		mc_t=0.0;
-		if(event.hasBank("EC::true")==true)
-		{
-			EvioDataBank bank = (EvioDataBank) event.getBank("EC::true");
-			int nrows = bank.rows();
-			for(int i=0; i < nrows; i++)
-			{
-				mc_t = bank.getDouble("avgT",i);
-			}	
-		}
-		
-		if(event.hasBank("EC::dgtz")==true)
-		{
-        	float uvw=0;
-            float tdcmax=100000;
-            EvioDataBank bank = (EvioDataBank) event.getBank("EC::dgtz");
-            
-            for(int i = 0; i < bank.rows(); i++)
-            {
-            	float tdc = (float)bank.getInt("TDC",i)-(float)mc_t*1000;
-            	if (tdc<tdcmax) tdcmax=tdc;
+            	   namedir = String.format("dalitz%02d", iteration);
+            	   hDalitz = (H1D) getDir().getDirectory(namedir).getObject("Dalitz Condition");
+                   hDalitz.fill(uvw);
+                }
             }
             
-            for(int i = 0; i < bank.rows(); i++)
-            {
-            	int  is = bank.getInt("sector",i); //sector
-            	int  ip = bank.getInt("strip",i); //strip 68,62,62, 35,35
-             	int  ic = bank.getInt("stack",i); //pcal = 0, ecin = 1, ecout = 2
-            	int  il = bank.getInt("view",i); //u=1, v = 2, w =3
-            	int adc = bank.getInt("ADC",i);
-            	int tdc = bank.getInt("TDC",i);
-            	
-            	float tdcc=(((float)tdc-(float)mc_t*1000)-tdcmax+1340000)/1000;
-            	
-            	int  iv = ic*3+il;
-                
-                if(is==iis)
-                {
-            	   if (adc>thr) 
-            	   {
-            	     nh[is-1][iv-1]++;
-            	     int inh = nh[is-1][iv-1];
-            	     adcr[is-1][iv-1][inh-1] = adc;
-            	     tdcr[is-1][iv-1][inh-1] = tdcc;
-            	     strr[is-1][iv-1][inh-1] = ip;
-            	     uvw=uvw+uvw_dalitz(ic,ip,il);
-            	   }
-            	   
-                   hid = (int) (1e7*is+10*tid+ic*cid+il*lid);
-                   namedir = String.format(laba[ic]+ "%02d", iteration);
-            	   hadc = (H2D) getDir().getDirectory(namedir).getObject("A"+hid);
-            	   namedir = String.format(labt[ic]+ "%02d", iteration);
-            	   htdc = (H2D) getDir().getDirectory(namedir).getObject("T"+hid);
-                   hadc.fill(adc,ip);
-                   htdc.fill(tdcc,ip);
-            	   hid = (int) (1e7*is+11*tid+ic*cid);
-            	   namedir = String.format(laba[ic]+ "%02d", iteration);
-            	   hpix = (H1D) getDir().getDirectory(namedir).getObject("A"+hid);
-                   hpix.fill(uvw);
-               }
-            }
+
          }
         
         // Logic: Limit multiplicity to 1 hit per view
-        
         for (int il=0 ; il<9 ; il++)
         {
         	good_lay[il]=nh[iis-1][il]==1;
@@ -1533,7 +1467,6 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
         }
         
         // Logic: Good two-view and three-view multiplicity (m2,m3 cut)
-        
         for (int ic=0 ; ic<3; ic++)
         {
         	good_uv[ic]   = good_lay[0+ic*3]&good_lay[1+ic*3];
@@ -1549,207 +1482,55 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
         	good_wutt[ic] = good_wut[ic]&ad[rsw[ic]+ic*3]>adcutwu[ic];        	
         }  
         
-        // Histo: Check plots using trigger condition (here u.v coincidence) (TAG=15)
-        
-        hid  = (int) (1e7*iis);
-        
-        for (int ic=0 ; ic<3 ; ic++)
+        String histNameFormat[] = {"histU_%02d", "histV_%02d", "histW_%02d"};
+		String histname;
+		
+        for (int ic=0 ; ic<3 ; ic++)//ic = {PCAL, EC inner, EC outer}
         {
-        	if (good_uv[ic]) 
+        	if (good_uvw[ic])//multiplicity
         	{
-        		for (int il=1 ; il<4 ; il++) 
+        		if(ic == 0)//PCAL
         		{
-        			hidd = hid+15*tid+ic*cid+il*lid;
-        			namedir = String.format(laba[ic]+ "%02d", iteration);
-        			hadc = (H2D) getDir().getDirectory(namedir).getObject("A"+hidd);
-        			int ill=ic*3+il-1;
-        			hadc.fill(ad[ill],rs[ill]);
-        		}
-        	}
-        }
-        
-        // Histo: MIP plots using m2 and s cuts (TAG=20)
- 
-        H2D hadca[] = new H2D[3];
-        
-        for (int ic=0 ; ic<3 ; ic++)
-        { 	
-        	for (int il=1 ; il<4 ; il++) 
-        	{
-        		hidd = hid+20*tid+ic*cid+il*lid;   
-        		namedir = String.format(laba[ic]+ "%02d", iteration);
-        		hadca[il-1] = (H2D) getDir().getDirectory(namedir).getObject("A"+hidd);
-        	}
-        	if(good_uwt[ic]) hadca[0].fill(ad[ic*3+0],rs[ic*3+0]);
-            if(good_vwt[ic]) hadca[1].fill(ad[ic*3+1],rs[ic*3+1]);
-            if(good_wut[ic]) hadca[2].fill(ad[ic*3+2],rs[ic*3+2]);
-        } 
-        
-        // Histo: MIP plots using Dalitz m3 cut (TAG=21) and s cut (TAG=22)
-        
-        //ic = 0 -> PCAL
-        for (int ic=0 ; ic<3 ; ic++) 
-        {
-        	if (good_uvw[ic]) 
-        	{
-        		if(ic == 0 && hit[rs[0] - 1][rs[1] - 1][rs[2] - 1] == 1)
-        		{
-        			if(rs[0] == 67 && rs[2] % 5 == 0)
+        			namedir = String.format("dalitz%02d", iteration);
+        			hDalitzMCut = (H1D) getDir().getDirectory(namedir).getObject("Dalitz Multiplicity Cut");
+        			hDalitzMCut.fill(uvw);
+        			HnumhitsUV = (H2D) getDir().getDirectory(namedir).getObject("numHitsUV");
+        			HnumhitsUV.fill(rs[0],rs[1]);
+        			HnumhitsUW = (H2D) getDir().getDirectory(namedir).getObject("numHitsUW");
+        			HnumhitsUW.fill(rs[0],rs[2]);
+        			HnumhitsVW = (H2D) getDir().getDirectory(namedir).getObject("numHitsVW");
+        			HnumhitsVW.fill(rs[1],rs[2]);
+        			for(int il = 0; il < 3; il++)//three layers il = {u,v,w}
         			{
-        				namedir = String.format(laba[ic]+ "%02d", iteration);
-	        			whatever = (H1D) getDir().getDirectory(namedir).getObject("u67w" + rs[2] + "adu");
-	        			whatever.fill(ad[0]);	
+        				namedir = String.format("crossStripHisto%02d", iteration);
+        				histname = String.format(histNameFormat[il], rs[il]);
+            			histadu = (H2D) getDir().getDirectory(namedir).getObject(histname);
+            			if(il == 0)histadu.fill(rs[2],ad[il]);
+            			else histadu.fill(rs[0],ad[il]);
+        			} 
+        			
+        			
+        			//check if pixel is valid with hitmatrix
+        			//fill pixel histograms initialized by Nickinit()
+        			if(hit[rs[0] - 1][rs[1] - 1][rs[2] - 1] == 1)
+        			{
+        				namedir = String.format("pixelsignal%02d", iteration);
+            			name = String.format("adu_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
+            			pixelfilling = (H1D)getDir().getDirectory(namedir).getObject(name);
+            			pixelfilling.fill(ad[0]);
+            			
+            			name = String.format("adv_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
+            			pixelfilling = (H1D)getDir().getDirectory(namedir).getObject(name);
+            			pixelfilling.fill(ad[1]);
+            			
+            			name = String.format("adw_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
+            			pixelfilling = (H1D)getDir().getDirectory(namedir).getObject(name);
+            			pixelfilling.fill(ad[2]);
         			}
-        				
-        			//hit[rs[0] - 1][rs[1] - 1][rs[2] - 1] = 1;
-        			
-        			namedir = String.format("pixelsignal%02d", iteration);
-        			name = String.format("adu_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
-        			whatever = (H1D)getDir().getDirectory(namedir).getObject(name);
-        			whatever.fill(ad[0]);
-        			
-        			name = String.format("adv_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
-        			whatever = (H1D)getDir().getDirectory(namedir).getObject(name);
-        			whatever.fill(ad[1]);
-        			
-        			name = String.format("adw_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
-        			whatever = (H1D)getDir().getDirectory(namedir).getObject(name);
-        			whatever.fill(ad[2]);
-        			
-        			   
         		}
-            	for (int il=1 ; il<4 ; il++) 
-            	{
-            		namedir = String.format(laba[ic]+ "%02d", iteration);
-            		hidd = hid+21*tid+ic*cid+il*lid;   
-            		hadca[il-1] = (H2D) getDir().getDirectory(namedir).getObject("A"+hidd);
-            	}
-                if(good_uwt[ic]) hadca[0].fill(ad[ic*3+0],rs[ic*3+0]);
-                if(good_vwt[ic]) hadca[1].fill(ad[ic*3+1],rs[ic*3+1]);
-                if(good_wut[ic]) hadca[2].fill(ad[ic*3+2],rs[ic*3+2]);
-            	for (int il=1 ; il<4 ; il++) 
-            	{
-            		namedir = String.format(laba[ic]+ "%02d", iteration);
-            		hidd = hid+22*tid+ic*cid+il*lid;   
-            		hadca[il-1] = (H2D) getDir().getDirectory(namedir).getObject("A"+hidd);
-            	}
-                if(good_uwtt[ic]) hadca[0].fill(ad[ic*3+0],rs[ic*3+0]);
-                if(good_vwtt[ic]) hadca[1].fill(ad[ic*3+1],rs[ic*3+1]);
-                if(good_wutt[ic]) hadca[2].fill(ad[ic*3+2],rs[ic*3+2]);
-                
-        // Histo: U vs V, U vs W, V vs W (used for detector map)
-                
-                double rs1=rs[ic*3+0] ; double rs2=rs[ic*3+1] ; double rs3=rs[ic*3+2];
-                double ad1=ad[ic*3+0] ; double ad2=ad[ic*3+1] ; double ad3=ad[ic*3+2];
-                double td1=td[ic*3+0] ; double td2=td[ic*3+1] ; double td3=td[ic*3+2];
-                
-                hidd = hid+40*tid+ic*cid;
-                
-                namedir = String.format(laba[ic]+ "%02d", iteration);
-        		H2D hadc121 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+12*lid+1));
-        		H2D hadc122 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+12*lid+2));
-        		H2D hadc131 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+13*lid+1));
-        		H2D hadc132 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+13*lid+2));
-        		H2D hadc133 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+13*lid+3));
-        		H2D hadc231 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+23*lid+1));
-        		H2D hadc232 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+23*lid+2));
-        		H2D hadc321 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+32*lid+1));
-        		H2D hadc322 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+32*lid+2));
-                      
-                                
-                for (int i=0 ; i<nh[iis-1][ic*3+0] ; i++) 
-                {
-                	double ris1=strr[iis-1][ic*3+0][i];
-                	for (int k=0 ; k<nh[iis-1][ic*3+1] ; k++) 
-                	{
-                		double ris2=strr[iis-1][ic*3+1][k];
-                		hadc121.fill(ris1,ris2,1.0);
-                		hadc122.fill(ris1,ris2,ad1);
-                	}
-                	for (int k=0 ; k<nh[iis-1][ic*3+2] ; k++) 
-                	{
-                		double ris3=strr[iis-1][ic*3+2][k];
-                		hadc131.fill(ris1,ris3,1.0);
-                		hadc132.fill(ris1,ris3,ad1);
-                		hadc133.fill(ris1,ris3,td3-td1);
-                	}
-                }
-                
-                for (int i=0 ; i<nh[iis-1][ic*3+1] ; i++) 
-                {
-                	double ris2=strr[iis-1][ic*3+1][i];
-                	for (int k=0 ; k<nh[iis-1][ic*3+2] ; k++) 
-                	{
-                		double ris3=strr[iis-1][ic*3+2][k];
-                		hadc231.fill(ris2,ris3,1.0);
-                		hadc232.fill(ris2,ris3,ad2);
-                		hadc321.fill(ris3,ris2,1.0);
-                		hadc322.fill(ris3,ris2,ad3);                		
-                	}
-                }
-                
-                
-        // Histo: Attenuation lengths from ADC vs strip (TAG=50)
-                
-                hidd=hid+50*tid+ic*cid;
-                
-                namedir = String.format(laba[ic]+ "%02d", iteration);
-        		H2D hadc21 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+21*lid+rs1));
-        		H2D hadc12 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+12*lid+rs2));
-        		H2D hadc31 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+31*lid+rs1));
-        		H2D hadc13 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+13*lid+rs3));
-        		H2D hadc32 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+32*lid+rs2));
-        		H2D hadc23 = (H2D) getDir().getDirectory(namedir).getObject("A"+(int)(hidd+23*lid+rs3));
-               
-                if (good_uv[ic]) 
-                {
-                	if(ad2>10) hadc21.fill(rs2,ad1); // U MIP VS V STRIP
-                	if(ad1>10) hadc12.fill(rs1,ad2); // V MIP VS U STRIP
-                }
-                if (good_uw[ic]) 
-                {
-                	if(ad3>10) hadc31.fill(rs3,ad1); // U MIP VS W STRIP
-                	if(ad1>10) hadc13.fill(rs1,ad3); // W MIP VS U STRIP
-                }
-                if (good_vw[ic]) 
-                {
-                	if(ad3>10) hadc32.fill(rs3,ad2); // V MIP VS W STRIP
-                	if(ad2>10) hadc23.fill(rs2,ad3); // W MIP VS V STRIP
-                }
-                
-        // Histo: Attenuation lengths from ADC vs strip (TAG=60)
-                
-                hidd=hid+60*tid+ic*cid;
-                
-                namedir = String.format(labt[ic]+ "%02d", iteration);
-        		H2D htdc21 = (H2D) getDir().getDirectory(namedir).getObject("T"+(int)(hidd+21*lid+rs1));
-        		H2D htdc12 = (H2D) getDir().getDirectory(namedir).getObject("T"+(int)(hidd+12*lid+rs2));
-        		H2D htdc31 = (H2D) getDir().getDirectory(namedir).getObject("T"+(int)(hidd+31*lid+rs1));
-        		H2D htdc13 = (H2D) getDir().getDirectory(namedir).getObject("T"+(int)(hidd+13*lid+rs3));
-        		H2D htdc32 = (H2D) getDir().getDirectory(namedir).getObject("T"+(int)(hidd+32*lid+rs2));
-        		H2D htdc23 = (H2D) getDir().getDirectory(namedir).getObject("T"+(int)(hidd+23*lid+rs3));
-               
-                if (good_uv[ic]) 
-                {
-                	if(ad2>5) htdc21.fill(rs2,td1-td2); // U MIP VS V STRIP
-                	if(ad1>5) htdc12.fill(rs1,td2-td1); // V MIP VS U STRIP
-                }
-                if (good_uw[ic]) 
-                {
-                	if(ad3>5) htdc31.fill(rs3,td1-td3); // U MIP VS W STRIP
-                	if(ad1>5) htdc13.fill(rs1,td3-td1); // W MIP VS U STRIP
-                }
-                if (good_vw[ic]) 
-                {
-                	if(ad3>5) htdc32.fill(rs3,td2-td3); // V MIP VS W STRIP
-                	if(ad2>5) htdc23.fill(rs2,td3-td2); // W MIP VS V STRIP
-                }                
-                
-      // Histo: Time Walk (Delta t vs ADC) (TAG=61)
-                
-                
         	}
         }
+        
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -1782,7 +1563,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     	   //this.analyze();
     	}
     
-    public void analyze() 
+    public void Nickanalyze() 
 	{
 		double centroids[] = new double[20000];
 		double x[] = new double[20000];
@@ -1924,124 +1705,93 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 			fitdir.add(attengraph);
 		}
 		
-	
-		//JFrame frame1 = new JFrame();
-		//TCanvas u67can = new TCanvas("u67can", "u67can", 800, 600, 1, 1);
-		//GraphErrors attengraph;
-		//attengraph = graphn("attenplot_u67",counter,x,centroids,ex,ey);
-	
-		//create function and fit
-		//myfunc2 = new F1D("exp",0.0,500.0); //"mycustomfunc",
-		//myfunc2.parameter(0).setValue(100.0);
-		//myfunc2.setParLimits(0, 0.0, 200.0);
-		//myfunc2.parameter(1).setValue(-0.002659574468);
-		//myfunc2.setParLimits(1, 0.0, 105.0);
-		//attengraph.fit(myfunc2);
-		
-		//System.out.println(myfunc2.getParameter(0));
-		//System.out.println(myfunc2.getParameter(1));
-		//myfunc2.getParameter(0);
-		//myfunc2.getParameter(1);
-		
-		
-		//u67can.draw(attengraph);
-		//u67can.draw(myfunc2, "same");
-		//frame1.add(u67can);
-		//frame1.setVisible(true);
-		//frame1.export("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/testattenALLu.png");
-		//u67can.save("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/testattenu67.png");
-		
-		//.saveAs("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/testattenu67.eps");
-		//.save("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/testattenALLu.png");
-		
-		
 		getDir().addDirectory(fitdir);
 
 		
 	}
 	
-	public GraphErrors graphn(String name, int numberpoints, double x[], double y[], double xe[], double ye[])
-	{
-		double a[] = new double[numberpoints];
-		double b[] = new double[numberpoints];
-		double ae[] = new double[numberpoints];
-		double be[] = new double[numberpoints];
-		
-		for(int i = 0; i < numberpoints; ++i)
-		{
-			a[i] = x[i];
-			ae[i] = xe[i];
-			b[i] = y[i];
-			be[i] = ye[i];			
-		}
-		
-		GraphErrors mygraph = new GraphErrors(a,b,ae,be);
-		mygraph.setName(name);
-		
-		return mygraph;
-	}
-	
-	//xdistance[i] needs to be 1-62 or 1-68 not 0
-	public void CalcDistance(double xdistance[], double xdistanceE[], int numpoints, char stripletter)
-	{
-	    int i;
-	    double distperstrip = 5.055;
-	    
-	    if(stripletter == 'u' || stripletter == 'U')
-	    {
-	        //convert strip number to distance
-	        for(i = 0; i < numpoints; ++i)
-	        {
-	            xdistance[i] = Math.abs(xdistance[i] - 77.0) * distperstrip;
-	            xdistanceE[i] = xdistanceE[i] * distperstrip;
-	        }
-	    }
-	    else if(stripletter == 'v' || stripletter == 'w' || stripletter == 'V' || stripletter == 'W')
-	    {
-	        //convert strip number to distance
-	        for(i = 0; i < numpoints; ++i)
-	        {
-	            xdistance[i] = Math.abs(xdistance[i] - 84.0) * distperstrip;
-	            xdistanceE[i] = xdistanceE[i] * distperstrip;
-	        }
-	    }
-
-	}
-	
-	//crossstrip needs to be 1-62 or 1-68 not 0
-	void CalcDistinStrips(char stripletter, int crossstrip, double x[], double xE[], int pointnum)
-	{
-	    if(stripletter == 'u' || stripletter == 'U')
-	    {
-	        if(crossstrip <= 15)
-	        {
-	            //converts to 77 strips
-	            x[pointnum] = 2.0* crossstrip - 1.0;
-	            xE[pointnum] = 1.0;
-	        }
-	        else if(crossstrip > 15)
-	        {
-	            //converts to 77 strips
-	            x[pointnum] = (30.0 + (crossstrip - 15.0)) - 0.5;
-	            xE[pointnum] = 1.0/2.0;
-	        }
-	    }
-	    else if(stripletter == 'v' || stripletter == 'w' || stripletter == 'V' || stripletter == 'W')
-	    {
-	        if(crossstrip <= 52)
-	        {
-	            //converts to 84 strips
-	            x[pointnum] = crossstrip - 0.5;
-	            xE[pointnum] = 1.0/2.0;
-	            }
-	            else if(crossstrip > 52)
-	            {
-	                //converts to 84 strips
-	                x[pointnum] = (52.0 + 2.0*(crossstrip - 52.0)) - 1.0;
-	                xE[pointnum] = 1.0;
-	            }
-	    }
-	}
+  //graphErrors constructor
+  	public GraphErrors graphn(String name, int numberpoints, double x[], double y[], double xe[], double ye[])
+      {
+          double a[] = new double[numberpoints];
+          double b[] = new double[numberpoints];
+          double ae[] = new double[numberpoints];
+          double be[] = new double[numberpoints];
+          
+          for(int i = 0; i < numberpoints; ++i)
+          {
+              a[i] = x[i];
+              ae[i] = xe[i];
+              b[i] = y[i];
+              be[i] = ye[i];            
+          }
+          
+          GraphErrors mygraph = new GraphErrors(a,b,ae,be);
+          mygraph.setName(name);
+          mygraph.setTitle(name);
+          
+          return mygraph;
+      }
+  	
+  	
+  	//crossstrip needs to be 1-62 or 1-68 not 0
+      public double[] CalcDistinStrips(char stripletter, int crossstrip)
+      {
+  	  double x=0;
+  	  double xE = 0.0;
+          if(stripletter == 'u' || stripletter == 'U')
+          {
+              if(crossstrip <= 15)
+              {
+                  //converts to 77 strips
+                  x = 2.0* crossstrip - 1.0;
+                  xE = 1.0;
+              }
+              else if(crossstrip > 15)
+              {
+                  //converts to 77 strips
+                  x = (30.0 + (crossstrip - 15.0)) - 0.5;
+                  xE = 1.0/2.0;
+              }
+          }
+          else if(stripletter == 'v' || stripletter == 'w' || stripletter == 'V' || stripletter == 'W')
+          {
+              if(crossstrip <= 52)
+              {
+                  //converts to 84 strips
+                  x = crossstrip - 0.5;
+                  xE = 1.0/2.0;
+                  }
+                  else if(crossstrip > 52)
+                  {
+                      //converts to 84 strips
+                      x = (52.0 + 2.0*(crossstrip - 52.0)) - 1.0;
+                      xE = 1.0;
+                  }
+          }
+          return new double[] {x, xE};
+      }
+      
+      //xdistance needs to be 1-62 or 1-68 not 0
+      public double[] CalcDistance(char stripletter, double xdistance, double xdistanceE)
+      {
+          double distperstrip = 5.055;
+          
+          if(stripletter == 'u' || stripletter == 'U')
+          {
+              //convert strip number to distance
+              xdistance = Math.abs(xdistance - 77.0) * distperstrip;
+              xdistanceE = xdistanceE * distperstrip;
+          }
+          else if(stripletter == 'v' || stripletter == 'w' || stripletter == 'V' || stripletter == 'W')
+          {
+              //convert strip number to distance
+              xdistance = Math.abs(xdistance - 84.0) * distperstrip;
+              xdistanceE = xdistanceE * distperstrip;
+          }
+          return new double[] {xdistance, xdistanceE};
+      }
+      
 	
 
 	
@@ -2091,100 +1841,46 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		getDir().addDirectory(pixelsignal);
 	}
 	
-
-
 	public void init() 
 	{
+		                            //strip number
+		String histNameFormat[] = {"histU_%02d", "histV_%02d", "histW_%02d"};
+		String histname;
+		String namedir;
 		
-		//Histogram ID convention
-		//hid=is*1e7 + tag*1e5 + ic*1e4 + uv*1e2 + pmt
-		//is=1-6 tag=0-99 ic=0-2 uv=12,13,23 pmt=1-68
-		//                    
-		int    nbn1[] = {68,36,36}; //PCAL, EC inner, EC outer
-		double nbn2[] = {69.0,37.0,37.0}; //PCAL, EC inner, EC outer
-		String name;
+		int stripMax[] = {68, 62, 62};//u, v, w
+		int binNum[] = {62,68,68};//w, u, u
+		double binMaxX[] = {62.5,68.5,68.5};
+	
+		namedir = String.format("crossStripHisto%02d", iteration);
+		TDirectory geometry = new TDirectory(namedir);
+		namedir = String.format("dalitz%02d", iteration);
+		TDirectory calADC = new TDirectory(namedir);
 		
-		int hid;
-		int tid       = 100000; //Tag number
-		int cid       = 10000; //EC inner, EC outer, pcal
-		int lid       = 100; //u,v,w
-		int is        = CurrentSector; //sector number
-		int iss       = (int) (is*1e7); //sector number scale
-
-	    TDirectory calADC[] = new TDirectory[3]; //creates adc directory for each cid
-	    TDirectory calTDC[] = new TDirectory[3]; //creates tdc directory for each cid
-	    
-    	for (int ic=0 ; ic<3 ; ic++)
-    	{  
-    		//ic=0,1,2 -> PCAL,ECALinner,ECALouter
-    		
-    		name = String.format(laba[ic]+ "%02d", iteration);
-    		calADC[ic] = new TDirectory(name);
-    		name = String.format(labt[ic]+"%02d", iteration);
-    		calTDC[ic] = new TDirectory(name);
- 
-    		hid=iss+11*tid+ic*cid; //Dalitz test
-    		calADC[ic].add(new H1D("A"+hid,50,0.,3.0));
-    		
-    		hid=iss+50*tid+ic*cid; //Light attenuation vs crossing strip
-    		for (int ip=1 ; ip<nbn1[ic]+1 ; ip++) 
-    		{    		 
-    			calADC[ic].add(new H2D("A"+(int)(hid+21*lid+ip),nbn1[ic],1.0,nbn2[ic],30,0.0,200.0));
-    			calADC[ic].add(new H2D("A"+(int)(hid+12*lid+ip),nbn1[ic],1.0,nbn2[ic],30,0.0,200.0));     
-    			calADC[ic].add(new H2D("A"+(int)(hid+31*lid+ip),nbn1[ic],1.0,nbn2[ic],30,0.0,200.0));    	 
-    			calADC[ic].add(new H2D("A"+(int)(hid+13*lid+ip),nbn1[ic],1.0,nbn2[ic],30,0.0,200.0));    	 
-    			calADC[ic].add(new H2D("A"+(int)(hid+32*lid+ip),nbn1[ic],1.0,nbn2[ic],30,0.0,200.0));    		 
-    			calADC[ic].add(new H2D("A"+(int)(hid+23*lid+ip),nbn1[ic],1.0,nbn2[ic],30,0.0,200.0));	
-    		}
-    		
-    		if(ic == 0) //PCAL
-    		{
-    			calADC[ic].add(new H1D("u67w60adu",75,0.0,400.0));
-    			calADC[ic].add(new H1D("u67w55adu",75,0.0,400.0));
-    			calADC[ic].add(new H1D("u67w50adu",75,0.0,400.0));
-    			calADC[ic].add(new H1D("u67w45adu",75,0.0,400.0));
-    			calADC[ic].add(new H1D("u67w40adu",75,0.0,400.0));
-    			calADC[ic].add(new H1D("u67w35adu",75,0.0,400.0));
-    			calADC[ic].add(new H1D("u67w30adu",75,0.0,400.0));
-    			calADC[ic].add(new H1D("u67w25adu",75,0.0,400.0));
-    			calADC[ic].add(new H1D("u67w20adu",75,0.0,400.0));
-    			calADC[ic].add(new H1D("u67w15adu",75,0.0,400.0));
-    			calADC[ic].add(new H1D("u67w10adu",75,0.0,400.0));
-    			calADC[ic].add(new H1D("u67w5adu",75,0.0,400.0));
-    		}
-    		
-    		hid=iss+60*tid+ic*cid; //Time Difference vs crossing strip
-    		for (int ip=1 ; ip<nbn1[ic]+1 ; ip++) 
-    		{    		 
-    			calTDC[ic].add(new H2D("T"+(int)(hid+21*lid+ip),nbn1[ic],1.0,nbn2[ic],80,-40.0,40.0));
-    			calTDC[ic].add(new H2D("T"+(int)(hid+12*lid+ip),nbn1[ic],1.0,nbn2[ic],80,-40.0,40.0));     
-    			calTDC[ic].add(new H2D("T"+(int)(hid+31*lid+ip),nbn1[ic],1.0,nbn2[ic],80,-40.0,40.0));    	 
-    			calTDC[ic].add(new H2D("T"+(int)(hid+13*lid+ip),nbn1[ic],1.0,nbn2[ic],80,-40.0,40.0));    	 
-    			calTDC[ic].add(new H2D("T"+(int)(hid+32*lid+ip),nbn1[ic],1.0,nbn2[ic],80,-40.0,40.0));    		 
-    			calTDC[ic].add(new H2D("T"+(int)(hid+23*lid+ip),nbn1[ic],1.0,nbn2[ic],80,-40.0,40.0));	
-    		}
-    		hid=iss+40*tid+ic*cid; //Detector map
-    		for (int il=1 ; il<4 ; il++) 
-    		{    	 
-    			calADC[ic].add(new H2D("A"+(int)(hid+12*lid+il),nbn1[ic],1.0,nbn2[ic],nbn1[ic],1.0,nbn2[ic]));     
-    			calADC[ic].add(new H2D("A"+(int)(hid+13*lid+il),nbn1[ic],1.0,nbn2[ic],nbn1[ic],1.0,nbn2[ic]));    	 
-    			calADC[ic].add(new H2D("A"+(int)(hid+23*lid+il),nbn1[ic],1.0,nbn2[ic],nbn1[ic],1.0,nbn2[ic]));    		 
-    			calADC[ic].add(new H2D("A"+(int)(hid+32*lid+il),nbn1[ic],1.0,nbn2[ic],nbn1[ic],1.0,nbn2[ic]));
-    		}
-    		hid=iss+ic*cid; //strip versus FADC MIP
-    		for (int il=1 ; il<4 ; il++) 
-    		{
-    			calADC[ic].add(new H2D("A"+(int)(hid+10*tid+il*lid),50,0.0,200.0,nbn1[ic],1.0,nbn2[ic])); 
-    			calTDC[ic].add(new H2D("T"+(int)(hid+10*tid+il*lid),70,1330.0,1420.0,nbn1[ic],1.0,nbn2[ic]));     		 
-    			calADC[ic].add(new H2D("A"+(int)(hid+15*tid+il*lid),50,0.0,200.0,nbn1[ic],1.0,nbn2[ic]));     		 
-    			calADC[ic].add(new H2D("A"+(int)(hid+20*tid+il*lid),50,0.0,200.0,nbn1[ic],1.0,nbn2[ic]));     		 
-    			calADC[ic].add(new H2D("A"+(int)(hid+21*tid+il*lid),50,0.0,200.0,nbn1[ic],1.0,nbn2[ic]));     		 
-    			calADC[ic].add(new H2D("A"+(int)(hid+22*tid+il*lid),50,0.0,200.0,nbn1[ic],1.0,nbn2[ic])); 
-    		}
-    		getDir().addDirectory(calADC[ic]);
-    		getDir().addDirectory(calTDC[ic]);
-    	}
+		calADC.add(new H1D("Dalitz Condition",500,0.,3.0));
+		calADC.add(new H1D("Dalitz Multiplicity Cut",500,0.,3.0));
+		calADC.add(new H2D("numHitsUV",68,0.5,68.5,62,0.5,62.5));
+		calADC.add(new H2D("numHitsUW",68,0.5,68.5,62,0.5,62.5));
+		calADC.add(new H2D("numHitsVW",62,0.5,62.5,62,0.5,62.5));
+		
+		//declare histograms and add to directory
+		//loop over u,v,w (i.e. u == 0, v == 1, and w == 2)
+		for(int il = 0; il < 3; il++)
+		{
+			//loop over cross strips, in case of U it is W's
+			//stripMax[il] = 68,62,62
+			for(int strip = 0; strip < stripMax[il]; ++strip)
+			{
+				histname = String.format(histNameFormat[il], strip + 1);	
+				geometry.add(new H2D(histname,binNum[il],0.5,binMaxX[il],100,0.0,300.0));
+			}
+		}
+		//this directory is for attenuation 2D plots
+		getDir().addDirectory(geometry);
+		//this directory is for other interesting quanitities
+		getDir().addDirectory(calADC);
 	}
+	
 	
 	public float uvw_dalitz(int ic, int ip, int il) {
 		float uvw=0;
@@ -2355,6 +2051,178 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	   writer.close();
 	}
     
+	public void analyze() 
+	{
+		//create directories
+		String namedir;
+		namedir = String.format("Projection%02d", iteration);
+		TDirectory projection = new TDirectory(namedir);
+		namedir = String.format("GaussFit%02d", iteration);
+		TDirectory gausFitDir = new TDirectory(namedir);
+		namedir = String.format("ExpoFit%02d", iteration);
+		TDirectory expofit = new TDirectory(namedir);
+		namedir = String.format("GraphE%02d", iteration);
+		TDirectory graph = new TDirectory(namedir);
+		
+		double centroids[] = new double[500];
+		double centroidsErr[] = new double[500];
+		
+		double x[] = new double[500];
+		double ex[] = new double[500];
+		double ey[] = new double[500];
+		double xTemp[]   = new double[500];
+		double xTempEr[] = new double[500];
+		double minx = 0.0;
+		double maxx = 0.0;
+		int counter = 0;
+		
+		//histograms
+		H2D Hadc[] = new H2D[100];
+		//projections
+		H1D ProjHadc[] = new H1D[100];
+		
+		//fit function
+		F1D expfit;
+		F1D gausFit;//[] = new F1D[62*68];
+
+		String histName;
+		String projName;
+		String graphName;
+		//String plotName;
+		String functionName;
+		String gaussFuncName;
+
+		
+		PrintWriter writer = null;
+	
+		//U,V,W strip calibration
+		//int count = 0;
+		
+		char stripLetter[] = {'u','v','w'};
+		String histNameFormat[] = {"histU_%02d", "histV_%02d", "histW_%02d"};
+		String projNameFormat[] = {"ProjHistU%02d_W%02d", "ProjHistV%02d_U%02d", "ProjHistW%02d_U%02d"};
+		String gaussfuncNameFormat[] = {"gaussU%02d_%02d", "gaussV%02d_%02d", "gaussW%02d_%02d"};
+		String graphNameFormat[] = {"graphU_%02d", "graphV_%02d", "graphW_%02d"};
+		String functionNameFormat[] = {"expU_%02d", "expV_%02d", "expW_%02d"};
+		String fileName[] = {"UattenCoeff.dat", "VattenCoeff.dat", "WattenCoeff.dat"};
+		
+		int stripMax[] = {68, 62, 62};//u, v, w
+		int crossStripMax[] = {62, 68, 68};//w, u, u
+		
+		//create gaussian function and fit
+		
+		for(int il = 0; il < 3; ++il)
+		{
+			try 
+			{
+				writer = new PrintWriter(fileName[il]);
+			} 
+			catch (FileNotFoundException e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			//TCanvas Ucan = new TCanvas("Ucan", "Ucan", 800, 600, 2, 2);
+			for(int strip = 0; strip < stripMax[il]; ++strip)//calibrating u-strip
+			{
+				histName = String.format(histNameFormat[il], strip + 1);
+				namedir = String.format("crossStripHisto%02d", iteration);
+				Hadc[strip] = (H2D)getDir().getDirectory(namedir).getObject(histName);
+				counter = 0;
+				for(int crossStrip = 0; crossStrip < crossStripMax[il]; crossStrip++)
+				{
+					projName = String.format(projNameFormat[il], strip+1, crossStrip + 1);
+					ProjHadc[crossStrip] = Hadc[strip].sliceX(crossStrip);
+					ProjHadc[crossStrip].setName(projName);
+								
+					//create gaussian function and fit
+					gausFit = new F1D("gaus",0.0,150.0);
+					gaussFuncName = String.format(gaussfuncNameFormat[il], strip+1, crossStrip + 1);
+					gausFit.setName(gaussFuncName);
+					gausFit.setParameter(0, ProjHadc[crossStrip].getBinContent(ProjHadc[crossStrip].getMaximumBin()));
+					gausFit.setParLimits(0, 0.0, 500.0);
+					gausFit.setParameter(1, ProjHadc[crossStrip].getMean());
+					gausFit.setParLimits(1, 0.0, 150.0);
+					gausFit.setParameter(2, ProjHadc[crossStrip].getRMS());
+					gausFit.setParLimits(2, 0.0, 200.0);
+					
+					
+					if(ProjHadc[crossStrip].getEntries() >= 20)
+					{
+						projection.add(ProjHadc[crossStrip]);
+						//System.out.println(il + "    " + strip + "    " + crossStrip);
+						ProjHadc[crossStrip].fit(gausFit);
+						gausFitDir.add(gausFit);
+						
+						centroids[counter] = gausFit.getParameter(1);
+						centroidsErr[counter] = (float)gausFit.getParameter(2)/Math.sqrt(ProjHadc[crossStrip].getEntries());
+					}
+					else
+					{
+						centroids[counter] = ProjHadc[crossStrip].getMean();
+						centroidsErr[counter] = (float)ProjHadc[crossStrip].getRMS()/Math.sqrt(ProjHadc[crossStrip].getEntries());
+						
+					}
+					gausFit = null;
+					if(centroids[counter] >= 1.0)
+					{
+						xTemp[counter] = CalcDistinStrips(stripLetter[il], crossStrip+1)[0];//calcDistinStrips
+						xTempEr[counter] = CalcDistinStrips(stripLetter[il], crossStrip+1)[1];//calcDistinStrips
+						
+						x[counter] = CalcDistance(stripLetter[il], xTemp[counter], xTempEr[counter])[0];
+						ex[counter] = CalcDistance(stripLetter[il], xTemp[counter], xTempEr[counter])[1];
+						//centroids[counter] = ProjHadc[crossStrip].getMean();
+						
+						ey[counter] = 1.0;
+						counter++;
+					}
+				}
+				graphName = String.format(graphNameFormat[il], strip + 1);
+				GraphErrors attengraph = graphn(graphName,counter,x,centroids,ex,centroidsErr);
+				if(counter < 5)
+				{
+					minx = 500.0;
+					maxx = 0.00;
+				}
+				else
+				{
+					minx = x[1];
+					maxx = x[counter-2];
+				}
+				//Ucan.cd(count);
+				//Ucan.draw(attengraph);
+				
+				//create function and fit
+				functionName = String.format(functionNameFormat[il], strip + 1);
+				expfit = new F1D("expC",maxx,minx);
+				expfit.setName(functionName);
+				expfit.parameter(0).setValue(100.0);
+				expfit.setParLimits(0, -1000.0, 1000.0);
+				expfit.parameter(1).setValue(-0.002659574468);
+				expfit.parameter(2).setValue(10.0);
+				
+	
+				attengraph.fit(expfit);
+				//Ucan.draw(expfit,"same");
+				graph.add(attengraph);
+				expofit.add(expfit);
+
+				int j = strip+1;
+				writer.println(j  + "   " + x[0] + "   "
+						+ expfit.getParameter(0) + "   " 
+						+ expfit.getParameter(1) + "   " 
+						+ expfit.getParameter(2));
+				//++count;
+			}
+			writer.close();
+		}
+		getDir().addDirectory(projection);
+		getDir().addDirectory(gausFitDir);
+		getDir().addDirectory(expofit);
+		getDir().addDirectory(graph);
+		
+	}
+	
     public static void main(String[] args){    	
     	//PCALcalib detview = new PCALcalib("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-100k.evio");
     	//PCALcalib detview = new PCALcalib("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-500k.evio");
@@ -2384,6 +2252,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 			//fits signal histograms
 			//makes graph of centroids
 			//fits graphs of centroids
+			detview.Nickanalyze();
 			detview.analyze();
 			
 			//calculate new gains and attenuation coefficients
