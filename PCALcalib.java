@@ -89,17 +89,33 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	double vgain[] = new double[62]; //
 	double wgain[] = new double[62]; //
 	
+	double umaxX[] = new double[68]; //
+	double vmaxX[] = new double[62]; //
+	double wmaxX[] = new double[62]; //
+	
 	double uA[] = new double[68]; //
 	double uB[] = new double[68]; //
 	double uC[] = new double[68]; //
+	
+	double genuA[] = new double[68]; //
+	double genuB[] = new double[68]; //
+	double genuC[] = new double[68]; //
 	
 	double vA[] = new double[62]; //
 	double vB[] = new double[62]; //
 	double vC[] = new double[62]; //
 	
+	double genvA[] = new double[62]; //
+	double genvB[] = new double[62]; //
+	double genvC[] = new double[62]; //
+	
 	double wA[] = new double[62]; //
 	double wB[] = new double[62]; //
 	double wC[] = new double[62]; //
+	
+	double genwA[] = new double[62]; //
+	double genwB[] = new double[62]; //
+	double genwC[] = new double[62]; //
 	
 	int numiterations = 1;
     
@@ -134,7 +150,8 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     private void initDetector(){
     	pixelpane();
     	UWpane();
-    	UVpane();
+    	VUpane();
+    	WUpane();
     	//this.view.repaint();
     	
     }
@@ -808,8 +825,8 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     
     }
     
-    private void UVpane(){
-    	DetectorShapeView2D  dv4 = new DetectorShapeView2D("PCAL UV");
+    private void VUpane(){
+    	DetectorShapeView2D  dv4 = new DetectorShapeView2D("PCAL VU");
         for(int sector = 0; sector < this.numsectors; sector++){
             for(int upaddle = 0; upaddle < 68; upaddle++){
             	for(int vpaddle = 0; vpaddle < 62; vpaddle++){
@@ -1137,6 +1154,331 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     
     }
     
+    private void WUpane(){
+    	DetectorShapeView2D  dv5 = new DetectorShapeView2D("PCAL WU");
+        for(int sector = 0; sector < this.numsectors; sector++){
+            for(int upaddle = 0; upaddle < 68; upaddle++){
+            		for(int wpaddle = 0; wpaddle < 62; wpaddle++){
+		                double length = 4.5;
+		                double uyup, uydown;
+		                double vmup, vmdown, vbup, vbdown;
+		                double wmup, wmdown, wbup, wbdown;
+		                int vpaddle = 61;
+		                double x1, x2, y1, y2;
+		                int numpoints = 0;
+		                double x[] = new double [12];
+		                double y[] = new double [12];
+		                int numpointsA = 0;
+		                double a[] = new double [12];
+		                double b[] = new double [12];
+		                double anglewidth = length/Math.sin(Math.toRadians(62.8941));
+		                double slightshift = length/Math.tan(Math.toRadians(62.8941));
+		                
+		                System.out.println("Sector: " + sector + " u: " + upaddle + " w: " + wpaddle);
+		                
+		                //convert strip numbers to slopes and intercepts
+		                // rsu 1-68  
+		                if(upaddle + 1 > 52)
+		                {
+		                	uyup = (upaddle + 1) - 52.0;
+		                	uyup = uyup * 2.0;
+		                	uyup = uyup + 52;
+		                	uyup = uyup - 1;
+		                	uydown = (83 - (uyup)) * length;
+		                	uyup = (83 - (uyup - 2)) * length;
+		                	//System.out.println("uyup: " + uyup);
+		                	//System.out.println("uydown: " + uydown);
+		                }
+		                else
+		                {
+		                	uyup = upaddle + 1;
+		                	uydown = (84 - (uyup)) * length;
+		                	uyup = (84 - (uyup - 1)) * length;
+		                }
+		                // rsv 1-62  
+		                if(vpaddle + 1 >= 16)
+		                {
+		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth - slightshift;
+		            		y1 = 0.0;
+		            		y2 = length;
+		            		vmup = (y2 - y1)/(x2 - x1);
+		            		vbup = -x1*vmup;
+		            		
+		            		//System.out.println("vxright: " + x1);
+		            		
+		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth - slightshift;
+		            		y1 = 0.0;
+		            		y2 = length;
+		            		vmdown = (y2 - y1)/(x2 - x1);
+		            		vbdown = -x1*vmdown;
+		            		
+		            		//System.out.println("vxleft: " + x1);
+		                }
+		                else
+		                {
+		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
+		            		y1 = 0.0;
+		            		y2 = length;
+		            		vmdown = (y2 - y1)/(x2 - x1);
+		            		vbdown = -x1*vmdown;
+		            		
+		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth - slightshift;
+		            		y1 = 0.0;
+		            		y2 = length;
+		            		vmup = (y2 - y1)/(x2 - x1);
+		            		vbup = -x1*vmup;
+		                }
+		                // rsw 1-62  
+		                if(wpaddle + 1 >= 16)
+		                {
+		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth + slightshift;
+		            		y1 = 0.0;
+		            		y2 = length;
+		            		wmup = (y2 - y1)/(x2 - x1);
+		            		wbup = -x1*wmup;
+		            		
+		            		//System.out.println("wxright: " + x1);
+		            		
+		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth + slightshift;
+		            		y1 = 0.0;
+		            		y2 = length;
+		            		wmdown = (y2 - y1)/(x2 - x1);
+		            		wbdown = -x1*wmdown;
+		            		
+		            		//System.out.println("wxleft: " + x1);
+		                }
+		                else
+		                {
+		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
+		            		y1 = 0.0;
+		            		y2 = length;
+		            		wmdown = (y2 - y1)/(x2 - x1);
+		            		wbdown = -x1*wmdown;
+		            		
+		            		//System.out.println("wxright: " + x1);
+		            		
+		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth + slightshift;
+		            		y1 = 0.0;
+		            		y2 = length;
+		            		wmup = (y2 - y1)/(x2 - x1);
+		            		wbup = -x1*wmup;
+		            		
+		            		//System.out.println("wxleft: " + x1);
+		                }
+		                
+		                //maximum of 8 vertices for every 3 strips
+		                //most of which can be thrown out later
+		                //calculate all 8
+		                
+		                //udown
+		                a[0] = (uydown - wbdown)/(wmdown); //udown and wdown, u slope = 0
+		                b[0] = uydown; //udown and vdown, u slope = 0
+		                
+		                a[1] = (uydown - vbup)/(vmup); //udown and vup, u slope = 0
+		                b[1] = uydown; //udown and vdown, u slope = 0
+		                
+		                a[2] = (uydown - wbup)/(wmup); //udown and wup, u slope = 0
+		                b[2] = uydown; //udown and vdown, u slope = 0
+		                
+		                //uup
+		                a[3] = (uyup - wbdown)/(wmdown); //uup and wdown, u slope = 0
+		                b[3] = uyup; //uyup and wdown, u slope = 0
+		                
+		                a[4] = (uyup - vbup)/(vmup); //uup and vup, u slope = 0
+		                b[4] = uyup; //uyup and vup, u slope = 0
+		                
+		                a[5] = (uyup - wbup)/(wmup); //uup and wup, u slope = 0
+		                b[5] = uyup; //uyup and wup, u slope = 0
+		                
+		                //vup
+		                a[6] = (vbup - wbdown)/(wmdown - vmup);
+		                b[6] = vmup * a[6] + vbup;
+		                
+		                a[7] = (vbup - wbup)/(wmup - vmup); 
+		                b[7] = vmup * a[7] + vbup; 
+		                
+		                
+		                //veto bad points by setting them = 999
+		                for(numpointsA = 0; numpointsA < 8; ++numpointsA)
+		                {
+		                	//System.out.println("x: " + a[numpointsA] + " y: " + b[numpointsA]);
+		                	if(b[numpointsA] < uydown - 0.0001)
+		                	{
+		                		a[numpointsA] = 999;
+		                		b[numpointsA] = 999;
+		                	}
+		                	if(b[numpointsA] > uyup + 0.0001)
+		                	{
+			                	a[numpointsA] = 999;
+			                	b[numpointsA] = 999;
+		                	}
+
+			                if(b[numpointsA] > vmup * a[numpointsA] + vbup + 0.0001)
+			                {
+				               	a[numpointsA] = 999;
+				                b[numpointsA] = 999;
+			                }
+			                
+				            if(b[numpointsA] < wmdown * a[numpointsA] + wbdown - 0.0001)
+				            {
+				                a[numpointsA] = 999;
+				                b[numpointsA] = 999;
+				            }
+				            if(b[numpointsA] > wmup * a[numpointsA] + wbup + 0.0001)
+				            {
+					            a[numpointsA] = 999;
+					            b[numpointsA] = 999;
+				            }
+				            //System.out.println("x: " + a[numpointsA] + " y: " + b[numpointsA]);
+				            
+		                }
+		                
+		                //organize good points in x and y array, count with numpoints
+		                numpoints = 0;
+		                int count = 0;
+		                int count2 = 0;
+		                int index = 0;
+		                double distance= 0.0;
+		                double mindist = 9000.0;
+		                double slopediff;
+		                int pass = 0;
+		                while(count < 8)
+		                {
+		                	if(a[count] < 900)
+		                	{
+		                		
+		                		if(numpoints == 0)
+		                		{
+		                			//System.out.println("x: " + a[count] + " y: " + b[count]);
+		                			x[numpoints] = a[count];
+		                			y[numpoints] = b[count];
+		                			++numpoints;
+		                			a[count] = 999;
+		                			b[count] = 999;
+		                			
+		                		}
+		                		else
+		                		{
+		                			mindist = 9000.0;
+		                			for(int i = 0; i < 8; ++i)
+		                			{
+		                				if(a[i] < 900 && b[i] < 900)
+		                				{
+			                				distance = Math.sqrt(Math.pow(a[i] - x[numpoints - 1], 2) + Math.pow(b[i] - y[numpoints - 1], 2));
+			                				if(distance < 0.0001) //throws out the overlapping points...
+			                				{
+			                					a[i] = 999;
+						                		b[i] = 999;
+						                		distance = 999.0;
+			                				}
+			                				else if(distance > 20.0) //throws out points really far away
+			                				{
+			                					a[i] = 999;
+						                		b[i] = 999;
+			                				}
+			                				else
+			                				{
+			                					//test for on a straight line
+			                					pass = 0;
+				                				slopediff = Math.abs((b[i]-y[numpoints - 1])/(a[i]-x[numpoints - 1]));
+				                				//System.out.println("slope: " + slopediff + " distance: " + distance);
+				                				//System.out.println("vslope: " + vmup);
+				                				//System.out.println("wslope: " + wmup);
+				                				if( Math.abs(slopediff - Math.abs(vmup)) < 0.001) 
+			                					{
+			                						pass = 1;
+			                					}
+				                				else if( Math.abs(slopediff - Math.abs(wmup)) < 0.001) 
+			                					{
+			                						pass = 1;
+			                					}
+				                				else if( Math.abs(slopediff) < 0.0001 && Math.abs(b[i]/((int)(b[i]/4.5) * 4.5)) - 1.0 < 0.00001) 
+			                					{
+			                						pass = 1;
+			                						//System.out.println("x: " + a[index] + " y: " + b[index]);
+			                					}
+				                				else
+				                				{
+				                					distance = 999.0;
+				                				}
+			                				}
+
+			                				if(distance < mindist) //keeping on a straight predefined line
+			                				{
+			                					mindist = distance;
+			                					index = i;
+			                				}
+		                				}
+		                			}
+		                			//System.out.println("x: " + a[index] + " y: " + b[index]);
+		                			if(mindist < 50.0)
+		                			{
+		                				//System.out.println("x: " + a[index] + " y: " + b[index]);
+		                				x[numpoints] = a[index];
+			                			y[numpoints] = b[index];
+			                			++numpoints;
+			                			a[index] = 999;
+			                			b[index] = 999;
+		                			}
+		                		}
+		                	}
+		                	else
+		                	{
+		                		++count;
+		                	}
+		                	
+		                	
+		                	++count2;
+		                	if(count2 == 8 && count != 8)
+		                	{
+		                		count = 0;
+		                	}
+		                	
+		                }
+
+		                for(int i = 0; i< numpoints; ++i)
+		                {
+		                	y[i] -= 400.0;
+		                }
+		                //if(numpoints < 2)System.out.println("Didn't work");
+		              
+		                	
+		                
+		                //shape.createTrapXY(xhigh, xlow,  yhigh - ylow, 0.0, -(yhigh + ylow)/2.0 + 50.0); 
+		                if(numpoints > 2) 
+		                {
+		                	DetectorShape2D  shape = new DetectorShape2D(DetectorType.PCAL,sector,5,upaddle * 100 + wpaddle);
+		                	shape.getShapePath().clear(); 
+		                	for(int i = 0; i < numpoints; ++i){ 
+		                		shape.getShapePath().addPoint(x[i],  y[i],  0.0); 
+		                	} 
+		                	//shape.createNXY(numpoints,x,y);
+			                shape.getShapePath().rotateZ(Math.toRadians(sector*60.0));
+			               
+			                /*
+			                if(paddle%2==0){
+			                    shape.setColor(180, 255, 180);
+			                } else {
+			                    shape.setColor(180, 180, 255);
+			                }
+			                */
+			                dv5.addShape(shape);   
+		                }
+            		}
+            }
+        }
+        this.view.addDetectorLayer(dv5);
+        view.addDetectorListener(this);
+    
+    }
     /**
      * When the detector is clicked, this function is called
      * @param desc 
@@ -1145,13 +1487,17 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
         int u, v, w, uvwnum;
         String name;
         String namedir;
-        H1D h1, hsum = null;
+        H1D h1 = null;
+        H1D hsum1 = null;
+        H1D hsum2 = null;
         F1D gaus = null;
         F1D exp = null;
+        F1D genexp = null;
         GraphErrors g1;
         
+            
         
-        System.out.println("SELECTED = " + desc);
+        //System.out.println("SELECTED = " + desc);
         
         namedir = String.format("pixelsignal%02d", iteration);
         if(desc.getLayer() == 2)
@@ -1238,24 +1584,44 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	        namedir = String.format("GraphE%02d", iteration);
 			name = String.format("graphU_%02d", u + 1);
 		    g1  = (GraphErrors)getDir().getDirectory(namedir).getObject(name);
+		    g1.setMarkerSize(2);
 		    namedir = String.format("ExpoFit%02d", iteration);
 			name = String.format("expU_%02d", u + 1);
 		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
 		    canvas.cd(2);
 		    canvas.draw(g1);
+		    canvas.setAxisRange(0.0, umaxX[u] + 20.0, 0.0, 120.0);
 		    canvas.draw(exp,"same");
+		    
+		    genexp = new F1D("expC",0.0,umaxX[u]);
+		    genexp.setParameter(0,genuA[u]);
+		    genexp.setParameter(1,genuB[u]);
+		    genexp.setParameter(2,genuC[u]);
+		    genexp.setLineColor(2);
+		    genexp.setLineStyle(2);
+		    canvas.draw(genexp,"same");
 	        
 		    
 		    //Draw W attenuation with exponential
 	        namedir = String.format("GraphE%02d", iteration);
 			name = String.format("graphW_%02d", w + 1);
 		    g1  = (GraphErrors)getDir().getDirectory(namedir).getObject(name);
+		    g1.setMarkerSize(2);
 		    namedir = String.format("ExpoFit%02d", iteration);
 			name = String.format("expW_%02d", w + 1);
 		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(3);
 	        canvas.draw(g1);
+	        canvas.setAxisRange(0.0, wmaxX[w] + 20.0, 0.0, 120.0);
 	        canvas.draw(exp,"same");
+	        
+	        genexp = new F1D("expC",0.0,wmaxX[w]);
+		    genexp.setParameter(0,genwA[w]);
+		    genexp.setParameter(1,genwB[w]);
+		    genexp.setParameter(2,genwC[w]);
+		    genexp.setLineColor(2);
+		    genexp.setLineStyle(2);
+		    canvas.draw(genexp,"same");
 	          
         }
         if(desc.getLayer() == 4)
@@ -1307,13 +1673,118 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	        namedir = String.format("GraphE%02d", iteration);
 			name = String.format("graphV_%02d", v + 1);
 		    g1  = (GraphErrors)getDir().getDirectory(namedir).getObject(name);
+		    g1.setMarkerSize(2);
 		    namedir = String.format("ExpoFit%02d", iteration);
 			name = String.format("expV_%02d", v + 1);
 		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(1);
 	        canvas.draw(g1);
+	        canvas.setAxisRange(0.0, vmaxX[v] + 20.0, 0.0, 120.0);
 	        canvas.draw(exp,"same");
 	        
+	        genexp = new F1D("expC",0.0,vmaxX[v]);
+		    genexp.setParameter(0,genvA[v]);
+		    genexp.setParameter(1,genvB[v]);
+		    genexp.setParameter(2,genvC[v]);
+		    genexp.setLineColor(2);
+		    genexp.setLineStyle(2);
+		    canvas.draw(genexp,"same");
+	        
+        }
+        if(desc.getLayer() == 5)
+        {
+        	//this.canvas = new EmbeddedCanvas();
+        	//this.canvas.update();
+	        canvas.divide(2,2);
+	        uvwnum = (int)desc.getComponent();
+	    	u = (int)(uvwnum/100.0);
+	    	uvwnum -= u*100;
+	    	w = uvwnum;
+	    	v = 61;
+	    	
+	    	
+//			//Draw U strip shape ADC value with gaussian fit
+//			namedir = String.format("Projection%02d", iteration);
+//			name = String.format("ProjHistU%02d_W%02d", u + 1, w + 1);
+//		    h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
+//		    namedir = String.format("GaussFit%02d", iteration);
+//			name = String.format("gaussU%02d_%02d", u + 1, w + 1);
+//			gaus  = (F1D)getDir().getDirectory(namedir).getObject(name);
+//	        canvas.cd(0);
+//	        canvas.draw(h1);
+//	        canvas.draw(gaus,"same");
+	    	
+	    	hsum1 = new H1D("uA + uC",40, 90.0, 110.0);
+	        for(int i = 0; i < 68; ++i)
+	        {
+	        	hsum1.fill(ugain[i]);
+	        }
+	        hsum2 = new H1D("ugainselect",40, 90.0, 110.0);
+	        hsum2.fill(ugain[u]);
+	        hsum2.setLineColor(2); //getAttributes().getProperties().setProperty("line-color", "2");
+	        canvas.cd(0);
+	        canvas.draw(hsum1);
+	        canvas.draw(hsum2,"same");
+	        
+	        
+	        //Draw W strip shape ADC value with gaussian fit
+	        namedir = String.format("Projection%02d", iteration);
+			name = String.format("ProjHistW%02d_U%02d", w + 1, u + 1);
+		    h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
+		    namedir = String.format("GaussFit%02d", iteration);
+			name = String.format("gaussW%02d_%02d", w + 1, u + 1);
+			gaus  = (F1D)getDir().getDirectory(namedir).getObject(name);
+	        canvas.cd(1);
+	        canvas.draw(h1);
+	        canvas.draw(gaus,"same");
+	        
+	        
+//	        //Draw U attenuation with exponential
+//	        namedir = String.format("GraphE%02d", iteration);
+//			name = String.format("graphU_%02d", u + 1);
+//		    g1  = (GraphErrors)getDir().getDirectory(namedir).getObject(name);
+//		    namedir = String.format("ExpoFit%02d", iteration);
+//			name = String.format("expU_%02d", u + 1);
+//		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
+//		    canvas.cd(2);
+//		    canvas.draw(g1);
+//		    canvas.setAxisRange(0.0, umaxX[u] + 5.0, 0.0, 120.0);
+//		    canvas.draw(exp,"same");
+	        
+	        
+	    	hsum1 = new H1D("wA + wC",40, 90.0, 110.0);
+	        for(int i = 0; i < 62; ++i)
+	        {
+	        	hsum1.fill(wgain[i]);
+	        }
+	        hsum2 = new H1D("wgainselect",40, 90.0, 110.0);
+	        hsum2.fill(wgain[w]);
+	        hsum2.setLineColor(2);
+	        canvas.cd(2);
+	        canvas.draw(hsum1);
+	        canvas.draw(hsum2, "same");
+	        
+		    
+		    //Draw W attenuation with exponential
+	        namedir = String.format("GraphE%02d", iteration);
+			name = String.format("graphW_%02d", w + 1);
+		    g1  = (GraphErrors)getDir().getDirectory(namedir).getObject(name);
+		    g1.setMarkerSize(2);
+		    namedir = String.format("ExpoFit%02d", iteration);
+			name = String.format("expW_%02d", w + 1);
+		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
+	        canvas.cd(3);
+	        canvas.draw(g1);
+	        canvas.setAxisRange(0.0, wmaxX[w] + 20.0, 0.0, 120.0);
+	        canvas.draw(exp,"same");
+	        
+	        genexp = new F1D("expC",0.0,wmaxX[w]);
+		    genexp.setParameter(0,genwA[w]);
+		    genexp.setParameter(1,genwB[w]);
+		    genexp.setParameter(2,genwC[w]);
+		    genexp.setLineColor(2);
+		    genexp.setLineStyle(2);
+		    canvas.draw(genexp,"same");
         }
 	        
     }
@@ -2104,7 +2575,9 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		String gaussfuncNameFormat[] = {"gaussU%02d_%02d", "gaussV%02d_%02d", "gaussW%02d_%02d"};
 		String graphNameFormat[] = {"graphU_%02d", "graphV_%02d", "graphW_%02d"};
 		String functionNameFormat[] = {"expU_%02d", "expV_%02d", "expW_%02d"};
-		String fileName[] = {"UattenCoeff.dat", "VattenCoeff.dat", "WattenCoeff.dat"};
+		String fileName[] = {"/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/UattenCoeff.dat", 
+							 "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/VattenCoeff.dat", 
+							 "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/WattenCoeff.dat"};
 		
 		int stripMax[] = {68, 62, 62};//u, v, w
 		int crossStripMax[] = {62, 68, 68};//w, u, u
@@ -2223,6 +2696,144 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		
 	}
 	
+	
+	public void getAttenuationCoefficients()
+    {
+			
+    	int stripnum = 0;
+    	int ijunk;
+    	int counter = 0;
+        Scanner scanner;
+        //generted values
+        try 
+		{
+			scanner = new Scanner(new File("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/AttenCoeffSec4a.dat"));
+			while(scanner.hasNextInt())
+			{
+				if(counter < 68)
+				{
+					ijunk = scanner.nextInt();
+					stripnum = scanner.nextInt();
+					//umaxX[stripnum - 1] = scanner.nextDouble();
+					genuA[stripnum - 1] = scanner.nextDouble();
+					genuB[stripnum - 1] = scanner.nextDouble();
+					genuC[stripnum - 1] = scanner.nextDouble();
+					ijunk = scanner.nextInt();
+					
+					genuA[stripnum - 1] *= 100.0/650.0;
+					genuC[stripnum - 1] *= 100.0/650.0;
+				}
+				else if(counter < 130)
+				{
+					ijunk = scanner.nextInt();
+					stripnum = scanner.nextInt();
+					//umaxX[stripnum - 1] = scanner.nextDouble();
+					genvA[stripnum - 1] = scanner.nextDouble();
+					genvB[stripnum - 1] = scanner.nextDouble();
+					genvC[stripnum - 1] = scanner.nextDouble();
+					ijunk = scanner.nextInt();
+					
+					genvA[stripnum - 1] *= 100.0/650.0;
+					genvC[stripnum - 1] *= 100.0/650.0;
+				}
+				else
+				{
+					ijunk = scanner.nextInt();
+					stripnum = scanner.nextInt();
+					//umaxX[stripnum - 1] = scanner.nextDouble();
+					genwA[stripnum - 1] = scanner.nextDouble();
+					genwB[stripnum - 1] = scanner.nextDouble();
+					genwC[stripnum - 1] = scanner.nextDouble();
+					ijunk = scanner.nextInt();
+					
+					genwA[stripnum - 1] *= 100.0/650.0;
+					genwC[stripnum - 1] *= 100.0/650.0;
+				}
+				++counter;
+				
+			}
+			scanner.close();
+		}
+		catch (FileNotFoundException e1) 
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        
+		try 
+		{
+			scanner = new Scanner(new File("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/UattenCoeff.dat"));
+			while(scanner.hasNextInt())
+			{
+				stripnum = scanner.nextInt();
+				umaxX[stripnum - 1] = scanner.nextDouble();
+				uA[stripnum - 1] = scanner.nextDouble();
+				uB[stripnum - 1] = scanner.nextDouble();
+				uC[stripnum - 1] = scanner.nextDouble();
+				
+				
+				ugain[stripnum - 1] = (uA[stripnum - 1] + uC[stripnum - 1]);
+				//uA[stripnum - 1] *= ugain[stripnum - 1];
+				//uC[stripnum - 1] *= ugain[stripnum - 1];
+			}
+			scanner.close();
+		}
+		catch (FileNotFoundException e1) 
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		try 
+		{
+			scanner = new Scanner(new File("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/VattenCoeff.dat"));
+			while(scanner.hasNextInt())
+			{
+				stripnum = scanner.nextInt();
+				vmaxX[stripnum - 1] = scanner.nextDouble();
+				vA[stripnum - 1] = scanner.nextDouble();
+				vB[stripnum - 1] = scanner.nextDouble();
+				vC[stripnum - 1] = scanner.nextDouble();
+				
+				
+				vgain[stripnum - 1] = (vA[stripnum - 1] + vC[stripnum - 1]);
+				//vA[stripnum - 1] *= vgain[stripnum - 1];
+				//vC[stripnum - 1] *= vgain[stripnum - 1];
+			}
+			scanner.close();
+		}
+		catch (FileNotFoundException e1) 
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		try 
+		{
+			scanner = new Scanner(new File("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/WattenCoeff.dat"));
+			while(scanner.hasNextInt())
+			{
+				stripnum = scanner.nextInt();
+				wmaxX[stripnum - 1] = scanner.nextDouble();
+				wA[stripnum - 1] = scanner.nextDouble();
+				wB[stripnum - 1] = scanner.nextDouble();
+				wC[stripnum - 1] = scanner.nextDouble();
+				
+				
+				wgain[stripnum - 1] = (wA[stripnum - 1] + wC[stripnum - 1]);
+				//wA[stripnum - 1] *= wgain[stripnum - 1];
+				//wC[stripnum - 1] *= wain[stripnum - 1];
+			}
+			scanner.close();
+		}
+		catch (FileNotFoundException e1) 
+		{
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+    }
+	
     public static void main(String[] args){    	
     	//PCALcalib detview = new PCALcalib("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-100k.evio");
     	//PCALcalib detview = new PCALcalib("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-500k.evio");
@@ -2237,6 +2848,8 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     	
     	for(iteration = 0; iteration < detview.numiterations; ++iteration)
     	{
+    		detview.getAttenuationCoefficients();
+    		
 	    	//initialize histograms that are sector and iteration dependent
 	    	//sets up histograms A
 	    	detview.NickInit();
