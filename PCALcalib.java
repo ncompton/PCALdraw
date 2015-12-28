@@ -1493,6 +1493,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
         F1D exp = null;
         F1D genexp = null;
         F1D genexp1 = null;
+        F1D genexp2 = null;
         GraphErrors g1;
         
         TStyle.setStatBoxFont("Helvetica", 12);
@@ -1513,8 +1514,17 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	    	
 	    	name = String.format("attu_%02d", u + 1);
 		    g1  = (GraphErrors)getDir().getDirectory("attendir").getObject(name);
+		    g1.setMarkerSize(2);
 		    canvas.cd(0);
 		    canvas.draw(g1);
+		    
+		    genexp = new F1D("exp+p0",0.0,umaxX[u]);
+		    genexp.setParameter(0,genuA[u]);
+		    genexp.setParameter(1,genuB[u]);
+		    genexp.setParameter(2,genuC[u]);
+		    genexp.setLineColor(2);
+		    genexp.setLineStyle(2);
+		    canvas.draw(genexp,"same");
 	        
 	        name = String.format("adu_%02d_%02d_%02d", u + 1, v + 1, w + 1);
 	        h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
@@ -1524,8 +1534,17 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	        
 	        name = String.format("attv_%02d", v + 1);
 	        g1  = (GraphErrors)getDir().getDirectory("attendir").getObject(name);
+	        g1.setMarkerSize(2);
 	        canvas.cd(2);
 	        canvas.draw(g1);
+	        
+	        genexp1 = new F1D("exp+p0",0.0,vmaxX[v]);
+		    genexp1.setParameter(0,genvA[v]);
+		    genexp1.setParameter(1,genvB[v]);
+		    genexp1.setParameter(2,genvC[v]);
+		    genexp1.setLineColor(2);
+		    genexp1.setLineStyle(2);
+		    canvas.draw(genexp1,"same");
 	        
 	        
 	        name = String.format("adv_%02d_%02d_%02d", u + 1, v + 1, w + 1);
@@ -1536,8 +1555,17 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	        
 	        name = String.format("attw_%02d", w + 1);
 	        g1  = (GraphErrors)getDir().getDirectory("attendir").getObject(name);
+	        g1.setMarkerSize(2);
 	        canvas.cd(4);
 	        canvas.draw(g1);
+	        
+	        genexp2 = new F1D("exp+p0",0.0,wmaxX[w]);
+		    genexp2.setParameter(0,genwA[w]);
+		    genexp2.setParameter(1,genwB[w]);
+		    genexp2.setParameter(2,genwC[w]);
+		    genexp2.setLineColor(2);
+		    genexp2.setLineStyle(2);
+		    canvas.draw(genexp2,"same");
 	        
 	        
 	        name = String.format("adw_%02d_%02d_%02d", u + 1, v + 1, w + 1);
@@ -1556,15 +1584,15 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	    	w = uvwnum;
 	    	v = 61;
 	    	
-	    	System.out.println("umaxX[u]: " + umaxX[u]);
-	    	System.out.println("genuA[u]: " + genuA[u]);
-	    	System.out.println("genuB[u]: " + genuB[u]);
-	    	System.out.println("genuC[u]: " + genuC[u]);
-	    	
-	    	System.out.println("wmaxX[w]: " + umaxX[w]);
-	    	System.out.println("genwA[w]: " + genwA[w]);
-	    	System.out.println("genwB[w]: " + genwB[w]);
-	    	System.out.println("genwC[w]: " + genwC[w]);
+//	    	System.out.println("umaxX[u]: " + umaxX[u]);
+//	    	System.out.println("genuA[u]: " + genuA[u]);
+//	    	System.out.println("genuB[u]: " + genuB[u]);
+//	    	System.out.println("genuC[u]: " + genuC[u]);
+//	    	
+//	    	System.out.println("wmaxX[w]: " + umaxX[w]);
+//	    	System.out.println("genwA[w]: " + genwA[w]);
+//	    	System.out.println("genwB[w]: " + genwB[w]);
+//	    	System.out.println("genwC[w]: " + genwC[w]);
 	    	
 			//Draw U strip shape ADC value with gaussian fit
 			namedir = String.format("Projection%02d", iteration);
@@ -1605,9 +1633,9 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		    canvas.draw(exp,"same");
 		    
 		    genexp1 = new F1D("exp+p0",0.0,umaxX[u]);
-		    genexp1.setParameter(0,genuA[u]);
+		    genexp1.setParameter(0,genuA[u] * (uA[u]+uC[u])/100.0);
 		    genexp1.setParameter(1,genuB[u]);
-		    genexp1.setParameter(2,genuC[u]);
+		    genexp1.setParameter(2,genuC[u] * (uA[u]+uC[u])/100.0);
 		    genexp1.setLineColor(2);
 		    genexp1.setLineStyle(2);
 		    canvas.draw(genexp1,"same");
@@ -1627,9 +1655,9 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	        canvas.draw(exp,"same");
 	        
 	        genexp = new F1D("exp+p0",0.0,wmaxX[w]);
-		    genexp.setParameter(0,genwA[w]);
+		    genexp.setParameter(0,genwA[w] * (wA[w]+wC[w])/100.0);
 		    genexp.setParameter(1,genwB[w]);
-		    genexp.setParameter(2,genwC[w]);
+		    genexp.setParameter(2,genwC[w] * (wA[w]+wC[w])/100.0);
 		    genexp.setLineColor(2);
 		    genexp.setLineStyle(2);
 		    canvas.draw(genexp,"same");
@@ -1694,12 +1722,13 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	        canvas.draw(exp,"same");
 	        
 	        genexp = new F1D("exp+p0",0.0,vmaxX[v]);
-		    genexp.setParameter(0,genvA[v]);
+		    genexp.setParameter(0,genvA[v] * (vA[v]+vC[v])/100.0);
 		    genexp.setParameter(1,genvB[v]);
-		    genexp.setParameter(2,genvC[v]);
+		    genexp.setParameter(2,genvC[v] * (vA[v]+vC[v])/100.0);
 		    genexp.setLineColor(2);
 		    genexp.setLineStyle(2);
 		    canvas.draw(genexp,"same");
+		    
 	        
         }
         if(desc.getLayer() == 5)
@@ -1790,12 +1819,13 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	        canvas.draw(exp,"same");
 	        
 	        genexp = new F1D("exp+p0",0.0,wmaxX[w]);
-		    genexp.setParameter(0,genwA[w]);
+		    genexp.setParameter(0,genwA[w] * (wA[w]+wC[w])/100.0);
 		    genexp.setParameter(1,genwB[w]);
-		    genexp.setParameter(2,genwC[w]);
+		    genexp.setParameter(2,genwC[w] * (wA[w]+wC[w])/100.0);
 		    genexp.setLineColor(2);
 		    genexp.setLineStyle(2);
 		    canvas.draw(genexp,"same");
+		    
         }
 	        
     }
@@ -2663,24 +2693,44 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 				}
 				graphName = String.format(graphNameFormat[il], strip + 1);
 				GraphErrors attengraph = graphn(graphName,counter,x,centroids,ex,centroidsErr);
-				if(counter < 5)
+				if(counter < 5) 
 				{
-					minx = 500.0;
-					maxx = 0.00;
+					//means low number of points
+					//probably short strip
+					minx = 0.0;
+					if(strip == 0)
+					{
+						maxx = umaxX[strip];
+					}
+					else if(strip == 1)
+					{
+						maxx = vmaxX[strip];
+					}
+					else
+					{
+						maxx = wmaxX[strip];
+					}
 				}
 				else
 				{
-					minx = x[1];
-					maxx = x[counter-2];
+					if(x[1] > x[counter-2])
+					{
+						minx = x[counter-2];
+						maxx = x[1];
+					}
+					else
+					{
+						minx = x[1];
+						maxx = x[counter-2];
+					}
 				}
 				//Ucan.cd(count);
 				//Ucan.draw(attengraph);
 				
 				//create function and fit
 				functionName = String.format(functionNameFormat[il], strip + 1);
-				//expfit = new F1D("exp+p0",maxx,minx);
 				
-				expfit = new F1D("exp+p0",maxx,minx);
+				expfit = new F1D("exp+p0",minx,maxx);
 				expfit.setName(functionName);
 				expfit.parameter(0).setValue(100.0);
 				expfit.setParLimits(0, -1000.0, 1000.0);
