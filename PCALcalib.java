@@ -31,12 +31,12 @@ import org.jlab.clas12.calib.DetectorShapeTabView;
 import org.jlab.clas12.calib.DetectorShapeView2D;
 import org.jlab.clas12.calib.IDetectorListener;
 import org.jlab.clasrec.main.DetectorEventProcessorDialog;
-import org.jlab.clasrec.rec.CLASMonitoring;
 import org.jlab.data.io.DataEvent;
 import org.jlab.evio.clas12.EvioDataBank;
 import org.jlab.evio.clas12.EvioDataEvent;
 import org.jlab.evio.clas12.EvioSource;
 import org.root.attr.ColorPalette;
+import org.root.attr.TStyle;
 import org.root.func.F1D;
 import org.root.group.TBrowser;
 import org.root.group.TDirectory;
@@ -44,12 +44,11 @@ import org.root.histogram.GraphErrors;
 import org.root.histogram.H1D;
 import org.root.histogram.H2D;
 import org.root.pad.EmbeddedCanvas;
-import org.root.pad.TCanvas;
 
 /**
  *
  * @author gavalian
- * edited by N. Compton
+ * @edited by N. Compton
  */
 public class PCALcalib extends JFrame implements IDetectorListener, IDetectorProcessor, ActionListener {
 
@@ -73,7 +72,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     int numpaddles = 68 * 10000 + 62 * 100 + 62;
     
     private String inputFileName = "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-3M-s2.evio";
-    private int RunNumber = 4284;
+    //private int RunNumber = 4284;
     private int CurrentSector = 2;
     private static int iteration = 0;
     
@@ -1493,8 +1492,10 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
         F1D gaus = null;
         F1D exp = null;
         F1D genexp = null;
+        F1D genexp1 = null;
         GraphErrors g1;
         
+        TStyle.setStatBoxFont("Helvetica", 12);
             
         
         //System.out.println("SELECTED = " + desc);
@@ -1555,6 +1556,15 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	    	w = uvwnum;
 	    	v = 61;
 	    	
+	    	System.out.println("umaxX[u]: " + umaxX[u]);
+	    	System.out.println("genuA[u]: " + genuA[u]);
+	    	System.out.println("genuB[u]: " + genuB[u]);
+	    	System.out.println("genuC[u]: " + genuC[u]);
+	    	
+	    	System.out.println("wmaxX[w]: " + umaxX[w]);
+	    	System.out.println("genwA[w]: " + genwA[w]);
+	    	System.out.println("genwB[w]: " + genwB[w]);
+	    	System.out.println("genwC[w]: " + genwC[w]);
 	    	
 			//Draw U strip shape ADC value with gaussian fit
 			namedir = String.format("Projection%02d", iteration);
@@ -1564,6 +1574,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 			name = String.format("gaussU%02d_%02d", u + 1, w + 1);
 			gaus  = (F1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(0);
+	        //canvas.getPad().setStatBoxFont("Helvetica", 12);
 	        canvas.draw(h1);
 	        canvas.draw(gaus,"same");
 	        
@@ -1590,16 +1601,16 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
 		    canvas.cd(2);
 		    canvas.draw(g1);
-		    canvas.setAxisRange(0.0, umaxX[u] + 20.0, 0.0, 120.0);
+		    canvas.getPad().setAxisRange(0.0, umaxX[u] + 20.0, 0.0, 120.0);
 		    canvas.draw(exp,"same");
 		    
-		    genexp = new F1D("expC",0.0,umaxX[u]);
-		    genexp.setParameter(0,genuA[u]);
-		    genexp.setParameter(1,genuB[u]);
-		    genexp.setParameter(2,genuC[u]);
-		    genexp.setLineColor(2);
-		    genexp.setLineStyle(2);
-		    canvas.draw(genexp,"same");
+		    genexp1 = new F1D("exp+p0",0.0,umaxX[u]);
+		    genexp1.setParameter(0,genuA[u]);
+		    genexp1.setParameter(1,genuB[u]);
+		    genexp1.setParameter(2,genuC[u]);
+		    genexp1.setLineColor(2);
+		    genexp1.setLineStyle(2);
+		    canvas.draw(genexp1,"same");
 	        
 		    
 		    //Draw W attenuation with exponential
@@ -1612,10 +1623,10 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(3);
 	        canvas.draw(g1);
-	        canvas.setAxisRange(0.0, wmaxX[w] + 20.0, 0.0, 120.0);
+	        canvas.getPad().setAxisRange(0.0, wmaxX[w] + 20.0, 0.0, 120.0);
 	        canvas.draw(exp,"same");
 	        
-	        genexp = new F1D("expC",0.0,wmaxX[w]);
+	        genexp = new F1D("exp+p0",0.0,wmaxX[w]);
 		    genexp.setParameter(0,genwA[w]);
 		    genexp.setParameter(1,genwB[w]);
 		    genexp.setParameter(2,genwC[w]);
@@ -1679,10 +1690,10 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(1);
 	        canvas.draw(g1);
-	        canvas.setAxisRange(0.0, vmaxX[v] + 20.0, 0.0, 120.0);
+	        canvas.getPad().setAxisRange(0.0, vmaxX[v] + 20.0, 0.0, 120.0);
 	        canvas.draw(exp,"same");
 	        
-	        genexp = new F1D("expC",0.0,vmaxX[v]);
+	        genexp = new F1D("exp+p0",0.0,vmaxX[v]);
 		    genexp.setParameter(0,genvA[v]);
 		    genexp.setParameter(1,genvB[v]);
 		    genexp.setParameter(2,genvC[v]);
@@ -1775,10 +1786,10 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(3);
 	        canvas.draw(g1);
-	        canvas.setAxisRange(0.0, wmaxX[w] + 20.0, 0.0, 120.0);
+	        canvas.getPad().setAxisRange(0.0, wmaxX[w] + 20.0, 0.0, 120.0);
 	        canvas.draw(exp,"same");
 	        
-	        genexp = new F1D("expC",0.0,wmaxX[w]);
+	        genexp = new F1D("exp+p0",0.0,wmaxX[w]);
 		    genexp.setParameter(0,genwA[w]);
 		    genexp.setParameter(1,genwB[w]);
 		    genexp.setParameter(2,genwC[w]);
@@ -2183,7 +2194,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	
   //graphErrors constructor
   	public GraphErrors graphn(String name, int numberpoints, double x[], double y[], double xe[], double ye[])
-      {
+    {
           double a[] = new double[numberpoints];
           double b[] = new double[numberpoints];
           double ae[] = new double[numberpoints];
@@ -2202,7 +2213,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
           mygraph.setTitle(name);
           
           return mygraph;
-      }
+    }
   	
   	
   	//crossstrip needs to be 1-62 or 1-68 not 0
@@ -2624,7 +2635,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 					{
 						projection.add(ProjHadc[crossStrip]);
 						//System.out.println(il + "    " + strip + "    " + crossStrip);
-						ProjHadc[crossStrip].fit(gausFit);
+						ProjHadc[crossStrip].fit(gausFit,"Q");
 						gausFitDir.add(gausFit);
 						
 						centroids[counter] = gausFit.getParameter(1);
@@ -2667,7 +2678,9 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 				
 				//create function and fit
 				functionName = String.format(functionNameFormat[il], strip + 1);
-				expfit = new F1D("expC",maxx,minx);
+				//expfit = new F1D("exp+p0",maxx,minx);
+				
+				expfit = new F1D("exp+p0",maxx,minx);
 				expfit.setName(functionName);
 				expfit.parameter(0).setValue(100.0);
 				expfit.setParLimits(0, -1000.0, 1000.0);
