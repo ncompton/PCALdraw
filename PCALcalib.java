@@ -44,6 +44,7 @@ import org.root.histogram.GraphErrors;
 import org.root.histogram.H1D;
 import org.root.histogram.H2D;
 import org.root.pad.EmbeddedCanvas;
+import org.root.pad.TCanvas;
 
 /**
  *
@@ -1501,8 +1502,8 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
         
         //System.out.println("SELECTED = " + desc);
         
-        namedir = String.format("pixelsignal%02d", iteration);
-        if(desc.getLayer() == 2)
+        
+        if(desc.getLayer() == 2) //pixel pane
         {
         	canvas.divide(2,3);
 	        uvwnum = (int)desc.getComponent();
@@ -1512,11 +1513,16 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	    	uvwnum -= v*100;
 	    	w = uvwnum;
 	    	
+	    	namedir = String.format("attendir%02d", iteration);
 	    	name = String.format("attu_%02d", u + 1);
-		    g1  = (GraphErrors)getDir().getDirectory("attendir").getObject(name);
+		    g1  = (GraphErrors)getDir().getDirectory(namedir).getObject(name);
 		    g1.setMarkerSize(2);
 		    canvas.cd(0);
 		    canvas.draw(g1);
+		    
+		    name = String.format("attufit_%02d", u + 1);
+		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
+		    canvas.draw(exp,"same");
 		    
 		    genexp = new F1D("exp+p0",0.0,umaxX[u]);
 		    genexp.setParameter(0,genuA[u]);
@@ -1526,14 +1532,16 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		    genexp.setLineStyle(2);
 		    canvas.draw(genexp,"same");
 	        
+		    namedir = String.format("pixelsignal%02d", iteration);
 	        name = String.format("adu_%02d_%02d_%02d", u + 1, v + 1, w + 1);
 	        h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(1);
 	        canvas.draw(h1);
 	        
 	        
+	        namedir = String.format("attendir%02d", iteration);
 	        name = String.format("attv_%02d", v + 1);
-	        g1  = (GraphErrors)getDir().getDirectory("attendir").getObject(name);
+	        g1  = (GraphErrors)getDir().getDirectory(namedir).getObject(name);
 	        g1.setMarkerSize(2);
 	        canvas.cd(2);
 	        canvas.draw(g1);
@@ -1547,14 +1555,16 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		    canvas.draw(genexp1,"same");
 	        
 	        
+		    namedir = String.format("pixelsignal%02d", iteration);
 	        name = String.format("adv_%02d_%02d_%02d", u + 1, v + 1, w + 1);
 	        h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(3);
 	        canvas.draw(h1);
 	        
 	        
+	        namedir = String.format("attendir%02d", iteration);
 	        name = String.format("attw_%02d", w + 1);
-	        g1  = (GraphErrors)getDir().getDirectory("attendir").getObject(name);
+	        g1  = (GraphErrors)getDir().getDirectory(namedir).getObject(name);
 	        g1.setMarkerSize(2);
 	        canvas.cd(4);
 	        canvas.draw(g1);
@@ -1567,7 +1577,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		    genexp2.setLineStyle(2);
 		    canvas.draw(genexp2,"same");
 	        
-	        
+		    namedir = String.format("pixelsignal%02d", iteration);
 	        name = String.format("adw_%02d_%02d_%02d", u + 1, v + 1, w + 1);
 	        h1  = (H1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas.cd(5);
@@ -1633,9 +1643,9 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		    canvas.draw(exp,"same");
 		    
 		    genexp1 = new F1D("exp+p0",0.0,umaxX[u]);
-		    genexp1.setParameter(0,genuA[u] * (uA[u]+uC[u])/100.0);
+		    genexp1.setParameter(0,genuA[u]);// * (uA[u]+uC[u] + wA[w]+wC[w])/200.0);
 		    genexp1.setParameter(1,genuB[u]);
-		    genexp1.setParameter(2,genuC[u] * (uA[u]+uC[u])/100.0);
+		    genexp1.setParameter(2,genuC[u]);// * (uA[u]+uC[u] + wA[w]+wC[w])/200.0);
 		    genexp1.setLineColor(2);
 		    genexp1.setLineStyle(2);
 		    canvas.draw(genexp1,"same");
@@ -1655,15 +1665,15 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	        canvas.draw(exp,"same");
 	        
 	        genexp = new F1D("exp+p0",0.0,wmaxX[w]);
-		    genexp.setParameter(0,genwA[w] * (wA[w]+wC[w])/100.0);
+		    genexp.setParameter(0,genwA[w]);// * (uA[u]+uC[u] + wA[w]+wC[w])/200.0);
 		    genexp.setParameter(1,genwB[w]);
-		    genexp.setParameter(2,genwC[w] * (wA[w]+wC[w])/100.0);
+		    genexp.setParameter(2,genwC[w]);// * (uA[u]+uC[u] + wA[w]+wC[w])/200.0);
 		    genexp.setLineColor(2);
 		    genexp.setLineStyle(2);
 		    canvas.draw(genexp,"same");
 	          
         }
-        if(desc.getLayer() == 4)
+        if(desc.getLayer() == 4) //VU
         {
 	        canvas.divide(2,1);
 	        uvwnum = (int)desc.getComponent();
@@ -1722,16 +1732,16 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	        canvas.draw(exp,"same");
 	        
 	        genexp = new F1D("exp+p0",0.0,vmaxX[v]);
-		    genexp.setParameter(0,genvA[v] * (vA[v]+vC[v])/100.0);
+		    genexp.setParameter(0,genvA[v]);// * (vA[v]+vC[v])/100.0);
 		    genexp.setParameter(1,genvB[v]);
-		    genexp.setParameter(2,genvC[v] * (vA[v]+vC[v])/100.0);
+		    genexp.setParameter(2,genvC[v]);// * (vA[v]+vC[v])/100.0);
 		    genexp.setLineColor(2);
 		    genexp.setLineStyle(2);
 		    canvas.draw(genexp,"same");
 		    
 	        
         }
-        if(desc.getLayer() == 5)
+        if(desc.getLayer() == 5) //WU
         {
         	//this.canvas = new EmbeddedCanvas();
         	//this.canvas.update();
@@ -1819,9 +1829,9 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	        canvas.draw(exp,"same");
 	        
 	        genexp = new F1D("exp+p0",0.0,wmaxX[w]);
-		    genexp.setParameter(0,genwA[w] * (wA[w]+wC[w])/100.0);
+		    genexp.setParameter(0,genwA[w]);// * (wA[w]+wC[w])/100.0);
 		    genexp.setParameter(1,genwB[w]);
-		    genexp.setParameter(2,genwC[w] * (wA[w]+wC[w])/100.0);
+		    genexp.setParameter(2,genwC[w]);// * (wA[w]+wC[w])/100.0);
 		    genexp.setLineColor(2);
 		    genexp.setLineStyle(2);
 		    canvas.draw(genexp,"same");
@@ -2083,12 +2093,15 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		double ey[] = new double[20000];
 		int counter = 0;
 		//RootCanvas canvas = new RootCanvas();
-		TDirectory fitdir = new TDirectory("attendir"); //creates directory
+		
 		H1D tempsignal;
 		F1D myfunc2;
 		GraphErrors attengraph;
 		String name;
 		String namedir;
+		
+		namedir = String.format("attendir%02d", iteration);
+		TDirectory fitdir = new TDirectory(namedir); //creates directory
 		
 		counter = 0;
 		for(int ustrip = 0; ustrip < 68; ++ustrip)
@@ -2108,7 +2121,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 						if(tempsignal.getMean() > 1 && tempsignal.getEntries() > 10)
 						{
 							centroids[counter] = tempsignal.getMean();
-							ey[counter] = 1.0; 
+							ey[counter] = tempsignal.getRMS(); 
 							
 							x[counter] = udpixel[ustrip][vstrip][wstrip];
 							ex[counter] = 1.0;
@@ -2123,13 +2136,24 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 			attengraph = graphn(name,counter,x,centroids,ex,ey);
 		
 			//create function and fit
-			myfunc2 = new F1D("exp",0.0,500.0); //"mycustomfunc",
-			myfunc2.parameter(0).setValue(100.0);
-			//myfunc2.setParLimits(0, 0.0, 200.0);
-			myfunc2.parameter(1).setValue(-0.002659574468);
-			//myfunc2.setParLimits(1, 0.0, 105.0);
-			//attengraph.fit(myfunc2);
+			myfunc2 = new F1D("exp+p0",0.0,umaxX[ustrip]); //"mycustomfunc",
+			name = String.format("attufit_%02d", ustrip + 1);
+			myfunc2.setName(name);
+			if(uA[ustrip] < 200.0)
+				myfunc2.parameter(0).setValue(uA[ustrip]);
+			else
+				myfunc2.parameter(0).setValue(100.0);
+			myfunc2.setParLimits(0, 0.0, 200.0);
+			myfunc2.parameter(1).setValue(uB[ustrip]);
+			myfunc2.setParLimits(1, -10.0, 10.0);
+			if(uC[ustrip] < 105.0)
+				myfunc2.parameter(2).setValue(uC[ustrip]);
+			else
+				myfunc2.parameter(2).setValue(15.0);
+			myfunc2.setParLimits(2, 0.0, 105.0);
+			attengraph.fit(myfunc2);
 			
+			fitdir.add(myfunc2);
 			fitdir.add(attengraph);
 		}
 		
@@ -2151,7 +2175,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 						if(tempsignal.getMean() > 1)
 						{
 							centroids[counter] = tempsignal.getMean();
-							ey[counter] = 1.0; 
+							ey[counter] = tempsignal.getRMS(); 
 							
 							x[counter] = vdpixel[ustrip][vstrip][wstrip];
 							ex[counter] = 1.0;
@@ -2194,7 +2218,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 						if(tempsignal.getMean() > 1)
 						{
 							centroids[counter] = tempsignal.getMean();
-							ey[counter] = 1.0; 
+							ey[counter] = tempsignal.getRMS(); 
 							
 							x[counter] = wdpixel[ustrip][vstrip][wstrip];
 							ex[counter] = 1.0;
@@ -2305,7 +2329,129 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
       }
       
 	
-
+      public F1D fitexp(double x[], int counter, int strip, String functionName, int uvw)
+      {
+    	  	double minx, maxx;
+			if(counter < 3) //no valid points
+			{
+				minx = 0.0;
+				if(uvw == 0)
+				{
+					maxx = umaxX[strip];
+				}
+				else if(uvw == 1)
+				{
+					maxx = vmaxX[strip];
+				}
+				else
+				{
+					maxx = wmaxX[strip];
+				}
+			}
+			else if(counter < 4) //3 points, 1 non-excluded points
+			{
+				if(x[0] > x[counter-1])
+				{
+					minx = (x[counter-1] + x[counter-2] + x[counter-2])/3.0;
+					maxx = (x[0] + x[1] + x[1])/3.0;
+				}
+				else
+				{
+					minx = (x[0] + x[1] + x[1])/3.0;
+					maxx = (x[counter-1] + x[counter-2] + x[counter-2])/3.0;
+				}
+			}
+			else if(counter < 5) //4 points, 2 non-excluded points
+			{
+				//means low number of points
+				//probably short strip
+				if(x[0] > x[counter-1])
+				{
+					minx = (x[counter-1] + x[counter-2] + x[counter-2])/3.0;
+					maxx = (x[0] + x[1] + x[1])/3.0;
+				}
+				else
+				{
+					minx = (x[0] + x[1] + x[1])/3.0;
+					maxx = (x[counter-1] + x[counter-2] + x[counter-2])/3.0;
+				}
+			}
+			else
+			{
+				if(x[0] > x[counter-1])
+				{
+					minx = (x[counter-1] + x[counter-2] + x[counter-2])/3.0;
+					maxx = (x[0] + x[1] + x[1])/3.0;
+				}
+				else
+				{
+					minx = (x[0] + x[1] + x[1])/3.0;
+					maxx = (x[counter-1] + x[counter-2] + x[counter-2])/3.0;
+				}
+			}
+			
+		  //initialize function
+			F1D fitatten; 
+    	    if(counter < 3) //no valid points
+    	    {
+    	    	fitatten = new F1D("p0",minx,maxx);
+    	    	//fitatten.fixParameter(1, 0.0); //straight line, not x dependent
+    	    	//fitatten.fixParameter(2, 0.0);
+			}
+			else if(counter < 4) //3 points, 1 non-excluded points
+			{
+				fitatten = new F1D("p0",minx,maxx);
+				//fitatten.fixParameter(1, 0.0); //straight line, not x dependent
+    	    	//fitatten.fixParameter(2, 0.0);
+			}
+			else if(counter < 5) //4 points, 2 non-excluded points
+			{
+				fitatten = new F1D("exp",minx,maxx);
+    	    	//fitatten.fixParameter(2, 0.0); //just exponential
+			}
+			else
+			{
+				fitatten = new F1D("exp+p0",minx,maxx);
+				if(uvw == 0) //ustrip
+		    	  {
+		    	  	fitatten.parameter(0).setValue(genuA[strip]);
+		    	  	fitatten.parameter(1).setValue(genuB[strip]);
+		    	  	fitatten.parameter(2).setValue(genuC[strip]);
+		    	  }
+		    	  else if(uvw == 1) //vstrip
+		    	  {
+		    		fitatten.parameter(0).setValue(genvA[strip]);
+		      	  	fitatten.parameter(1).setValue(genvB[strip]);
+		      	  	fitatten.parameter(2).setValue(genvC[strip]);
+		    	  }
+		    	  else //wstrip
+		    	  {
+		    		fitatten.parameter(0).setValue(genwA[strip]);
+		      	  	fitatten.parameter(1).setValue(genwB[strip]);
+		      	  	fitatten.parameter(2).setValue(genwC[strip]);
+		    	  }
+		    	  
+		    	  //make sure parameters are reasonable
+		    	  if(fitatten.getParameter(0) > 200.0 || fitatten.getParameter(0) < 0.0)
+		    		  fitatten.parameter(0).setValue(100.0);
+		    	  if(fitatten.getParameter(1) > 5.0 || fitatten.getParameter(1) < -5.0)
+		    		  fitatten.parameter(1).setValue(-0.005);
+		    	  if(fitatten.getParameter(2) > 200.0 || fitatten.getParameter(2) < 0.0)
+		    		  fitatten.parameter(2).setValue(0.0);
+		    	  
+		    	  //minimize the checking range
+		    	  fitatten.setParLimits(0, 0.0, 200.0);
+		    	  fitatten.setParLimits(1, -5.0, 5.0);
+		    	  fitatten.setParLimits(2, 0.0, 200.0);
+			}
+    	  
+    	  
+    	  // set function name
+    	  fitatten.setName(functionName);
+    	 
+    	  //pass back function with its parameters
+    	  return fitatten;
+      }
 	
 	public void NickInit() 
 	{
@@ -2693,62 +2839,44 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 				}
 				graphName = String.format(graphNameFormat[il], strip + 1);
 				GraphErrors attengraph = graphn(graphName,counter,x,centroids,ex,centroidsErr);
-				if(counter < 5) 
-				{
-					//means low number of points
-					//probably short strip
-					minx = 0.0;
-					if(strip == 0)
-					{
-						maxx = umaxX[strip];
-					}
-					else if(strip == 1)
-					{
-						maxx = vmaxX[strip];
-					}
-					else
-					{
-						maxx = wmaxX[strip];
-					}
-				}
-				else
-				{
-					if(x[1] > x[counter-2])
-					{
-						minx = x[counter-2];
-						maxx = x[1];
-					}
-					else
-					{
-						minx = x[1];
-						maxx = x[counter-2];
-					}
-				}
-				//Ucan.cd(count);
-				//Ucan.draw(attengraph);
 				
-				//create function and fit
+				
+				//set up function name
 				functionName = String.format(functionNameFormat[il], strip + 1);
-				
-				expfit = new F1D("exp+p0",minx,maxx);
-				expfit.setName(functionName);
-				expfit.parameter(0).setValue(100.0);
-				expfit.setParLimits(0, -1000.0, 1000.0);
-				expfit.parameter(1).setValue(-0.002659574468);
-				expfit.parameter(2).setValue(10.0);
-				
+		
+				//create and name function
+				expfit = fitexp(x, counter, strip, functionName, il);
 	
-				attengraph.fit(expfit);
-				//Ucan.draw(expfit,"same");
+				//fit function
+				attengraph.fit(expfit,"R");
+				
+				//add to directories
 				graph.add(attengraph);
 				expofit.add(expfit);
 
+				//record parameters
 				int j = strip+1;
-				writer.println(j  + "   " + x[0] + "   "
-						+ expfit.getParameter(0) + "   " 
-						+ expfit.getParameter(1) + "   " 
-						+ expfit.getParameter(2));
-				//++count;
+				if(counter < 4)
+				{
+					writer.println(j  + "   " + x[0] + "   "
+							+ expfit.getParameter(0) + "   " 
+							+ 0.0 + "   " 
+							+ 0.0);
+				}
+				else if(counter < 5)
+				{
+					writer.println(j  + "   " + x[0] + "   "
+							+ expfit.getParameter(0) + "   " 
+							+ expfit.getParameter(1) + "   " 
+							+ 0.0);
+				}
+				else
+				{
+					writer.println(j  + "   " + x[0] + "   "
+							+ expfit.getParameter(0) + "   " 
+							+ expfit.getParameter(1) + "   " 
+							+ expfit.getParameter(2));
+				}
 			}
 			writer.close();
 		}
@@ -2897,6 +3025,48 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		
     }
 	
+	public void test()
+	{
+		String name;
+		GraphErrors g1, g2;
+		double[] x = {10.0, 20.0};
+		double[] ex = {1.0, 1.0};
+		double[] y = {10.0, 20.0};
+		double[] ey = {1.0, 1.0};
+		
+		F1D fitfunc1 = new F1D("p0",9.0,11.0);
+		fitfunc1.setName("test_of_fit1");
+		fitfunc1.setParameter(0, 10.0);
+		
+		F1D fitfunc2 = new F1D("p0",9.0,11.0);
+		fitfunc2.setName("test_of_fit2");
+		fitfunc2.setParameter(0, 10.0);
+	
+		
+		//test 1
+		TCanvas test1 = new TCanvas("test1", "test1", 500, 500);
+		name = String.format("testgraph_%02d", 1);
+		g1 = graphn(name,1,x,y,ex,ey); //creates graph with a name and 1 point
+		g1.fit(fitfunc1,"R");
+		test1.draw(g1);
+		test1.setAxisRange(0.0, 25.0, 0.0, 25.0);
+		test1.draw(fitfunc1,"same");
+		
+		test1.save("test1.png");
+		
+		//test 2
+		TCanvas test2 = new TCanvas("test2", "test2", 500, 500);
+		name = String.format("testgraph_%02d", 2);
+		g2 = graphn(name,2,x,y,ex,ey);
+		g2.fit(fitfunc2,"R"); //creates graph with a name and 2 points
+		test2.draw(g2);
+		test2.setAxisRange(0.0, 25.0, 0.0, 25.0);
+		test2.draw(fitfunc2,"same");
+		
+		test2.save("test2.png");
+		
+	}
+	
     public static void main(String[] args){    	
     	//PCALcalib detview = new PCALcalib("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-100k.evio");
     	//PCALcalib detview = new PCALcalib("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-500k.evio");
@@ -2905,6 +3075,8 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     	//Draws detector views
     	PCALcalib detview = new PCALcalib();
     	
+    	//detview.test();
+    
     	//import hitmatrix
     	//import general info based on runnumber, sector, and file
     	detview.FillStaticArrays();
@@ -2940,6 +3112,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		//detview.OutputStaticArrays();
 		
 		TBrowser browser = new TBrowser(detview.getDir()); //shows histograms  
+		
     }
 
 
