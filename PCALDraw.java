@@ -19,7 +19,9 @@ public class PCALDraw {
 		slightshift = length/Math.tan(Math.toRadians(angle));
 	}
 	
-	public PCALDraw(double length, double angle) {
+	public PCALDraw(double inlength, double inangle) {
+		length = inlength;
+		angle = inangle;
 		anglewidth = length/Math.sin(Math.toRadians(angle));
 		slightshift = length/Math.tan(Math.toRadians(angle));
 	}
@@ -31,11 +33,11 @@ public class PCALDraw {
 	public DetectorShapeView2D drawAllPixels(int sector)
 	{
 		DetectorShapeView2D pixelmap= new DetectorShapeView2D("PCAL Pixels");
-            for(int upaddle = 0; upaddle < 68; upaddle++){
-            	for(int vpaddle = 0; vpaddle < 62; vpaddle++){
-            		for(int wpaddle = 0; wpaddle < 62; wpaddle++){
-            			if(isValidPixel(sector, upaddle, vpaddle, wpaddle))
-            				pixelmap.addShape(getPixelShape(sector, upaddle, vpaddle, wpaddle));
+            for(int uPaddle = 0; uPaddle < 68; uPaddle++){
+            	for(int vPaddle = 0; vPaddle < 62; vPaddle++){
+            		for(int wPaddle = 0; wPaddle < 62; wPaddle++){
+            			if(isValidPixel(sector, uPaddle, vPaddle, wPaddle))
+            				pixelmap.addShape(getPixelShape(sector, uPaddle, vPaddle, wPaddle));
             		}
             	}
             }
@@ -51,10 +53,10 @@ public class PCALDraw {
 	public DetectorShapeView2D drawUW(int sector)
 	{
 		DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL UW");
-	    	for(int upaddle = 0; upaddle < 68; upaddle++){
-	            for(int wpaddle = 0; wpaddle < 62; wpaddle++){
-	            	if(isValidOverlap(sector, "u", upaddle, "w", wpaddle))
-	            		UWmap.addShape(getOverlapShape(sector, "u", upaddle, "w", wpaddle));
+	    	for(int uPaddle = 0; uPaddle < 68; uPaddle++){
+	            for(int wPaddle = 0; wPaddle < 62; wPaddle++){
+	            	if(isValidOverlap(sector, "u", uPaddle, "w", wPaddle))
+	            		UWmap.addShape(getOverlapShape(sector, "u", uPaddle, "w", wPaddle));
 	            }
 	          
 	    	}
@@ -65,10 +67,10 @@ public class PCALDraw {
 	public DetectorShapeView2D drawWU(int sector)
 	{
 		DetectorShapeView2D WUmap= new DetectorShapeView2D("PCAL WU");
-		   	for(int upaddle = 0; upaddle < 68; upaddle++){
-		   		for(int wpaddle = 0; wpaddle < 62; wpaddle++){
-		            if(isValidOverlap(sector, "w", wpaddle, "u", upaddle))
-		            	WUmap.addShape(getOverlapShape(sector, "w", wpaddle, "u", upaddle));
+		   	for(int uPaddle = 0; uPaddle < 68; uPaddle++){
+		   		for(int wPaddle = 0; wPaddle < 62; wPaddle++){
+		            if(isValidOverlap(sector, "w", wPaddle, "u", uPaddle))
+		            	WUmap.addShape(getOverlapShape(sector, "w", wPaddle, "u", uPaddle));
 		        }
 		          
 		   	}
@@ -79,10 +81,10 @@ public class PCALDraw {
 	public DetectorShapeView2D drawVU(int sector)
 	{
 		DetectorShapeView2D UVmap= new DetectorShapeView2D("PCAL UV");
-		   	for(int upaddle = 0; upaddle < 68; upaddle++){
-		   		for(int vpaddle = 0; vpaddle < 62; vpaddle++){
-		            if(isValidOverlap(sector, "v", vpaddle, "u", upaddle))
-		            	UVmap.addShape(getOverlapShape(sector, "v", vpaddle, "u", upaddle));
+		   	for(int uPaddle = 0; uPaddle < 68; uPaddle++){
+		   		for(int vPaddle = 0; vPaddle < 62; vPaddle++){
+		            if(isValidOverlap(sector, "v", vPaddle, "u", uPaddle))
+		            	UVmap.addShape(getOverlapShape(sector, "v", vPaddle, "u", uPaddle));
 		        }
 		          
 		   	}
@@ -97,9 +99,9 @@ public class PCALDraw {
 	public DetectorShapeView2D drawUStrips(int sector)
 	{
 		DetectorShapeView2D Umap= new DetectorShapeView2D("PCAL U Strips");
-		   	for(int upaddle = 0; upaddle < 68; upaddle++){
-		   		//System.out.println(upaddle);
-		   		Umap.addShape(getStripShape(sector, "u", upaddle));
+		   	for(int uPaddle = 0; uPaddle < 68; uPaddle++){
+		   		//System.out.println(uPaddle);
+		   		Umap.addShape(getStripShape(sector, "u", uPaddle));
 		   	}
 		    return Umap;
 	}
@@ -108,9 +110,9 @@ public class PCALDraw {
 	public DetectorShapeView2D drawVStrips(int sector)
 	{
 		DetectorShapeView2D Vmap= new DetectorShapeView2D("PCAL V Strips");
-		   	for(int vpaddle = 0; vpaddle < 62; vpaddle++){
-		   		//System.out.println(vpaddle);
-		   		Vmap.addShape(getStripShape(sector, "v", vpaddle));
+		   	for(int vPaddle = 0; vPaddle < 62; vPaddle++){
+		   		//System.out.println(vPaddle);
+		   		Vmap.addShape(getStripShape(sector, "v", vPaddle));
 		   	}
 		    return Vmap;
 	}
@@ -119,9 +121,9 @@ public class PCALDraw {
 	public DetectorShapeView2D drawWStrips(int sector)
 	{
 		DetectorShapeView2D Wmap= new DetectorShapeView2D("PCAL W Strips");
-		   	for(int wpaddle = 0; wpaddle < 62; wpaddle++){
-		   		//System.out.println(wpaddle);
-		   		Wmap.addShape(getStripShape(sector, "w", wpaddle));
+		   	for(int wPaddle = 0; wPaddle < 62; wPaddle++){
+		   		//System.out.println(wPaddle);
+		   		Wmap.addShape(getStripShape(sector, "w", wPaddle));
 		   	}
 		    return Wmap;
 	}
@@ -132,9 +134,9 @@ public class PCALDraw {
 	
 	//calls getPixelVerticies
 	//uses those 3 verticies to make a shape
-	public DetectorShape2D getPixelShape(int sector, int upaddle, int vpaddle, int wpaddle){
+	public DetectorShape2D getPixelShape(int sector, int uPaddle, int vPaddle, int wPaddle){
 		
-		Object[] obj = getPixelVerticies(sector, upaddle, vpaddle, wpaddle);
+		Object[] obj = getPixelVerticies(sector, uPaddle, vPaddle, wPaddle);
 		int numpoints = (int)obj[0];
 		//double[] x = (double[])obj[1];//new double[numpoints];
 		//double[] y = (double[])obj[2];//new double[numpoints];
@@ -154,7 +156,7 @@ public class PCALDraw {
       
         	
         
-        DetectorShape2D  pixel = new DetectorShape2D(DetectorType.PCAL,sector,2,upaddle * 10000 + vpaddle * 100 + wpaddle);
+        DetectorShape2D  pixel = new DetectorShape2D(DetectorType.PCAL,sector,2,uPaddle * 10000 + vPaddle * 100 + wPaddle);
     	pixel.getShapePath().clear(); 
         if(numpoints > 2) 
         {
@@ -179,32 +181,32 @@ public class PCALDraw {
 	//uses those 3 verticies to make a shape
 	public DetectorShape2D getOverlapShape(int sector, String strip1, int paddle1, String strip2, int paddle2){
 			
-		int upaddle = -1;
-		int vpaddle = -1;
-		int wpaddle = -1;
+		int uPaddle = -1;
+		int vPaddle = -1;
+		int wPaddle = -1;
 		if((strip1 == "u" || strip1 == "U"))
 		{
-			upaddle = paddle1;
+			uPaddle = paddle1;
 		}
 		if((strip2 == "u" || strip2 == "U"))
 		{
-			upaddle = paddle2;
+			uPaddle = paddle2;
 		}
 		if((strip1 == "v" || strip1 == "V"))
 		{
-			vpaddle = paddle1;
+			vPaddle = paddle1;
 		}
 		if((strip2 == "v" || strip2 == "V"))
 		{
-			vpaddle = paddle2;
+			vPaddle = paddle2;
 		}
 		if((strip1 == "w" || strip1 == "W"))
 		{
-			wpaddle = paddle1;
+			wPaddle = paddle1;
 		}
 		if((strip2 == "w" || strip2 == "W"))
 		{
-			wpaddle = paddle2;
+			wPaddle = paddle2;
 		}
 		
 		Object[] obj = getOverlapVerticies(sector, strip1, paddle1, strip2, paddle2);
@@ -224,14 +226,14 @@ public class PCALDraw {
 	      
 	        	
 		DetectorShape2D  overlapShape;
-	    if(upaddle == paddle1 && wpaddle == paddle2)
-	    	overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,3,upaddle * 100 + wpaddle);
-	    else if(vpaddle == paddle1 && upaddle == paddle2)
-    		overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,4,upaddle * 100 + vpaddle);
-	    else if(wpaddle == paddle1 && upaddle == paddle2)
-	    	overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,5,upaddle * 100 + wpaddle);
+	    if(uPaddle == paddle1 && wPaddle == paddle2)
+	    	overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,3,uPaddle * 100 + wPaddle);
+	    else if(vPaddle == paddle1 && uPaddle == paddle2)
+    		overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,4,uPaddle * 100 + vPaddle);
+	    else if(wPaddle == paddle1 && uPaddle == paddle2)
+	    	overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,5,uPaddle * 100 + wPaddle);
 	    else
-	    	overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,6,vpaddle * 100 + wpaddle);
+	    	overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,6,vPaddle * 100 + wPaddle);
 	    
 	    overlapShape.getShapePath().clear(); 
 	    if(numpoints > 2) 
@@ -258,20 +260,20 @@ public class PCALDraw {
 	//uses those 3 verticies to make a shape
 	public DetectorShape2D getStripShape(int sector, String strip1, int paddle1){
 			
-		int upaddle = -1;
-		int vpaddle = -1;
-		int wpaddle = -1;
+		int uPaddle = -1;
+		int vPaddle = -1;
+		int wPaddle = -1;
 		if((strip1 == "u" || strip1 == "U"))
 		{
-			upaddle = paddle1;
+			uPaddle = paddle1;
 		}
 		if((strip1 == "v" || strip1 == "V"))
 		{
-			vpaddle = paddle1;
+			vPaddle = paddle1;
 		}
 		if((strip1 == "w" || strip1 == "W"))
 		{
-			wpaddle = paddle1;
+			wPaddle = paddle1;
 		}
 
 		
@@ -293,12 +295,12 @@ public class PCALDraw {
 	      
 	        	
 		DetectorShape2D  stripShape;
-	    if(upaddle == paddle1)
-	    	stripShape = new DetectorShape2D(DetectorType.PCAL,sector,7,upaddle);
-	    else if(vpaddle == paddle1)
-	    	stripShape = new DetectorShape2D(DetectorType.PCAL,sector,8,vpaddle);
-	    else if(wpaddle == paddle1)
-	    	stripShape = new DetectorShape2D(DetectorType.PCAL,sector,9,wpaddle);
+	    if(uPaddle == paddle1)
+	    	stripShape = new DetectorShape2D(DetectorType.PCAL,sector,7,uPaddle);
+	    else if(vPaddle == paddle1)
+	    	stripShape = new DetectorShape2D(DetectorType.PCAL,sector,8,vPaddle);
+	    else if(wPaddle == paddle1)
+	    	stripShape = new DetectorShape2D(DetectorType.PCAL,sector,9,wPaddle);
 	    else
 	    {
 	    	stripShape = new DetectorShape2D();
@@ -333,8 +335,8 @@ public class PCALDraw {
 	//calls getPixelVerticies to check
 	//that at least 3 points exist,
 	// if so it is marked as true, else false
-	public Boolean isValidPixel(int sector, int upaddle, int vpaddle, int wpaddle){
-		Object[] obj = getPixelVerticies(sector, upaddle, vpaddle, wpaddle);
+	public Boolean isValidPixel(int sector, int uPaddle, int vPaddle, int wPaddle){
+		Object[] obj = getPixelVerticies(sector, uPaddle, vPaddle, wPaddle);
 		int numpoints = (int)obj[0];
 		
         if(numpoints > 2) 
@@ -367,7 +369,7 @@ public class PCALDraw {
 	//second element is an array x-coordinates (double[]) of size n
 	//third element is an array y-coordinates (double[]) of size n
 	//                                     0-5         0-67         0-61          0-61
-	public Object[] getPixelVerticies(int sector, int upaddle, int vpaddle, int wpaddle){
+	public Object[] getPixelVerticies(int sector, int uPaddle, int vPaddle, int wPaddle){
 		double uyup, uydown;
         double vmup, vmdown, vbup, vbdown;
         double wmup, wmdown, wbup, wbdown;
@@ -381,9 +383,9 @@ public class PCALDraw {
 
         //convert strip numbers to slopes and intercepts
         // rsu 1-68  
-        if(upaddle + 1 > 52)
+        if(uPaddle + 1 > 52)
         {
-        	uyup = (upaddle + 1) - 52.0;
+        	uyup = (uPaddle + 1) - 52.0;
         	uyup = uyup * 2.0;
         	uyup = uyup + 52;
         	uyup = uyup - 1;
@@ -394,15 +396,15 @@ public class PCALDraw {
         }
         else
         {
-        	uyup = upaddle + 1;
+        	uyup = uPaddle + 1;
         	uydown = (84 - (uyup)) * length;
         	uyup = (84 - (uyup - 1)) * length;
         }
         // rsv 1-62  
-        if(vpaddle + 1 >= 16)
+        if(vPaddle + 1 >= 16)
         {
-        	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth;
-    		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth - slightshift;
+        	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
+    		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
     		y1 = 0.0;
     		y2 = length;
     		vmup = (y2 - y1)/(x2 - x1);
@@ -410,8 +412,8 @@ public class PCALDraw {
     		
     		//System.out.println("vxright: " + x1);
     		
-    		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth;
-    		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth - slightshift;
+    		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
+    		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
     		y1 = 0.0;
     		y2 = length;
     		vmdown = (y2 - y1)/(x2 - x1);
@@ -421,25 +423,25 @@ public class PCALDraw {
         }
         else
         {
-        	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth;
-    		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
+        	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
+    		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
     		y1 = 0.0;
     		y2 = length;
     		vmdown = (y2 - y1)/(x2 - x1);
     		vbdown = -x1*vmdown;
     		
-    		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth;
-    		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth - slightshift;
+    		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
+    		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
     		y1 = 0.0;
     		y2 = length;
     		vmup = (y2 - y1)/(x2 - x1);
     		vbup = -x1*vmup;
         }
         // rsw 1-62  
-        if(wpaddle + 1 >= 16)
+        if(wPaddle + 1 >= 16)
         {
-        	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth;
-    		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth + slightshift;
+        	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
+    		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
     		y1 = 0.0;
     		y2 = length;
     		wmup = (y2 - y1)/(x2 - x1);
@@ -447,8 +449,8 @@ public class PCALDraw {
     		
     		//System.out.println("wxright: " + x1);
     		
-    		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth;
-    		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth + slightshift;
+    		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
+    		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
     		y1 = 0.0;
     		y2 = length;
     		wmdown = (y2 - y1)/(x2 - x1);
@@ -458,8 +460,8 @@ public class PCALDraw {
         }
         else
         {
-        	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth;
-    		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
+        	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
+    		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
     		y1 = 0.0;
     		y2 = length;
     		wmdown = (y2 - y1)/(x2 - x1);
@@ -467,8 +469,8 @@ public class PCALDraw {
     		
     		//System.out.println("wxright: " + x1);
     		
-    		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth;
-    		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth + slightshift;
+    		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
+    		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
     		y1 = 0.0;
     		y2 = length;
     		wmup = (y2 - y1)/(x2 - x1);
@@ -672,9 +674,9 @@ public class PCALDraw {
 	//second element is an array x-coordinates (double[]) of size n
 	//third element is an array y-coordinates (double[]) of size n
 	public Object[] getOverlapVerticies(int sector, String strip1, int paddle1, String strip2, int paddle2){
-		int upaddle = -1;
-		int vpaddle = -1;
-		int wpaddle = -1;
+		int uPaddle = -1;
+		int vPaddle = -1;
+		int wPaddle = -1;
 		
 		
 		double x1, x2, y1, y2;
@@ -691,41 +693,41 @@ public class PCALDraw {
 		
 		if((strip1 == "u" || strip1 == "U"))
 		{
-			upaddle = paddle1;
+			uPaddle = paddle1;
 		}
 		if((strip2 == "u" || strip2 == "U"))
 		{
-			upaddle = paddle2;
+			uPaddle = paddle2;
 		}
 		if((strip1 == "v" || strip1 == "V"))
 		{
-			vpaddle = paddle1;
+			vPaddle = paddle1;
 		}
 		if((strip2 == "v" || strip2 == "V"))
 		{
-			vpaddle = paddle2;
+			vPaddle = paddle2;
 		}
 		if((strip1 == "w" || strip1 == "W"))
 		{
-			wpaddle = paddle1;
+			wPaddle = paddle1;
 		}
 		if((strip2 == "w" || strip2 == "W"))
 		{
-			wpaddle = paddle2;
+			wPaddle = paddle2;
 		}
 		
 		//case 1: UW plane
-		if(upaddle != -1 && wpaddle != -1)
+		if(uPaddle != -1 && wPaddle != -1)
 		{ 
-		                vpaddle = 61;
+		                vPaddle = 61;
 		                		                
-		                //System.out.println("Sector: " + sector + " u: " + upaddle + " w: " + wpaddle);
+		                //System.out.println("Sector: " + sector + " u: " + uPaddle + " w: " + wPaddle);
 		                
 		                //convert strip numbers to slopes and intercepts
 		                // rsu 1-68  
-		                if(upaddle + 1 > 52)
+		                if(uPaddle + 1 > 52)
 		                {
-		                	uyup = (upaddle + 1) - 52.0;
+		                	uyup = (uPaddle + 1) - 52.0;
 		                	uyup = uyup * 2.0;
 		                	uyup = uyup + 52;
 		                	uyup = uyup - 1;
@@ -736,15 +738,15 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	uyup = upaddle + 1;
+		                	uyup = uPaddle + 1;
 		                	uydown = (84 - (uyup)) * length;
 		                	uyup = (84 - (uyup - 1)) * length;
 		                }
 		                // rsv 1-62  
-		                if(vpaddle + 1 >= 16)
+		                if(vPaddle + 1 >= 16)
 		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth - slightshift;
+		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmup = (y2 - y1)/(x2 - x1);
@@ -752,8 +754,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("vxright: " + x1);
 		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth - slightshift;
+		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmdown = (y2 - y1)/(x2 - x1);
@@ -763,25 +765,25 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
+		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmdown = (y2 - y1)/(x2 - x1);
 		            		vbdown = -x1*vmdown;
 		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth - slightshift;
+		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmup = (y2 - y1)/(x2 - x1);
 		            		vbup = -x1*vmup;
 		                }
 		                // rsw 1-62  
-		                if(wpaddle + 1 >= 16)
+		                if(wPaddle + 1 >= 16)
 		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth + slightshift;
+		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmup = (y2 - y1)/(x2 - x1);
@@ -789,8 +791,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("wxright: " + x1);
 		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth + slightshift;
+		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmdown = (y2 - y1)/(x2 - x1);
@@ -800,8 +802,8 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
+		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmdown = (y2 - y1)/(x2 - x1);
@@ -809,8 +811,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("wxright: " + x1);
 		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth + slightshift;
+		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmup = (y2 - y1)/(x2 - x1);
@@ -991,17 +993,17 @@ public class PCALDraw {
 		                
 			}
 			//case 2: UV plane
-			else if(upaddle != -1 && vpaddle != -1)
+			else if(uPaddle != -1 && vPaddle != -1)
 			{ 
-    			wpaddle = 61;
+    			wPaddle = 61;
                 
-                //System.out.println("Sector: " + sector + " u: " + upaddle + " v: " + vpaddle);
+                //System.out.println("Sector: " + sector + " u: " + uPaddle + " v: " + vPaddle);
                 
                 //convert strip numbers to slopes and intercepts
                 // rsu 1-68  
-                if(upaddle + 1 > 52)
+                if(uPaddle + 1 > 52)
                 {
-                	uyup = (upaddle + 1) - 52.0;
+                	uyup = (uPaddle + 1) - 52.0;
                 	uyup = uyup * 2.0;
                 	uyup = uyup + 52;
                 	uyup = uyup - 1;
@@ -1012,15 +1014,15 @@ public class PCALDraw {
                 }
                 else
                 {
-                	uyup = upaddle + 1;
+                	uyup = uPaddle + 1;
                 	uydown = (84 - (uyup)) * length;
                 	uyup = (84 - (uyup - 1)) * length;
                 }
                 // rsv 1-62  
-                if(vpaddle + 1 >= 16)
+                if(vPaddle + 1 >= 16)
                 {
-                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth - slightshift;
+                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
+            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
             		y1 = 0.0;
             		y2 = length;
             		vmup = (y2 - y1)/(x2 - x1);
@@ -1028,8 +1030,8 @@ public class PCALDraw {
             		
             		//System.out.println("vxright: " + x1);
             		
-            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth - slightshift;
+            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
+            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
             		y1 = 0.0;
             		y2 = length;
             		vmdown = (y2 - y1)/(x2 - x1);
@@ -1039,25 +1041,25 @@ public class PCALDraw {
                 }
                 else
                 {
-                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
+                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
+            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
             		y1 = 0.0;
             		y2 = length;
             		vmdown = (y2 - y1)/(x2 - x1);
             		vbdown = -x1*vmdown;
             		
-            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth - slightshift;
+            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
+            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
             		y1 = 0.0;
             		y2 = length;
             		vmup = (y2 - y1)/(x2 - x1);
             		vbup = -x1*vmup;
                 }
                 // rsw 1-62  
-                if(wpaddle + 1 >= 16)
+                if(wPaddle + 1 >= 16)
                 {
-                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth + slightshift;
+                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
+            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
             		y1 = 0.0;
             		y2 = length;
             		wmup = (y2 - y1)/(x2 - x1);
@@ -1065,8 +1067,8 @@ public class PCALDraw {
             		
             		//System.out.println("wxright: " + x1);
             		
-            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth + slightshift;
+            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
+            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
             		y1 = 0.0;
             		y2 = length;
             		wmdown = (y2 - y1)/(x2 - x1);
@@ -1076,8 +1078,8 @@ public class PCALDraw {
                 }
                 else
                 {
-                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
+                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
+            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
             		y1 = 0.0;
             		y2 = length;
             		wmdown = (y2 - y1)/(x2 - x1);
@@ -1085,8 +1087,8 @@ public class PCALDraw {
             		
             		//System.out.println("wxright: " + x1);
             		
-            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth + slightshift;
+            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
+            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
             		y1 = 0.0;
             		y2 = length;
             		wmup = (y2 - y1)/(x2 - x1);
@@ -1278,9 +1280,9 @@ public class PCALDraw {
 	//second element is an array x-coordinates (double[]) of size n
 	//third element is an array y-coordinates (double[]) of size n
 	public Object[] getStripVerticies(int sector, String strip1, int paddle1){
-		int upaddle = -1;
-		int vpaddle = -1;
-		int wpaddle = -1;
+		int uPaddle = -1;
+		int vPaddle = -1;
+		int wPaddle = -1;
 		
 		
 		double x1, x2, y1, y2;
@@ -1297,29 +1299,29 @@ public class PCALDraw {
 		
 		if((strip1 == "u" || strip1 == "U"))
 		{
-			upaddle = paddle1;
+			uPaddle = paddle1;
 		}
 		if((strip1 == "v" || strip1 == "V"))
 		{
-			vpaddle = paddle1;
+			vPaddle = paddle1;
 		}
 		if((strip1 == "w" || strip1 == "W"))
 		{
-			wpaddle = paddle1;
+			wPaddle = paddle1;
 		}
 		
 		//case 1: U strip
-		if(upaddle != -1)
+		if(uPaddle != -1)
 		{ 
-			vpaddle = 61;
-		    wpaddle = 61;
+			vPaddle = 61;
+		    wPaddle = 61;
 		                		                
 
 		                //convert strip numbers to slopes and intercepts
 		                // rsu 1-68  
-		                if(upaddle + 1 > 52)
+		                if(uPaddle + 1 > 52)
 		                {
-		                	uyup = (upaddle + 1) - 52.0;
+		                	uyup = (uPaddle + 1) - 52.0;
 		                	uyup = uyup * 2.0;
 		                	uyup = uyup + 52;
 		                	uyup = uyup - 1;
@@ -1330,15 +1332,15 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	uyup = upaddle + 1;
+		                	uyup = uPaddle + 1;
 		                	uydown = (84 - (uyup)) * length;
 		                	uyup = (84 - (uyup - 1)) * length;
 		                }
 		                // rsv 1-62  
-		                if(vpaddle + 1 >= 16)
+		                if(vPaddle + 1 >= 16)
 		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth - slightshift;
+		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmup = (y2 - y1)/(x2 - x1);
@@ -1346,8 +1348,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("vxright: " + x1);
 		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth - slightshift;
+		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmdown = (y2 - y1)/(x2 - x1);
@@ -1357,25 +1359,25 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
+		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmdown = (y2 - y1)/(x2 - x1);
 		            		vbdown = -x1*vmdown;
 		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth - slightshift;
+		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmup = (y2 - y1)/(x2 - x1);
 		            		vbup = -x1*vmup;
 		                }
 		                // rsw 1-62  
-		                if(wpaddle + 1 >= 16)
+		                if(wPaddle + 1 >= 16)
 		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth + slightshift;
+		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmup = (y2 - y1)/(x2 - x1);
@@ -1383,8 +1385,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("wxright: " + x1);
 		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth + slightshift;
+		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmdown = (y2 - y1)/(x2 - x1);
@@ -1394,8 +1396,8 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
+		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmdown = (y2 - y1)/(x2 - x1);
@@ -1403,8 +1405,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("wxright: " + x1);
 		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth + slightshift;
+		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmup = (y2 - y1)/(x2 - x1);
@@ -1575,18 +1577,18 @@ public class PCALDraw {
 		                
 			}
 			//case 2: V strip
-			else if(vpaddle != -1)
+			else if(vPaddle != -1)
 			{ 
-    			wpaddle = 61;
-    			upaddle = 67;
+    			wPaddle = 61;
+    			uPaddle = 67;
                 
-                //System.out.println("Sector: " + sector + " u: " + upaddle + " v: " + vpaddle);
+                //System.out.println("Sector: " + sector + " u: " + uPaddle + " v: " + vPaddle);
                 
                 //convert strip numbers to slopes and intercepts
                 // rsu 1-68  
-                if(upaddle + 1 > 52)
+                if(uPaddle + 1 > 52)
                 {
-                	uyup = (upaddle + 1) - 52.0;
+                	uyup = (uPaddle + 1) - 52.0;
                 	uyup = uyup * 2.0;
                 	uyup = uyup + 52;
                 	uyup = uyup - 1;
@@ -1597,15 +1599,15 @@ public class PCALDraw {
                 }
                 else
                 {
-                	uyup = upaddle + 1;
+                	uyup = uPaddle + 1;
                 	uydown = (84 - (uyup)) * length;
                 	uyup = (84 - (uyup - 1)) * length;
                 }
                 // rsv 1-62  
-                if(vpaddle + 1 >= 16)
+                if(vPaddle + 1 >= 16)
                 {
-                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth - slightshift;
+                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
+            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
             		y1 = 0.0;
             		y2 = length;
             		vmup = (y2 - y1)/(x2 - x1);
@@ -1613,8 +1615,8 @@ public class PCALDraw {
             		
             		//System.out.println("vxright: " + x1);
             		
-            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth - slightshift;
+            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
+            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
             		y1 = 0.0;
             		y2 = length;
             		vmdown = (y2 - y1)/(x2 - x1);
@@ -1624,25 +1626,25 @@ public class PCALDraw {
                 }
                 else
                 {
-                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
+                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
+            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
             		y1 = 0.0;
             		y2 = length;
             		vmdown = (y2 - y1)/(x2 - x1);
             		vbdown = -x1*vmdown;
             		
-            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth - slightshift;
+            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
+            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
             		y1 = 0.0;
             		y2 = length;
             		vmup = (y2 - y1)/(x2 - x1);
             		vbup = -x1*vmup;
                 }
                 // rsw 1-62  
-                if(wpaddle + 1 >= 16)
+                if(wPaddle + 1 >= 16)
                 {
-                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth + slightshift;
+                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
+            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
             		y1 = 0.0;
             		y2 = length;
             		wmup = (y2 - y1)/(x2 - x1);
@@ -1650,8 +1652,8 @@ public class PCALDraw {
             		
             		//System.out.println("wxright: " + x1);
             		
-            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth + slightshift;
+            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
+            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
             		y1 = 0.0;
             		y2 = length;
             		wmdown = (y2 - y1)/(x2 - x1);
@@ -1661,8 +1663,8 @@ public class PCALDraw {
                 }
                 else
                 {
-                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
+                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
+            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
             		y1 = 0.0;
             		y2 = length;
             		wmdown = (y2 - y1)/(x2 - x1);
@@ -1670,8 +1672,8 @@ public class PCALDraw {
             		
             		//System.out.println("wxright: " + x1);
             		
-            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth + slightshift;
+            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
+            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
             		y1 = 0.0;
             		y2 = length;
             		wmup = (y2 - y1)/(x2 - x1);
@@ -1838,18 +1840,18 @@ public class PCALDraw {
 		                
 			}
 		//case 3: W strip
-		else if(wpaddle != -1)
+		else if(wPaddle != -1)
 		{ 
-			upaddle = 67;
-		    vpaddle = 61;
+			uPaddle = 67;
+		    vPaddle = 61;
 		                		                
-		                //System.out.println("Sector: " + sector + " u: " + upaddle + " w: " + wpaddle);
+		                //System.out.println("Sector: " + sector + " u: " + uPaddle + " w: " + wPaddle);
 		                
 		                //convert strip numbers to slopes and intercepts
 		                // rsu 1-68  
-		                if(upaddle + 1 > 52)
+		                if(uPaddle + 1 > 52)
 		                {
-		                	uyup = (upaddle + 1) - 52.0;
+		                	uyup = (uPaddle + 1) - 52.0;
 		                	uyup = uyup * 2.0;
 		                	uyup = uyup + 52;
 		                	uyup = uyup - 1;
@@ -1860,15 +1862,15 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	uyup = upaddle + 1;
+		                	uyup = uPaddle + 1;
 		                	uydown = (84 - (uyup)) * length;
 		                	uyup = (84 - (uyup - 1)) * length;
 		                }
 		                // rsv 1-62  
-		                if(vpaddle + 1 >= 16)
+		                if(vPaddle + 1 >= 16)
 		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth - slightshift;
+		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmup = (y2 - y1)/(x2 - x1);
@@ -1876,8 +1878,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("vxright: " + x1);
 		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth - slightshift;
+		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmdown = (y2 - y1)/(x2 - x1);
@@ -1887,25 +1889,25 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
+		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmdown = (y2 - y1)/(x2 - x1);
 		            		vbdown = -x1*vmdown;
 		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth - slightshift;
+		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmup = (y2 - y1)/(x2 - x1);
 		            		vbup = -x1*vmup;
 		                }
 		                // rsw 1-62  
-		                if(wpaddle + 1 >= 16)
+		                if(wPaddle + 1 >= 16)
 		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth + slightshift;
+		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmup = (y2 - y1)/(x2 - x1);
@@ -1913,8 +1915,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("wxright: " + x1);
 		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth + slightshift;
+		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmdown = (y2 - y1)/(x2 - x1);
@@ -1924,8 +1926,8 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
+		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmdown = (y2 - y1)/(x2 - x1);
@@ -1933,8 +1935,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("wxright: " + x1);
 		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth + slightshift;
+		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmup = (y2 - y1)/(x2 - x1);
@@ -2108,7 +2110,7 @@ public class PCALDraw {
 
 	
 	
-	//estimates the shape center by calculating average x and y
+	//estimates the shape center by calculating average x, y, z
 	//from all verticies in the shape
 	public double[] getShapeCenter(DetectorShape2D shape){
 		double[] center = new double[3];
@@ -2132,9 +2134,9 @@ public class PCALDraw {
 	public double[] getPMTLocation(String strip1, int paddle1){
 		double[] center = new double[3];
 		
-		int upaddle = -1;
-		int vpaddle = -1;
-		int wpaddle = -1;
+		int uPaddle = -1;
+		int vPaddle = -1;
+		int wPaddle = -1;
 		
 		
 		double x1, x2, y1, y2;
@@ -2147,29 +2149,29 @@ public class PCALDraw {
 		
 		if((strip1 == "u" || strip1 == "U"))
 		{
-			upaddle = paddle1;
+			uPaddle = paddle1;
 		}
 		if((strip1 == "v" || strip1 == "V"))
 		{
-			vpaddle = paddle1;
+			vPaddle = paddle1;
 		}
 		if((strip1 == "w" || strip1 == "W"))
 		{
-			wpaddle = paddle1;
+			wPaddle = paddle1;
 		}
 		
 		//case 1: U strip
-		if(upaddle != -1)
+		if(uPaddle != -1)
 		{ 
-			vpaddle = 61;
-		    wpaddle = 61;
+			vPaddle = 61;
+		    wPaddle = 61;
 		                		                
 
 		                //convert strip numbers to slopes and intercepts
 		                // rsu 1-68  
-		                if(upaddle + 1 > 52)
+		                if(uPaddle + 1 > 52)
 		                {
-		                	uyup = (upaddle + 1) - 52.0;
+		                	uyup = (uPaddle + 1) - 52.0;
 		                	uyup = uyup * 2.0;
 		                	uyup = uyup + 52;
 		                	uyup = uyup - 1;
@@ -2180,15 +2182,15 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	uyup = upaddle + 1;
+		                	uyup = uPaddle + 1;
 		                	uydown = (84 - (uyup)) * length;
 		                	uyup = (84 - (uyup - 1)) * length;
 		                }
 		                // rsv 1-62  
-		                if(vpaddle + 1 >= 16)
+		                if(vPaddle + 1 >= 16)
 		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth - slightshift;
+		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmup = (y2 - y1)/(x2 - x1);
@@ -2196,8 +2198,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("vxright: " + x1);
 		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth - slightshift;
+		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmdown = (y2 - y1)/(x2 - x1);
@@ -2207,25 +2209,25 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
+		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmdown = (y2 - y1)/(x2 - x1);
 		            		vbdown = -x1*vmdown;
 		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth - slightshift;
+		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmup = (y2 - y1)/(x2 - x1);
 		            		vbup = -x1*vmup;
 		                }
 		                // rsw 1-62  
-		                if(wpaddle + 1 >= 16)
+		                if(wPaddle + 1 >= 16)
 		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth + slightshift;
+		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmup = (y2 - y1)/(x2 - x1);
@@ -2233,8 +2235,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("wxright: " + x1);
 		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth + slightshift;
+		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmdown = (y2 - y1)/(x2 - x1);
@@ -2244,8 +2246,8 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
+		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmdown = (y2 - y1)/(x2 - x1);
@@ -2253,8 +2255,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("wxright: " + x1);
 		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth + slightshift;
+		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmup = (y2 - y1)/(x2 - x1);
@@ -2268,18 +2270,18 @@ public class PCALDraw {
 		                
 		}
 		//case 2: V strip
-		else if(vpaddle != -1)
+		else if(vPaddle != -1)
 		{ 
-    			wpaddle = 61;
-    			upaddle = 67;
+    			wPaddle = 61;
+    			uPaddle = 67;
                 
-                //System.out.println("Sector: " + sector + " u: " + upaddle + " v: " + vpaddle);
+                //System.out.println("Sector: " + sector + " u: " + uPaddle + " v: " + vPaddle);
                 
                 //convert strip numbers to slopes and intercepts
                 // rsu 1-68  
-                if(upaddle + 1 > 52)
+                if(uPaddle + 1 > 52)
                 {
-                	uyup = (upaddle + 1) - 52.0;
+                	uyup = (uPaddle + 1) - 52.0;
                 	uyup = uyup * 2.0;
                 	uyup = uyup + 52;
                 	uyup = uyup - 1;
@@ -2290,15 +2292,15 @@ public class PCALDraw {
                 }
                 else
                 {
-                	uyup = upaddle + 1;
+                	uyup = uPaddle + 1;
                 	uydown = (84 - (uyup)) * length;
                 	uyup = (84 - (uyup - 1)) * length;
                 }
                 // rsv 1-62  
-                if(vpaddle + 1 >= 16)
+                if(vPaddle + 1 >= 16)
                 {
-                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth - slightshift;
+                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
+            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
             		y1 = 0.0;
             		y2 = length;
             		vmup = (y2 - y1)/(x2 - x1);
@@ -2306,8 +2308,8 @@ public class PCALDraw {
             		
             		//System.out.println("vxright: " + x1);
             		
-            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth - slightshift;
+            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
+            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
             		y1 = 0.0;
             		y2 = length;
             		vmdown = (y2 - y1)/(x2 - x1);
@@ -2317,25 +2319,25 @@ public class PCALDraw {
                 }
                 else
                 {
-                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
+                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
+            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
             		y1 = 0.0;
             		y2 = length;
             		vmdown = (y2 - y1)/(x2 - x1);
             		vbdown = -x1*vmdown;
             		
-            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth - slightshift;
+            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
+            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
             		y1 = 0.0;
             		y2 = length;
             		vmup = (y2 - y1)/(x2 - x1);
             		vbup = -x1*vmup;
                 }
                 // rsw 1-62  
-                if(wpaddle + 1 >= 16)
+                if(wPaddle + 1 >= 16)
                 {
-                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth + slightshift;
+                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
+            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
             		y1 = 0.0;
             		y2 = length;
             		wmup = (y2 - y1)/(x2 - x1);
@@ -2343,8 +2345,8 @@ public class PCALDraw {
             		
             		//System.out.println("wxright: " + x1);
             		
-            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth + slightshift;
+            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
+            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
             		y1 = 0.0;
             		y2 = length;
             		wmdown = (y2 - y1)/(x2 - x1);
@@ -2354,8 +2356,8 @@ public class PCALDraw {
                 }
                 else
                 {
-                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
+                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
+            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
             		y1 = 0.0;
             		y2 = length;
             		wmdown = (y2 - y1)/(x2 - x1);
@@ -2363,8 +2365,8 @@ public class PCALDraw {
             		
             		//System.out.println("wxright: " + x1);
             		
-            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth + slightshift;
+            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
+            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
             		y1 = 0.0;
             		y2 = length;
             		wmup = (y2 - y1)/(x2 - x1);
@@ -2381,18 +2383,18 @@ public class PCALDraw {
             
 		}
 		//case 3: W strip
-		else if(wpaddle != -1)
+		else if(wPaddle != -1)
 		{ 
-			upaddle = 67;
-		    vpaddle = 61;
+			uPaddle = 67;
+		    vPaddle = 61;
 		                		                
-		                //System.out.println("Sector: " + sector + " u: " + upaddle + " w: " + wpaddle);
+		                //System.out.println("Sector: " + sector + " u: " + uPaddle + " w: " + wPaddle);
 		                
 		                //convert strip numbers to slopes and intercepts
 		                // rsu 1-68  
-		                if(upaddle + 1 > 52)
+		                if(uPaddle + 1 > 52)
 		                {
-		                	uyup = (upaddle + 1) - 52.0;
+		                	uyup = (uPaddle + 1) - 52.0;
 		                	uyup = uyup * 2.0;
 		                	uyup = uyup + 52;
 		                	uyup = uyup - 1;
@@ -2403,15 +2405,15 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	uyup = upaddle + 1;
+		                	uyup = uPaddle + 1;
 		                	uydown = (84 - (uyup)) * length;
 		                	uyup = (84 - (uyup - 1)) * length;
 		                }
 		                // rsv 1-62  
-		                if(vpaddle + 1 >= 16)
+		                if(vPaddle + 1 >= 16)
 		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15))*anglewidth - slightshift;
+		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmup = (y2 - y1)/(x2 - x1);
@@ -2419,8 +2421,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("vxright: " + x1);
 		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vpaddle + 15 - 1))*anglewidth - slightshift;
+		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmdown = (y2 - y1)/(x2 - x1);
@@ -2430,25 +2432,25 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
+		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmdown = (y2 - y1)/(x2 - x1);
 		            		vbdown = -x1*vmdown;
 		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vpaddle + 1) * 2.0))*anglewidth - slightshift;
+		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
+		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		vmup = (y2 - y1)/(x2 - x1);
 		            		vbup = -x1*vmup;
 		                }
 		                // rsw 1-62  
-		                if(wpaddle + 1 >= 16)
+		                if(wPaddle + 1 >= 16)
 		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15))*anglewidth + slightshift;
+		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmup = (y2 - y1)/(x2 - x1);
@@ -2456,8 +2458,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("wxright: " + x1);
 		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wpaddle + 15 - 1))*anglewidth + slightshift;
+		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmdown = (y2 - y1)/(x2 - x1);
@@ -2467,8 +2469,8 @@ public class PCALDraw {
 		                }
 		                else
 		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
+		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmdown = (y2 - y1)/(x2 - x1);
@@ -2476,8 +2478,8 @@ public class PCALDraw {
 		            		
 		            		//System.out.println("wxright: " + x1);
 		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wpaddle + 1) * 2.0))*anglewidth + slightshift;
+		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
+		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
 		            		y1 = 0.0;
 		            		y2 = length;
 		            		wmup = (y2 - y1)/(x2 - x1);
@@ -2501,14 +2503,14 @@ public class PCALDraw {
 	}
 	
 	//get attenuation distance
-	public double getUPixelDistance(int upaddle, int vpaddle, int wpaddle){
+	public double getUPixelDistance(int uPaddle, int vPaddle, int wPaddle){
 		double distance = 0;
 		double[] shapecenter = new double[3];
 		double[] PMTloc = new double[3];
 		
 		
-		shapecenter = getShapeCenter(getPixelShape(0,upaddle,vpaddle,wpaddle));
-		PMTloc = getPMTLocation("u", upaddle);
+		shapecenter = getShapeCenter(getPixelShape(0,uPaddle,vPaddle,wPaddle));
+		PMTloc = getPMTLocation("u", uPaddle);
 		
 		distance = Math.sqrt(Math.pow(shapecenter[0] - PMTloc[0],2) + Math.pow(shapecenter[1] - PMTloc[1],2) + Math.pow(shapecenter[2] - PMTloc[2],2));
 		
@@ -2516,14 +2518,14 @@ public class PCALDraw {
 	}
 	
 	//get attenuation distance
-	public double getVPixelDistance(int upaddle, int vpaddle, int wpaddle){
+	public double getVPixelDistance(int uPaddle, int vPaddle, int wPaddle){
 		double distance = 0;
 		double[] shapecenter = new double[3];
 		double[] PMTloc = new double[3];
 		
 		
-		shapecenter = getShapeCenter(getPixelShape(0,upaddle,vpaddle,wpaddle));
-		PMTloc = getPMTLocation("v", vpaddle);
+		shapecenter = getShapeCenter(getPixelShape(0,uPaddle,vPaddle,wPaddle));
+		PMTloc = getPMTLocation("v", vPaddle);
 		
 		distance = Math.sqrt(Math.pow(shapecenter[0] - PMTloc[0],2) + Math.pow(shapecenter[1] - PMTloc[1],2) + Math.pow(shapecenter[2] - PMTloc[2],2));
 		
@@ -2531,14 +2533,14 @@ public class PCALDraw {
 	}
 	
 	//get attenuation distance
-	public double getWPixelDistance(int upaddle, int vpaddle, int wpaddle){
+	public double getWPixelDistance(int uPaddle, int vPaddle, int wPaddle){
 		double distance = 0;
 		double[] shapecenter = new double[3];
 		double[] PMTloc = new double[3];
 		
 		
-		shapecenter = getShapeCenter(getPixelShape(0,upaddle,vpaddle,wpaddle));
-		PMTloc = getPMTLocation("w", wpaddle);
+		shapecenter = getShapeCenter(getPixelShape(0,uPaddle,vPaddle,wPaddle));
+		PMTloc = getPMTLocation("w", wPaddle);
 		
 		distance = Math.sqrt(Math.pow(shapecenter[0] - PMTloc[0],2) + Math.pow(shapecenter[1] - PMTloc[1],2) + Math.pow(shapecenter[2] - PMTloc[2],2));
 		

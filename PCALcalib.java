@@ -217,7 +217,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     	view.addDetectorListener(this);
     	
     	//draw UV pane
-    	DetectorShapeView2D  dv4 = new DetectorShapeView2D("PCAL UV");
+    	DetectorShapeView2D  dv4 = new DetectorShapeView2D("PCAL VU");
     	dv4 = pcal.drawVU(sector);
     	this.view.addDetectorLayer(dv4);
     	view.addDetectorListener(this);
@@ -2933,7 +2933,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 					if(ProjHadc[crossStrip].getEntries() >= 20)
 					{
 						//System.out.println(il + "    " + strip + "    " + crossStrip);
-						ProjHadc[crossStrip].fit(gausFit,"Q");
+						ProjHadc[crossStrip].fit(gausFit,"REQ");
 						gausFitDir.add(gausFit);
 						
 						centroids[counter] = gausFit.getParameter(1);
@@ -2970,7 +2970,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 				expfit = fitexp(x, counter, strip, functionName, il);
 	
 				//fit function
-				attengraph.fit(expfit,"R");
+				attengraph.fit(expfit,"REQ");
 				
 				//add to directories
 				graph.add(attengraph);
