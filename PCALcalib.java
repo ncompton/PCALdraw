@@ -29,6 +29,7 @@ import javax.swing.JSplitPane;
 //import org.jlab.clas.detector.BankType;
 //import org.jlab.clas.detector.DetectorBankEntry;
 
+
 import org.jlab.clas.detector.DetectorCollection;
 import org.jlab.clas.detector.DetectorDescriptor;
 import org.jlab.clas.detector.DetectorType;
@@ -77,6 +78,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     public String laba[] = {"monitor/pcal/adc","monitor/ecinner/adc","monitor/ecouter/adc"}; 
 	public String labt[] = {"monitor/pcal/tdc","monitor/ecinner/tdc","monitor/ecouter/tdc"};
     
+	PCALDraw pcal = new PCALDraw();
     DetectorShapeTabView  view   = new DetectorShapeTabView();
     public CanvasViewPanel        canvasView;
 	public EmbeddedCanvas         canvas,canvas1;
@@ -179,11 +181,32 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
      */
     private void initDetector(){
     	int sector = 0;
-    	PCALDraw pcal = new PCALDraw();
+    	
     	
     	//draw pixels
     	DetectorShapeView2D  dv2 = new DetectorShapeView2D("PCAL Pixels");
-    	dv2 = pcal.drawAllPixels(sector);
+    	for(int upaddle = 0; upaddle < 68; upaddle++){
+        	for(int vpaddle = 0; vpaddle < 62; vpaddle++){
+        		for(int wpaddle = 0; wpaddle < 62; wpaddle++){
+        			if(pcal.isValidPixel(sector, upaddle, vpaddle, wpaddle))
+        			{
+        				dv2.addShape(pcal.getPixelShape(sector, upaddle, vpaddle, wpaddle));
+        				hit[upaddle][vpaddle][wpaddle] = 1;
+        				
+        				udpixel[upaddle][vpaddle][wpaddle] = pcal.getUPixelDistance(upaddle, vpaddle, wpaddle);
+        				vdpixel[upaddle][vpaddle][wpaddle] = pcal.getVPixelDistance(upaddle, vpaddle, wpaddle);
+        				wdpixel[upaddle][vpaddle][wpaddle] = pcal.getWPixelDistance(upaddle, vpaddle, wpaddle);
+        			}
+        			else
+        			{
+        				hit[upaddle][vpaddle][wpaddle] = 0;
+        				udpixel[upaddle][vpaddle][wpaddle] = -10.0;
+        				vdpixel[upaddle][vpaddle][wpaddle] = -10.0;
+        				wdpixel[upaddle][vpaddle][wpaddle] = -10.0;
+        			}
+        		}
+        	}
+        }
     	this.view.addDetectorLayer(dv2);
     	view.addDetectorListener(this);
     	
@@ -203,6 +226,26 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     	DetectorShapeView2D  dv5 = new DetectorShapeView2D("PCAL WU");
     	dv5 = pcal.drawWU(sector);
     	this.view.addDetectorLayer(dv5);
+    	view.addDetectorListener(this);
+    	
+    	
+    	//draw U strips
+    	DetectorShapeView2D  dv7 = new DetectorShapeView2D("PCAL U Strips");
+    	dv7 = pcal.drawUStrips(sector);
+    	this.view.addDetectorLayer(dv7);
+    	view.addDetectorListener(this);
+
+    	
+    	//draw V strips
+    	DetectorShapeView2D  dv8 = new DetectorShapeView2D("PCAL V Strips");
+    	dv8 = pcal.drawVStrips(sector);
+    	this.view.addDetectorLayer(dv8);
+    	view.addDetectorListener(this);
+ 
+    	//draw W strips
+    	DetectorShapeView2D  dv9 = new DetectorShapeView2D("PCAL W Strips");
+    	dv9 = pcal.drawWStrips(sector);
+    	this.view.addDetectorLayer(dv9);
     	view.addDetectorListener(this);
     	
     	//pixelpane();
@@ -2121,7 +2164,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
             	     adcr[is-1][il-1][inh-1] = adc;
             	     //tdcr[is-1][il-1][inh-1] = tdc;
             	     strr[is-1][il-1][inh-1] = ip;
-            	     uvw=uvw+uvw_dalitz(ic,ip,il);
+            	     uvw=uvw+pcal.uvw_dalitz(ic,ip,il);
             	   }
             	   namedir = String.format("dalitz%02d", iteration);
             	   hDalitz = (MyH1D) getDir().getDirectory(namedir).getObject("Dalitz Condition");
@@ -2239,7 +2282,6 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
         }
     }
   
-    
     public void process(){
     	   ProgressPrintout printout = new ProgressPrintout("Calibration");
     	   printout.setInterval(1.0);
@@ -2424,7 +2466,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		
 	}
 	
-  //MyGraphErrors constructor
+    	 //MyGraphErrors constructor
   	public MyGraphErrors graphn(String name, int numberpoints, double x[], double y[], double xe[], double ye[])
     {
           double a[] = new double[numberpoints];
@@ -2447,68 +2489,8 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
           return mygraph;
     }
   	
-  	
-  	//crossstrip needs to be 1-62 or 1-68 not 0
-      public double[] CalcDistinStrips(char stripletter, int crossstrip)
-      {
-  	  double x=0;
-  	  double xE = 0.0;
-          if(stripletter == 'u' || stripletter == 'U')
-          {
-              if(crossstrip <= 15)
-              {
-                  //converts to 77 strips
-                  x = 2.0* crossstrip - 1.0;
-                  xE = 1.0;
-              }
-              else if(crossstrip > 15)
-              {
-                  //converts to 77 strips
-                  x = (30.0 + (crossstrip - 15.0)) - 0.5;
-                  xE = 1.0/2.0;
-              }
-          }
-          else if(stripletter == 'v' || stripletter == 'w' || stripletter == 'V' || stripletter == 'W')
-          {
-              if(crossstrip <= 52)
-              {
-                  //converts to 84 strips
-                  x = crossstrip - 0.5;
-                  xE = 1.0/2.0;
-                  }
-                  else if(crossstrip > 52)
-                  {
-                      //converts to 84 strips
-                      x = (52.0 + 2.0*(crossstrip - 52.0)) - 1.0;
-                      xE = 1.0;
-                  }
-          }
-          return new double[] {x, xE};
-      }
-      
-      //xdistance needs to be 1-62 or 1-68 not 0
-      public double[] CalcDistance(char stripletter, double xdistance, double xdistanceE)
-      {
-          double distperstrip = 5.055;
-          
-          if(stripletter == 'u' || stripletter == 'U')
-          {
-              //convert strip number to distance
-              xdistance = Math.abs(xdistance - 77.0) * distperstrip;
-              xdistanceE = xdistanceE * distperstrip;
-          }
-          else if(stripletter == 'v' || stripletter == 'w' || stripletter == 'V' || stripletter == 'W')
-          {
-              //convert strip number to distance
-              xdistance = Math.abs(xdistance - 84.0) * distperstrip;
-              xdistanceE = xdistanceE * distperstrip;
-          }
-          return new double[] {xdistance, xdistanceE};
-      }
-      
-	
-      public F1D fitexp(double x[], int counter, int strip, String functionName, int uvw)
-      {
+    public F1D fitexp(double x[], int counter, int strip, String functionName, int uvw)
+    {
     	  	double minx, maxx;
 			if(counter < 3) //no valid points
 			{
@@ -2629,7 +2611,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     	 
     	  //pass back function with its parameters
     	  return fitatten;
-      }
+    }
 	
 	public void NickInit() 
 	{
@@ -2733,33 +2715,10 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		getDir().addDirectory(calADC);
 	}
 	
-	
-	public float uvw_dalitz(int ic, int ip, int il) {
-		float uvw=0;
-		switch (ic) {
-		case 0: //PCAL
-			if (il==1&&ip<=52) uvw=(float)ip/84;
-			if (il==1&&ip>52)  uvw=(float)(52+(ip-52)*2)/84;
-			if (il==2&&ip<=15) uvw=(float) 2*ip/77;
-			if (il==2&&ip>15)  uvw=(float)(30+(ip-15))/77;
-			if (il==3&&ip<=15) uvw=(float) 2*ip/77;
-			if (il==3&&ip>15)  uvw=(float)(30+(ip-15))/77;
-			break;
-		case 1: //ECALinner
-			uvw=(float)ip/36;
-			break;
-		case 2: //ECALouter
-			uvw=(float)ip/36;
-			break;
-		}
-		return uvw;
-		
-	}
-	
-	
 	public void FillStaticArrays() 
 	{
 		int counter = 0;
+		
 		//read in
 		Scanner scanner;
 		try 
@@ -2805,6 +2764,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 							for (int ip=0 ; ip<62 ; ip++) 
 							{
 								udpixel[is][il][ip] = udist.nextDouble();
+								if(is == 67 && hit[is][il][ip] == 1)System.out.println("Old Dist: " + udpixel[is][il][ip]);
 							}
 						}
 				   }
@@ -2869,35 +2829,6 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 					e1.printStackTrace();
 				}
 		
-	}
-
-	public void OutputStaticArrays() 
-	{
-	   //write out
-	   PrintWriter writer = null;
-		try 
-		{
-			writer = new PrintWriter("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/hitmatrix.dat");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		for (int is=0 ; is<68 ; is++) 
-		{
-			for (int il=0 ; il<62 ; il++) 
-			{
-				for (int ip=0 ; ip<62 ; ip++) 
-				{
-					writer.print(hit[is][il][ip]);
-					writer.print(" ");
-				}
-				writer.print("\n");
-			}
-			writer.print("\n");
-			writer.print("\n");
-		}
-	   writer.close();
 	}
     
 	public void analyze() 
@@ -3017,11 +2948,11 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 					gausFit = null;
 					if(centroids[counter] >= 1.0)
 					{
-						xTemp[counter] = CalcDistinStrips(stripLetter[il], crossStrip+1)[0];//calcDistinStrips
-						xTempEr[counter] = CalcDistinStrips(stripLetter[il], crossStrip+1)[1];//calcDistinStrips
+						xTemp[counter] = pcal.CalcDistinStrips(stripLetter[il], crossStrip+1)[0];//calcDistinStrips
+						xTempEr[counter] = pcal.CalcDistinStrips(stripLetter[il], crossStrip+1)[1];//calcDistinStrips
 						
-						x[counter] = CalcDistance(stripLetter[il], xTemp[counter], xTempEr[counter])[0];
-						ex[counter] = CalcDistance(stripLetter[il], xTemp[counter], xTempEr[counter])[1];
+						x[counter] = pcal.CalcDistance(stripLetter[il], xTemp[counter], xTempEr[counter])[0];
+						ex[counter] = pcal.CalcDistance(stripLetter[il], xTemp[counter], xTempEr[counter])[1];
 						//centroids[counter] = ProjHadc[crossStrip].getMean();
 						
 						ey[counter] = 1.0;
@@ -3077,7 +3008,6 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		getDir().addDirectory(graph);
 		
 	}
-	
 	
 	public void getAttenuationCoefficients()
     {
@@ -3224,10 +3154,6 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     	
     	//Draws detector views
     	PCALcalib detview = new PCALcalib();
-    
-    	//import hitmatrix
-    	//import general info based on runnumber, sector, and file
-    	detview.FillStaticArrays();
     	
     	for(iteration = 0; iteration < detview.numiterations; ++iteration)
     	{
