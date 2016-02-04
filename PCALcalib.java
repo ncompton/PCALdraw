@@ -178,10 +178,37 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
      * Creates a detector Shape.
      */
     private void initDetector(){
-    	pixelpane();
-    	UWpane();
-    	VUpane();
-    	WUpane();
+    	int sector = 0;
+    	PCALDraw pcal = new PCALDraw();
+    	
+    	//draw pixels
+    	DetectorShapeView2D  dv2 = new DetectorShapeView2D("PCAL Pixels");
+    	dv2 = pcal.drawAllPixels(sector);
+    	this.view.addDetectorLayer(dv2);
+    	view.addDetectorListener(this);
+    	
+    	//draw UW pane
+    	DetectorShapeView2D  dv3 = new DetectorShapeView2D("PCAL UW");
+    	dv3 = pcal.drawUW(sector);
+    	this.view.addDetectorLayer(dv3);
+    	view.addDetectorListener(this);
+    	
+    	//draw UV pane
+    	DetectorShapeView2D  dv4 = new DetectorShapeView2D("PCAL UV");
+    	dv4 = pcal.drawVU(sector);
+    	this.view.addDetectorLayer(dv4);
+    	view.addDetectorListener(this);
+    	
+    	//draw UW pane
+    	DetectorShapeView2D  dv5 = new DetectorShapeView2D("PCAL WU");
+    	dv5 = pcal.drawWU(sector);
+    	this.view.addDetectorLayer(dv5);
+    	view.addDetectorListener(this);
+    	
+    	//pixelpane();
+    	//UWpane();
+    	//VUpane();
+    	//WUpane();
     	//this.view.repaint();
     	
     }
@@ -511,18 +538,14 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		                	//shape.createNXY(numpoints,x,y);
 			                shape.getShapePath().rotateZ(Math.toRadians(sector*60.0));
 			               
-			                /*
-			                if(paddle%2==0){
-			                    shape.setColor(180, 255, 180);
-			                } else {
-			                    shape.setColor(180, 180, 255);
-			                }
-			                */
+
 			                dv2.addShape(shape);   
 		                }
             		}
             	}
             }
+        	PCALDraw pcal = new PCALDraw();
+        	dv2 = pcal.drawAllPixels(sector);
         }
         this.view.addDetectorLayer(dv2);
         view.addDetectorListener(this);
@@ -1520,6 +1543,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
         MyH1D h1 = null;
         MyH1D hsum1 = null;
         MyH1D hsum2 = null;
+        MyH1D hsum3 = null;
         F1D gaus = null;
         F1D exp = null;
         F1D genexp = null;
@@ -1615,10 +1639,33 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	        canvas.draw(h1);
 	        
 	        //canvas1
+	        canvas1.divide(2,2);
+	        canvas1.cd(0);
 	        namedir = String.format("pixelsignal%02d", iteration-1);
 	        name = String.format("toten_%02d_%02d_%02d", u + 1, v + 1, w + 1);
 	        h1  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
 	        canvas1.draw(h1);
+	        
+	        canvas1.cd(1);
+	        namedir = String.format("pixelsignal%02d", iteration-1);
+	        name = String.format("Uen_%02d_%02d_%02d", u + 1, v + 1, w + 1);
+	        hsum1  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+	        hsum1.setLineColor(2);
+	        canvas1.draw(hsum1,"same");
+	        
+	        canvas1.cd(2);
+	        namedir = String.format("pixelsignal%02d", iteration-1);
+	        name = String.format("Ven_%02d_%02d_%02d", u + 1, v + 1, w + 1);
+	        hsum2  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+	        hsum2.setLineColor(3);
+	        canvas1.draw(hsum2,"same");
+	        
+	        canvas1.cd(3);
+	        namedir = String.format("pixelsignal%02d", iteration-1);
+	        name = String.format("Wen_%02d_%02d_%02d", u + 1, v + 1, w + 1);
+	        hsum3  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+	        hsum3.setLineColor(4);
+	        canvas1.draw(hsum3,"same");
 			
         }
         if(desc.getLayer() == 3) //UW
@@ -2159,11 +2206,25 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
             			pixelfilling = (MyH1D)getDir().getDirectory(namedir).getObject(name);
             			pixelfilling.fill(ad[2]);
             			
-            			name = String.format("toten_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
-            			pixelfilling = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+            			
             			double ucor = ((ad[0] - uC[rs[0]-1])/Math.exp(uB[rs[0]-1] * udpixel[rs[0]-1][rs[1]-1][rs[2]-1])) + uC[rs[0]-1];
             			double vcor = ((ad[1] - vC[rs[1]-1])/Math.exp(vB[rs[1]-1] * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1])) + vC[rs[1]-1];
             			double wcor = ((ad[2] - wC[rs[2]-1])/Math.exp(wB[rs[2]-1] * wdpixel[rs[0]-1][rs[1]-1][rs[2]-1])) + wC[rs[2]-1];
+            			
+            			name = String.format("Uen_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
+            			pixelfilling = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+            			pixelfilling.fill(ucor);
+            			
+            			name = String.format("Ven_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
+            			pixelfilling = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+            			pixelfilling.fill(vcor);
+            			
+            			name = String.format("Wen_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
+            			pixelfilling = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+            			pixelfilling.fill(wcor);
+            			
+            			name = String.format("toten_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
+            			pixelfilling = (MyH1D)getDir().getDirectory(namedir).getObject(name);
             			pixelfilling.fill((ucor + vcor + wcor)/3.0);
         			}
         		}
@@ -2606,6 +2667,19 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 						pixelsignal.add(sig);
 						//adcH.add(0, 2, ustrip * 10000 + vstrip * 100 + wstrip, sig);
 						
+						
+						name = String.format("Uen_%02d_%02d_%02d", ustrip + 1, vstrip + 1, wstrip + 1);
+						sig = new MyH1D(name,100,0.0,300.0);
+						pixelsignal.add(sig);
+						
+						name = String.format("Ven_%02d_%02d_%02d", ustrip + 1, vstrip + 1, wstrip + 1);
+						sig = new MyH1D(name,100,0.0,300.0);
+						pixelsignal.add(sig);
+						
+						name = String.format("Wen_%02d_%02d_%02d", ustrip + 1, vstrip + 1, wstrip + 1);
+						sig = new MyH1D(name,100,0.0,300.0);
+						pixelsignal.add(sig);
+						
 						name = String.format("toten_%02d_%02d_%02d", ustrip + 1, vstrip + 1, wstrip + 1);
 						sig = new MyH1D(name,100,0.0,300.0);
 						pixelsignal.add(sig);
@@ -2681,9 +2755,6 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		return uvw;
 		
 	}
-	
-	
-	
 	
 	
 	public void FillStaticArrays() 

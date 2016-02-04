@@ -81,6 +81,7 @@ public class MyGraphErrors extends GraphErrors {
             g1.fit(func);
         }
     }
+    
      
 
 }
