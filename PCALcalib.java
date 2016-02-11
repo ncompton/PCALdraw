@@ -91,12 +91,12 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     int numsectors = 1;
     int numpaddles = 68 * 10000 + 62 * 100 + 62;
     
-    private String inputFileName = "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-3M-s2.evio";
+    private String inputFileName = "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-500k.evio";
     //sector2_000251_mode7.evio.0
     //fc-muon-3M-s2.evio  "sector 2"
     //fc-muon-500k.evio "sector 5"
     //private int RunNumber = 4284; 
-    private int CurrentSector = 2; 
+    private int CurrentSector = 5; 
     private static int iteration = 0;
     int numiterations = 1;
     int countertest = 0;
@@ -181,8 +181,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
      */
     private void initDetector(){
     	int sector = 0;
-    	
-    	
+  
     	//draw pixels
     	DetectorShapeView2D  dv2 = new DetectorShapeView2D("PCAL Pixels");
     	for(int upaddle = 0; upaddle < 68; upaddle++){
@@ -223,10 +222,11 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     	view.addDetectorListener(this);
     	
     	//draw UW pane
-    	DetectorShapeView2D  dv5 = new DetectorShapeView2D("PCAL WU");
-    	dv5 = pcal.drawWU(sector);
-    	this.view.addDetectorLayer(dv5);
-    	view.addDetectorListener(this);
+	    DetectorShapeView2D  dv5 = new DetectorShapeView2D("PCAL WU");
+	    dv5 = pcal.drawWU(sector);
+	    this.view.addDetectorLayer(dv5);
+	    view.addDetectorListener(this);
+
     	
     	
     	//draw U strips
@@ -587,8 +587,6 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
             		}
             	}
             }
-        	PCALDraw pcal = new PCALDraw();
-        	dv2 = pcal.drawAllPixels(sector);
         }
         this.view.addDetectorLayer(dv2);
         view.addDetectorListener(this);
@@ -2879,6 +2877,8 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 		//int count = 0;
 		
 		char stripLetter[] = {'u','v','w'};
+		//char stripLetter2[] = {'w','u','u'};
+		//String cstring1, cstring2;
 		String histNameFormat[] = {"histU_%02d", "histV_%02d", "histW_%02d"};
 		String projNameFormat[] = {"ProjHistU%02d_W%02d", "ProjHistV%02d_U%02d", "ProjHistW%02d_U%02d"};
 		String gaussfuncNameFormat[] = {"gaussU%02d_%02d", "gaussV%02d_%02d", "gaussW%02d_%02d"};
