@@ -57,14 +57,14 @@ import org.root.pad.EmbeddedCanvas;
  */
 public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorProcessor, ActionListener {
 
-	DetectorCollection<MyH1D>  tdcH = new DetectorCollection<MyH1D>();
-    DetectorCollection<MyH1D>  adcH = new DetectorCollection<MyH1D>();
+	//DetectorCollection<MyH1D>  tdcH = new DetectorCollection<MyH1D>();
+    //DetectorCollection<MyH1D>  adcH = new DetectorCollection<MyH1D>();
     
     //public EventDecoder     decoder = new EventDecoder();
 	//FADCConfigLoader          fadc  = new FADCConfigLoader();
     
-    public String laba[] = {"monitor/pcal/adc","monitor/ecinner/adc","monitor/ecouter/adc"}; 
-	public String labt[] = {"monitor/pcal/tdc","monitor/ecinner/tdc","monitor/ecouter/tdc"};
+    //public String laba[] = {"monitor/pcal/adc","monitor/ecinner/adc","monitor/ecouter/adc"}; 
+	//public String labt[] = {"monitor/pcal/tdc","monitor/ecinner/tdc","monitor/ecouter/tdc"};
     
 	PCALDraw pcal = new PCALDraw();
     DetectorShapeTabView  view   = new DetectorShapeTabView();
@@ -87,7 +87,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
     //private int RunNumber = 4284; 
     private int CurrentSector = 2; 
     private static int iteration = 0;
-    private int numiterations = 4;
+    private int numiterations = 1;
     private int countertest = 0;
     
     TDirectory mondirectory = new TDirectory("calibration");

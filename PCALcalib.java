@@ -84,7 +84,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	public EmbeddedCanvas         canvas,canvas1;
 	
     
-    int                   nProcessed = 3000000;
+    int nProcessed = 3000000;
 
     // ColorPalette class defines colors 
     ColorPalette         palette   = new ColorPalette();
@@ -96,7 +96,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     //fc-muon-3M-s2.evio  "sector 2"
     //fc-muon-500k.evio "sector 5"
     //private int RunNumber = 4284; 
-    private int CurrentSector = 5; 
+    private int CurrentSector = 2; 
     private static int iteration = 0;
     int numiterations = 1;
     int countertest = 0;
