@@ -1,6 +1,5 @@
 package org.jlab.calib;
 
-import java.util.ArrayList;
 import java.util.TreeMap;
 
 import org.root.attr.Attributes;

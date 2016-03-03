@@ -6,10 +6,10 @@ package org.jlab.calib;
 
 import java.util.Arrays;
 
-
 import org.root.data.DataSetXY;
 import org.root.fitter.DataFitter;
 import org.root.func.F1D;
+import org.root.histogram.GraphErrors;
 import org.root.histogram.H1D;
 
 
@@ -119,12 +119,12 @@ public class MyH1D extends H1D {
         int j = 0;
         for(i = 0; i < this.getAxis().getNBins(); i++){
             bincontent =  this.getBinContent(i);
-            if(bincontent!=0){
+            if(bincontent > 0.5){
                 //reject any leftovers under 0.5
                 for(j = 0; j + 0.5 < bincontent; ++j){
-                    numArray[currentindex + j] = this.getAxis().getBinCenter(i);
+                    numArray[currentindex] = this.getAxis().getBinCenter(i);
+                    ++currentindex;
                 }
-                currentindex += j;
             }
         }
         
@@ -137,18 +137,25 @@ public class MyH1D extends H1D {
         return median;
     }
     
-   
+    @Override
     public void fit(F1D func){
         this.fit(func, "*");
     }
     
+    @Override
     public void fit(F1D func, String options){
          MyH1D fithist = histClone("fithist");
+         //MyH1D fithist = this;
          double[] x = fithist.getAxis().getBinCenters();
          double[] y = fithist.getData();
-         double[] ye = fithist.getDataError();
-         int datasize = fithist.getDataSize();
+         int datasize = (int)fithist.getDataSize();
+         double[] ye = new double[datasize];
          int counter;
+         
+         for(int i = 0; i < datasize; ++i)
+         {
+        	 ye[i] = Math.sqrt(y[i]);
+         }
 
         //ignore points with ye = 0, unless option "0" is used
         if(options.contains("0")==false){
@@ -189,12 +196,14 @@ public class MyH1D extends H1D {
             yfinal[i] = y[i];
             yefinal[i] = ye[i];
         }
-        DataSetXY finaldataset = new DataSetXY(xfinal, yfinal, xefinal, yefinal);
+        //DataSetXY finaldataset = new DataSetXY(xfinal, yfinal, xefinal, yefinal);
+        GraphErrors finaldataset = new GraphErrors(xfinal, yfinal, xefinal, yefinal);
         
-        DataFitter.fit(finaldataset, func);
-        if(options.contains("Q")==false){
-            func.show();
-        }
+        //DataFitter.fit(finaldataset, func);
+        finaldataset.fit(func,options);
+        //if(options.contains("Q")==false){
+        //    func.show();
+        //}
     }
     
     /**

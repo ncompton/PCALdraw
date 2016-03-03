@@ -6,9 +6,7 @@ import java.util.ListIterator;
 import java.util.TreeMap;
 
 import org.root.attr.Attributes;
-import org.root.base.DataRegion;
 import org.root.base.EvioWritableTree;
-import org.root.base.IDataSet;
 import org.root.histogram.Axis;
 //import org.root.histogram.MultiIndex;
 import org.root.pad.TGCanvas;

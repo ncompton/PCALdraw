@@ -28,8 +28,8 @@ public class PCALDrawDB {
 	private double[] xrotation = new double [6];
 	private double[] yrotation = new double [6];
 	
-	private double[][][][] xPoint = new double [6][3][68][4];
-	private double[][][][] yPoint = new double [6][3][68][4];
+	private static double[][][][] xPoint = new double [6][3][68][4];
+	private static double[][][][] yPoint = new double [6][3][68][4];
 
 	public PCALDrawDB() {
 		initVert();
@@ -243,6 +243,12 @@ public class PCALDrawDB {
 	        y[i] -= 400.0;
 	    }
 	    */
+		/*
+		System.out.println("Blah!");
+		for(int i = 0; i < numpoints; ++i){ 
+        	System.out.println("i: " + i + " x: " + x[i] + " y: " + y[i]);
+        } 
+        */
 
 	      
 	        	
@@ -261,6 +267,7 @@ public class PCALDrawDB {
 	    {
 	        for(int i = 0; i < numpoints; ++i){ 
 	        	overlapShape.getShapePath().addPoint(x[i],  y[i],  0.0); 
+	        	//System.out.println("i: " + i + " x: " + x[i] + " y: " + y[i]);
 	        } 
 
 	        //overlapShape.getShapePath().rotateZ(Math.toRadians(sector*60.0));
@@ -370,6 +377,7 @@ public class PCALDrawDB {
 	public Boolean isValidOverlap(int sector, String strip1, int paddle1, String strip2, int paddle2){
 		Object[] obj = getOverlapVerticies(sector, strip1, paddle1, strip2, paddle2);
 		int numpoints = (int)obj[0];
+		//System.out.println("Blah!" + numpoints);
 		//System.out.println("numpoints: " + numpoints);
         if(numpoints > 2) 
         	return true;
@@ -379,8 +387,7 @@ public class PCALDrawDB {
 
 	
 	
-	
-	
+
 	
 	
 	//returns an Object array of size 3
@@ -389,920 +396,44 @@ public class PCALDrawDB {
 	//third element is an array y-coordinates (double[]) of size n
 	//                                     0-5         0-67         0-61          0-61
 	public Object[] getPixelVerticies(int sector, int uPaddle, int vPaddle, int wPaddle){
-		double uyup, uydown;
-        double vmup, vmdown, vbup, vbdown;
-        double wmup, wmdown, wbup, wbdown;
-        double x1, x2, y1, y2;
-        int numpoints = 0;
-        double x[] = new double [12];
-        double y[] = new double [12];
-        int numpointsA = 0;
-        double a[] = new double [12];
-        double b[] = new double [12];
-
-        //convert strip numbers to slopes and intercepts
-        // rsu 1-68  
-        if(uPaddle + 1 > 52)
-        {
-        	uyup = (uPaddle + 1) - 52.0;
-        	uyup = uyup * 2.0;
-        	uyup = uyup + 52;
-        	uyup = uyup - 1;
-        	uydown = (83 - (uyup)) * length;
-        	uyup = (83 - (uyup - 2)) * length;
-        	//System.out.println("uyup: " + uyup);
-        	//System.out.println("uydown: " + uydown);
-        }
-        else
-        {
-        	uyup = uPaddle + 1;
-        	uydown = (84 - (uyup)) * length;
-        	uyup = (84 - (uyup - 1)) * length;
-        }
-        // rsv 1-62  
-        if(vPaddle + 1 >= 16)
-        {
-        	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
-    		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
-    		y1 = 0.0;
-    		y2 = length;
-    		vmup = (y2 - y1)/(x2 - x1);
-    		vbup = -x1*vmup;
-    		
-    		//System.out.println("vxright: " + x1);
-    		
-    		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
-    		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
-    		y1 = 0.0;
-    		y2 = length;
-    		vmdown = (y2 - y1)/(x2 - x1);
-    		vbdown = -x1*vmdown;
-    		
-    		//System.out.println("vxleft: " + x1);
-        }
-        else
-        {
-        	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
-    		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
-    		y1 = 0.0;
-    		y2 = length;
-    		vmdown = (y2 - y1)/(x2 - x1);
-    		vbdown = -x1*vmdown;
-    		
-    		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
-    		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
-    		y1 = 0.0;
-    		y2 = length;
-    		vmup = (y2 - y1)/(x2 - x1);
-    		vbup = -x1*vmup;
-        }
-        // rsw 1-62  
-        if(wPaddle + 1 >= 16)
-        {
-        	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
-    		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
-    		y1 = 0.0;
-    		y2 = length;
-    		wmup = (y2 - y1)/(x2 - x1);
-    		wbup = -x1*wmup;
-    		
-    		//System.out.println("wxright: " + x1);
-    		
-    		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
-    		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
-    		y1 = 0.0;
-    		y2 = length;
-    		wmdown = (y2 - y1)/(x2 - x1);
-    		wbdown = -x1*wmdown;
-    		
-    		//System.out.println("wxleft: " + x1);
-        }
-        else
-        {
-        	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
-    		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
-    		y1 = 0.0;
-    		y2 = length;
-    		wmdown = (y2 - y1)/(x2 - x1);
-    		wbdown = -x1*wmdown;
-    		
-    		//System.out.println("wxright: " + x1);
-    		
-    		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
-    		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
-    		y1 = 0.0;
-    		y2 = length;
-    		wmup = (y2 - y1)/(x2 - x1);
-    		wbup = -x1*wmup;
-    		
-    		//System.out.println("wxleft: " + x1);
-        }
-        
-        //maximum of 12 vertices for every 3 strips
-        //most of which can be thrown out later
-        //calculate all 12
-        
-        //udown
-        a[0] = (uydown - vbdown)/(vmdown); //udown and vdown, u slope = 0
-        b[0] = uydown; //udown and vdown, u slope = 0
-        
-        a[1] = (uydown - wbdown)/(wmdown); //udown and wdown, u slope = 0
-        b[1] = uydown; //udown and vdown, u slope = 0
-        
-        a[2] = (uydown - vbup)/(vmup); //udown and vup, u slope = 0
-        b[2] = uydown; //udown and vdown, u slope = 0
-        
-        a[3] = (uydown - wbup)/(wmup); //udown and wup, u slope = 0
-        b[3] = uydown; //udown and vdown, u slope = 0
-        
-        //uup
-        a[4] = (uyup - vbdown)/(vmdown); //uup and vdown, u slope = 0
-        b[4] = uyup; //uyup and vdown, u slope = 0
-        
-        a[5] = (uyup - wbdown)/(wmdown); //uup and wdown, u slope = 0
-        b[5] = uyup; //uyup and wdown, u slope = 0
-        
-        a[6] = (uyup - vbup)/(vmup); //uup and vup, u slope = 0
-        b[6] = uyup; //uyup and vup, u slope = 0
-        
-        a[7] = (uyup - wbup)/(wmup); //uup and wup, u slope = 0
-        b[7] = uyup; //uyup and wup, u slope = 0
-        
-        //vup
-        a[8] = (vbup - wbdown)/(wmdown - vmup);
-        b[8] = vmup * a[8] + vbup;
-        
-        a[9] = (vbup - wbup)/(wmup - vmup); 
-        b[9] = vmup * a[9] + vbup; 
-        
-        //vdown
-        a[10] = (vbdown - wbup)/(wmup - vmdown); 
-        b[10] = vmdown * a[10] + vbdown; 
-        
-        a[11] = (vbdown - wbdown)/(wmdown - vmdown); 
-        b[11] = vmdown * a[11] + vbdown;
-        
-        //veto bad points by setting them = 999
-        for(numpointsA = 0; numpointsA < 12; ++numpointsA)
-        {
-        	//System.out.println("x: " + a[numpointsA] + " y: " + b[numpointsA]);
-        	if(b[numpointsA] < uydown - 0.0001)
-        	{
-        		a[numpointsA] = 999;
-        		b[numpointsA] = 999;
-        	}
-        	if(b[numpointsA] > uyup + 0.0001)
-        	{
-            	a[numpointsA] = 999;
-            	b[numpointsA] = 999;
-        	}
-            	
-            if(b[numpointsA] < vmdown * a[numpointsA] + vbdown - 0.0001)
-            {
-            	a[numpointsA] = 999;
-            	b[numpointsA] = 999;
-            }
-            if(b[numpointsA] > vmup * a[numpointsA] + vbup + 0.0001)
-            {
-               	a[numpointsA] = 999;
-                b[numpointsA] = 999;
-            }
-            
-            if(b[numpointsA] < wmdown * a[numpointsA] + wbdown - 0.0001)
-            {
-                a[numpointsA] = 999;
-                b[numpointsA] = 999;
-            }
-            if(b[numpointsA] > wmup * a[numpointsA] + wbup + 0.0001)
-            {
-	            a[numpointsA] = 999;
-	            b[numpointsA] = 999;
-            }
-            
-        }
-        
-        //organize good points in x and y array, count with numpoints
-        numpoints = 0;
-        int count = 0;
-        int count2 = 0;
-        int index = 0;
-        double distance= 0.0;
-        double mindist = 9000.0;
-        double slopediff;
-        int pass = 0;
-        while(count < 12)
-        {
-        	if(a[count] < 900)
-        	{
-        		
-        		if(numpoints == 0)
-        		{
-        			//System.out.println("x: " + a[count] + " y: " + b[count]);
-        			x[numpoints] = a[count];
-        			y[numpoints] = b[count];
-        			++numpoints;
-        			a[count] = 999;
-        			b[count] = 999;
-        			
-        		}
-        		else
-        		{
-        			mindist = 9000.0;
-        			for(int i = 0; i < 12; ++i)
-        			{
-        				if(a[i] < 900 && b[i] < 900)
-        				{
-            				distance = Math.sqrt(Math.pow(a[i] - x[numpoints - 1], 2) + Math.pow(b[i] - y[numpoints - 1], 2));
-            				if(distance < 0.0001) //throws out the overlapping points...
-            				{
-            					a[i] = 999;
-		                		b[i] = 999;
-		                		distance = 999.0;
-            				}
-            				else if(distance > 20.0) //throws out points really far away
-            				{
-            					a[i] = 999;
-		                		b[i] = 999;
-            				}
-            				else
-            				{
-            					//test for on a straight line
-            					pass = 0;
-                				slopediff = Math.abs((b[i]-y[numpoints - 1])/(a[i]-x[numpoints - 1]));
-                				//System.out.println("slope: " + slopediff + " distance: " + distance);
-                				//System.out.println("vslope: " + vmup);
-                				//System.out.println("wslope: " + wmup);
-                				if( Math.abs(slopediff - Math.abs(vmup)) < 0.001) 
-            					{
-            						pass = 1;
-            					}
-                				else if( Math.abs(slopediff - Math.abs(wmup)) < 0.001) 
-            					{
-            						pass = 1;
-            					}
-                				else if( Math.abs(slopediff) < 0.0001 && Math.abs(b[i]/((int)(b[i]/4.5) * 4.5)) - 1.0 < 0.00001) 
-            					{
-            						pass = 1;
-            						//System.out.println("x: " + a[index] + " y: " + b[index]);
-            					}
-                				else
-                				{
-                					distance = 999.0;
-                				}
-            				}
-
-            				if(distance < mindist) //keeping on a straight predefined line
-            				{
-            					mindist = distance;
-            					index = i;
-            				}
-        				}
-        			}
-        			//System.out.println("x: " + a[index] + " y: " + b[index]);
-        			if(mindist < 50.0)
-        			{
-        				//System.out.println("x: " + a[index] + " y: " + b[index]);
-        				x[numpoints] = a[index];
-            			y[numpoints] = b[index];
-            			++numpoints;
-            			a[index] = 999;
-            			b[index] = 999;
-        			}
-        		}
-        	}
-        	else
-        	{
-        		++count;
-        	}
-        	
-        	
-        	++count2;
-        	if(count2 == 12 && count != 12)
-        	{
-        		count = 0;
-        	}
-        	
-        }
 		
-		return(new Object[]{numpoints, x, y});
+		if(isValidOverlap(sector, "u", uPaddle,"w",wPaddle))
+		{
+			Object[] obj = getVerticies(getOverlapShape(sector, "u", uPaddle,"w",wPaddle),getStripShape(sector, "v", vPaddle));
+			
+			int numpoints = (int)obj[0];
+			//System.out.println("Strip let: " + strip1 + "Strip num: " + paddle1 + " Numpoints: " + numpoints);
+			double[] x = new double[numpoints];
+			double[] y = new double[numpoints];
+			System.arraycopy( (double[])obj[1], 0, x, 0, numpoints);
+			System.arraycopy( (double[])obj[2], 0, y, 0, numpoints);
+	
+			Object[] obj2 = sortVerticies(numpoints, x, y);
+			
+			int nPoints = (int)obj2[0];
+			//System.out.println("Strip let: " + strip1 + "Strip num: " + paddle1 + " Numpoints: " + numpoints);
+			double[] xnew = new double[nPoints];
+			double[] ynew = new double[nPoints];
+			System.arraycopy( (double[])obj2[1], 0, xnew, 0, nPoints);
+			System.arraycopy( (double[])obj2[2], 0, ynew, 0, nPoints);
+			
+			return(new Object[]{nPoints, xnew, ynew});
+		}
+		else
+		{
+			return(new Object[]{0, 0.0, 0.0});
+		}
+		
 	}
 	
-	
-	//returns an Object array of size 3
-	//first element is the number of verticies (n) (int)
-	//second element is an array x-coordinates (double[]) of size n
-	//third element is an array y-coordinates (double[]) of size n
-	public Object[] getOverlapVerticiesLoc(int sector, String strip1, int paddle1, String strip2, int paddle2){
-		int uPaddle = -1;
-		int vPaddle = -1;
-		int wPaddle = -1;
-		
-		
-		double x1, x2, y1, y2;
-		int numpoints = 0;
-        double x[] = new double [12];
-        double y[] = new double [12];
-        int numpointsA = 0;
-        double a[] = new double [12];
-        double b[] = new double [12];
-        double uyup, uydown;
-        double vmup, vmdown, vbup, vbdown;
-        double wmup, wmdown, wbup, wbdown;
-		
-		
-		if((strip1 == "u" || strip1 == "U"))
-		{
-			uPaddle = paddle1;
-		}
-		if((strip2 == "u" || strip2 == "U"))
-		{
-			uPaddle = paddle2;
-		}
-		if((strip1 == "v" || strip1 == "V"))
-		{
-			vPaddle = paddle1;
-		}
-		if((strip2 == "v" || strip2 == "V"))
-		{
-			vPaddle = paddle2;
-		}
-		if((strip1 == "w" || strip1 == "W"))
-		{
-			wPaddle = paddle1;
-		}
-		if((strip2 == "w" || strip2 == "W"))
-		{
-			wPaddle = paddle2;
-		}
-		
-		//case 1: UW plane
-		if(uPaddle != -1 && wPaddle != -1)
-		{ 
-		                vPaddle = 61;
-		                		                
-		                //System.out.println("Sector: " + sector + " u: " + uPaddle + " w: " + wPaddle);
-		                
-		                //convert strip numbers to slopes and intercepts
-		                // rsu 1-68  
-		                if(uPaddle + 1 > 52)
-		                {
-		                	uyup = (uPaddle + 1) - 52.0;
-		                	uyup = uyup * 2.0;
-		                	uyup = uyup + 52;
-		                	uyup = uyup - 1;
-		                	uydown = (83 - (uyup)) * length;
-		                	uyup = (83 - (uyup - 2)) * length;
-		                	//System.out.println("uyup: " + uyup);
-		                	//System.out.println("uydown: " + uydown);
-		                }
-		                else
-		                {
-		                	uyup = uPaddle + 1;
-		                	uydown = (84 - (uyup)) * length;
-		                	uyup = (84 - (uyup - 1)) * length;
-		                }
-		                // rsv 1-62  
-		                if(vPaddle + 1 >= 16)
-		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmup = (y2 - y1)/(x2 - x1);
-		            		vbup = -x1*vmup;
-		            		
-		            		//System.out.println("vxright: " + x1);
-		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmdown = (y2 - y1)/(x2 - x1);
-		            		vbdown = -x1*vmdown;
-		            		
-		            		//System.out.println("vxleft: " + x1);
-		                }
-		                else
-		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmdown = (y2 - y1)/(x2 - x1);
-		            		vbdown = -x1*vmdown;
-		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmup = (y2 - y1)/(x2 - x1);
-		            		vbup = -x1*vmup;
-		                }
-		                // rsw 1-62  
-		                if(wPaddle + 1 >= 16)
-		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmup = (y2 - y1)/(x2 - x1);
-		            		wbup = -x1*wmup;
-		            		
-		            		//System.out.println("wxright: " + x1);
-		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmdown = (y2 - y1)/(x2 - x1);
-		            		wbdown = -x1*wmdown;
-		            		
-		            		//System.out.println("wxleft: " + x1);
-		                }
-		                else
-		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmdown = (y2 - y1)/(x2 - x1);
-		            		wbdown = -x1*wmdown;
-		            		
-		            		//System.out.println("wxright: " + x1);
-		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmup = (y2 - y1)/(x2 - x1);
-		            		wbup = -x1*wmup;
-		            		
-		            		//System.out.println("wxleft: " + x1);
-		                }
-		                
-		                //maximum of 8 vertices for every 3 strips
-		                //most of which can be thrown out later
-		                //calculate all 8
-		                
-		                //udown
-		                a[0] = (uydown - wbdown)/(wmdown); //udown and wdown, u slope = 0
-		                b[0] = uydown; //udown and vdown, u slope = 0
-		                
-		                a[1] = (uydown - vbup)/(vmup); //udown and vup, u slope = 0
-		                b[1] = uydown; //udown and vdown, u slope = 0
-		                
-		                a[2] = (uydown - wbup)/(wmup); //udown and wup, u slope = 0
-		                b[2] = uydown; //udown and vdown, u slope = 0
-		                
-		                //uup
-		                a[3] = (uyup - wbdown)/(wmdown); //uup and wdown, u slope = 0
-		                b[3] = uyup; //uyup and wdown, u slope = 0
-		                
-		                a[4] = (uyup - vbup)/(vmup); //uup and vup, u slope = 0
-		                b[4] = uyup; //uyup and vup, u slope = 0
-		                
-		                a[5] = (uyup - wbup)/(wmup); //uup and wup, u slope = 0
-		                b[5] = uyup; //uyup and wup, u slope = 0
-		                
-		                //vup
-		                a[6] = (vbup - wbdown)/(wmdown - vmup);
-		                b[6] = vmup * a[6] + vbup;
-		                
-		                a[7] = (vbup - wbup)/(wmup - vmup); 
-		                b[7] = vmup * a[7] + vbup; 
-		                
-		                
-		                //veto bad points by setting them = 999
-		                for(numpointsA = 0; numpointsA < 8; ++numpointsA)
-		                {
-		                	//System.out.println("x: " + a[numpointsA] + " y: " + b[numpointsA]);
-		                	if(b[numpointsA] < uydown - 0.0001)
-		                	{
-		                		a[numpointsA] = 999;
-		                		b[numpointsA] = 999;
-		                	}
-		                	if(b[numpointsA] > uyup + 0.0001)
-		                	{
-			                	a[numpointsA] = 999;
-			                	b[numpointsA] = 999;
-		                	}
-
-			                if(b[numpointsA] > vmup * a[numpointsA] + vbup + 0.0001)
-			                {
-				               	a[numpointsA] = 999;
-				                b[numpointsA] = 999;
-			                }
-			                
-				            if(b[numpointsA] < wmdown * a[numpointsA] + wbdown - 0.0001)
-				            {
-				                a[numpointsA] = 999;
-				                b[numpointsA] = 999;
-				            }
-				            if(b[numpointsA] > wmup * a[numpointsA] + wbup + 0.0001)
-				            {
-					            a[numpointsA] = 999;
-					            b[numpointsA] = 999;
-				            }
-				            //System.out.println("x: " + a[numpointsA] + " y: " + b[numpointsA]);
-				            
-		                }
-		                
-		                //organize good points in x and y array, count with numpoints
-		                numpoints = 0;
-		                int count = 0;
-		                int count2 = 0;
-		                int index = 0;
-		                double distance= 0.0;
-		                double mindist = 9000.0;
-		                double slopediff;
-		                int pass = 0;
-		                while(count < 8)
-		                {
-		                	if(a[count] < 900)
-		                	{
-		                		
-		                		if(numpoints == 0)
-		                		{
-		                			//System.out.println("x: " + a[count] + " y: " + b[count]);
-		                			x[numpoints] = a[count];
-		                			y[numpoints] = b[count];
-		                			++numpoints;
-		                			a[count] = 999;
-		                			b[count] = 999;
-		                			
-		                		}
-		                		else
-		                		{
-		                			mindist = 9000.0;
-		                			for(int i = 0; i < 8; ++i)
-		                			{
-		                				if(a[i] < 900 && b[i] < 900)
-		                				{
-			                				distance = Math.sqrt(Math.pow(a[i] - x[numpoints - 1], 2) + Math.pow(b[i] - y[numpoints - 1], 2));
-			                				if(distance < 0.0001) //throws out the overlapping points...
-			                				{
-			                					a[i] = 999;
-						                		b[i] = 999;
-						                		distance = 999.0;
-			                				}
-			                				else if(distance > 20.0) //throws out points really far away
-			                				{
-			                					a[i] = 999;
-						                		b[i] = 999;
-			                				}
-			                				else
-			                				{
-			                					//test for on a straight line
-			                					pass = 0;
-				                				slopediff = Math.abs((b[i]-y[numpoints - 1])/(a[i]-x[numpoints - 1]));
-				                				//System.out.println("slope: " + slopediff + " distance: " + distance);
-				                				//System.out.println("vslope: " + vmup);
-				                				//System.out.println("wslope: " + wmup);
-				                				if( Math.abs(slopediff - Math.abs(vmup)) < 0.001) 
-			                					{
-			                						pass = 1;
-			                					}
-				                				else if( Math.abs(slopediff - Math.abs(wmup)) < 0.001) 
-			                					{
-			                						pass = 1;
-			                					}
-				                				else if( Math.abs(slopediff) < 0.0001 && Math.abs(b[i]/((int)(b[i]/4.5) * 4.5)) - 1.0 < 0.00001) 
-			                					{
-			                						pass = 1;
-			                						//System.out.println("x: " + a[index] + " y: " + b[index]);
-			                					}
-				                				else
-				                				{
-				                					distance = 999.0;
-				                				}
-			                				}
-
-			                				if(distance < mindist) //keeping on a straight predefined line
-			                				{
-			                					mindist = distance;
-			                					index = i;
-			                				}
-		                				}
-		                			}
-		                			//System.out.println("x: " + a[index] + " y: " + b[index]);
-		                			if(mindist < 50.0)
-		                			{
-		                				//System.out.println("x: " + a[index] + " y: " + b[index]);
-		                				x[numpoints] = a[index];
-			                			y[numpoints] = b[index];
-			                			++numpoints;
-			                			a[index] = 999;
-			                			b[index] = 999;
-		                			}
-		                		}
-		                	}
-		                	else
-		                	{
-		                		++count;
-		                	}
-		                	
-		                	
-		                	++count2;
-		                	if(count2 == 8 && count != 8)
-		                	{
-		                		count = 0;
-		                	}
-		                	
-		                }
-		                
-			}
-			//case 2: UV plane
-			else if(uPaddle != -1 && vPaddle != -1)
-			{ 
-    			wPaddle = 61;
-                
-                //System.out.println("Sector: " + sector + " u: " + uPaddle + " v: " + vPaddle);
-                
-                //convert strip numbers to slopes and intercepts
-                // rsu 1-68  
-                if(uPaddle + 1 > 52)
-                {
-                	uyup = (uPaddle + 1) - 52.0;
-                	uyup = uyup * 2.0;
-                	uyup = uyup + 52;
-                	uyup = uyup - 1;
-                	uydown = (83 - (uyup)) * length;
-                	uyup = (83 - (uyup - 2)) * length;
-                	//System.out.println("uyup: " + uyup);
-                	//System.out.println("uydown: " + uydown);
-                }
-                else
-                {
-                	uyup = uPaddle + 1;
-                	uydown = (84 - (uyup)) * length;
-                	uyup = (84 - (uyup - 1)) * length;
-                }
-                // rsv 1-62  
-                if(vPaddle + 1 >= 16)
-                {
-                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		vmup = (y2 - y1)/(x2 - x1);
-            		vbup = -x1*vmup;
-            		
-            		//System.out.println("vxright: " + x1);
-            		
-            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		vmdown = (y2 - y1)/(x2 - x1);
-            		vbdown = -x1*vmdown;
-            		
-            		//System.out.println("vxleft: " + x1);
-                }
-                else
-                {
-                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		vmdown = (y2 - y1)/(x2 - x1);
-            		vbdown = -x1*vmdown;
-            		
-            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		vmup = (y2 - y1)/(x2 - x1);
-            		vbup = -x1*vmup;
-                }
-                // rsw 1-62  
-                if(wPaddle + 1 >= 16)
-                {
-                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		wmup = (y2 - y1)/(x2 - x1);
-            		wbup = -x1*wmup;
-            		
-            		//System.out.println("wxright: " + x1);
-            		
-            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		wmdown = (y2 - y1)/(x2 - x1);
-            		wbdown = -x1*wmdown;
-            		
-            		//System.out.println("wxleft: " + x1);
-                }
-                else
-                {
-                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		wmdown = (y2 - y1)/(x2 - x1);
-            		wbdown = -x1*wmdown;
-            		
-            		//System.out.println("wxright: " + x1);
-            		
-            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		wmup = (y2 - y1)/(x2 - x1);
-            		wbup = -x1*wmup;
-            		
-            		//System.out.println("wxleft: " + x1);
-                }
-                
-                //maximum of 8 vertices for every 3 strips
-                //most of which can be thrown out later
-                //calculate all 8
-                
-                //udown
-                a[0] = (uydown - vbdown)/(vmdown); //udown and vdown, u slope = 0
-                b[0] = uydown; //udown and vdown, u slope = 0
-                
-                
-                a[1] = (uydown - vbup)/(vmup); //udown and vup, u slope = 0
-                b[1] = uydown; //udown and vdown, u slope = 0
-                
-                a[2] = (uydown - wbup)/(wmup); //udown and wup, u slope = 0
-                b[2] = uydown; //udown and vdown, u slope = 0
-                
-                //uup
-                a[3] = (uyup - vbdown)/(vmdown); //uup and vdown, u slope = 0
-                b[3] = uyup; //uyup and vdown, u slope = 0
-
-                
-                a[4] = (uyup - vbup)/(vmup); //uup and vup, u slope = 0
-                b[4] = uyup; //uyup and vup, u slope = 0
-                
-                a[5] = (uyup - wbup)/(wmup); //uup and wup, u slope = 0
-                b[5] = uyup; //uyup and wup, u slope = 0
-                
-                //vup
-                a[6] = (vbup - wbup)/(wmup - vmup); 
-                b[6] = vmup * a[6] + vbup; 
-                
-                //vdown
-                a[7] = (vbdown - wbup)/(wmup - vmdown); 
-                b[7] = vmdown * a[7] + vbdown; 
-
-                
-                //veto bad points by setting them = 999
-                for(numpointsA = 0; numpointsA < 8; ++numpointsA)
-                {
-                	//System.out.println("x: " + a[numpointsA] + " y: " + b[numpointsA]);
-                	if(b[numpointsA] < uydown - 0.0001)
-                	{
-                		a[numpointsA] = 999;
-                		b[numpointsA] = 999;
-                	}
-                	if(b[numpointsA] > uyup + 0.0001)
-                	{
-	                	a[numpointsA] = 999;
-	                	b[numpointsA] = 999;
-                	}
-	                	
-	                if(b[numpointsA] < vmdown * a[numpointsA] + vbdown - 0.0001)
-	                {
-	                	a[numpointsA] = 999;
-	                	b[numpointsA] = 999;
-	                }
-	                if(b[numpointsA] > vmup * a[numpointsA] + vbup + 0.0001)
-	                {
-		               	a[numpointsA] = 999;
-		                b[numpointsA] = 999;
-	                }
-	                
-		            if(b[numpointsA] > wmup * a[numpointsA] + wbup + 0.0001)
-		            {
-			            a[numpointsA] = 999;
-			            b[numpointsA] = 999;
-		            }
-		            
-                }
-                
-                //organize good points in x and y array, count with numpoints
-                numpoints = 0;
-                int count = 0;
-                int count2 = 0;
-                int index = 0;
-                double distance= 0.0;
-                double mindist = 9000.0;
-                double slopediff;
-                int pass = 0;
-                while(count < 8)
-                {
-                	if(a[count] < 900)
-                	{
-                		
-                		if(numpoints == 0)
-                		{
-                			//System.out.println("x: " + a[count] + " y: " + b[count]);
-                			x[numpoints] = a[count];
-                			y[numpoints] = b[count];
-                			++numpoints;
-                			a[count] = 999;
-                			b[count] = 999;
-                			
-                		}
-                		else
-                		{
-                			mindist = 9000.0;
-                			for(int i = 0; i < 8; ++i)
-                			{
-                				if(a[i] < 900 && b[i] < 900)
-                				{
-	                				distance = Math.sqrt(Math.pow(a[i] - x[numpoints - 1], 2) + Math.pow(b[i] - y[numpoints - 1], 2));
-	                				if(distance < 0.0001) //throws out the overlapping points...
-	                				{
-	                					a[i] = 999;
-				                		b[i] = 999;
-				                		distance = 999.0;
-	                				}
-	                				else if(distance > 20.0) //throws out points really far away
-	                				{
-	                					a[i] = 999;
-				                		b[i] = 999;
-	                				}
-	                				else
-	                				{
-	                					//test for on a straight line
-	                					pass = 0;
-		                				slopediff = Math.abs((b[i]-y[numpoints - 1])/(a[i]-x[numpoints - 1]));
-		                				//System.out.println("slope: " + slopediff + " distance: " + distance);
-		                				//System.out.println("vslope: " + vmup);
-		                				//System.out.println("wslope: " + wmup);
-		                				if( Math.abs(slopediff - Math.abs(vmup)) < 0.001) 
-	                					{
-	                						pass = 1;
-	                					}
-		                				else if( Math.abs(slopediff - Math.abs(wmup)) < 0.001) 
-	                					{
-	                						pass = 1;
-	                					}
-		                				else if( Math.abs(slopediff) < 0.0001 && Math.abs(b[i]/((int)(b[i]/4.5) * 4.5)) - 1.0 < 0.00001) 
-	                					{
-	                						pass = 1;
-	                						//System.out.println("x: " + a[index] + " y: " + b[index]);
-	                					}
-		                				else
-		                				{
-		                					distance = 999.0;
-		                				}
-	                				}
-
-	                				if(distance < mindist) //keeping on a straight predefined line
-	                				{
-	                					mindist = distance;
-	                					index = i;
-	                				}
-                				}
-                			}
-                			//System.out.println("x: " + a[index] + " y: " + b[index]);
-                			if(mindist < 50.0)
-                			{
-                				//System.out.println("x: " + a[index] + " y: " + b[index]);
-                				x[numpoints] = a[index];
-	                			y[numpoints] = b[index];
-	                			++numpoints;
-	                			a[index] = 999;
-	                			b[index] = 999;
-                			}
-                		}
-                	}
-                	else
-                	{
-                		++count;
-                	}
-                	
-                	
-                	++count2;
-                	if(count2 == 8 && count != 8)
-                	{
-                		count = 0;
-                	}
-                	
-                }
-		                
-			}
-		//System.out.println("numpoints: " + numpoints);            
-		return(new Object[]{numpoints, x, y});
-	}
-
 	
 	//returns an Object array of size 3
 	//first element is the number of verticies (n) (int)
 	//second element is an array x-coordinates (double[]) of size n
 	//third element is an array y-coordinates (double[]) of size n
 	public Object[] getOverlapVerticies(int sector, String strip1, int paddle1, String strip2, int paddle2){
-		
-
-		
-		Object[] obj = getVerticies(getStripShape(sector, strip1, paddle1),getStripShape(sector, strip1, paddle1));
+	
+		Object[] obj = getVerticies(getStripShape(sector, strip1, paddle1),getStripShape(sector, strip2, paddle2));
 		
 		int numpoints = (int)obj[0];
 		//System.out.println("Strip let: " + strip1 + "Strip num: " + paddle1 + " Numpoints: " + numpoints);
@@ -1310,1226 +441,19 @@ public class PCALDrawDB {
 		double[] y = new double[numpoints];
 		System.arraycopy( (double[])obj[1], 0, x, 0, numpoints);
 		System.arraycopy( (double[])obj[2], 0, y, 0, numpoints);
-		
+
 		Object[] obj2 = sortVerticies(numpoints, x, y);
-		int nPoints = 0;
-		double[] xnew = new double[numpoints];
-		double[] ynew = new double[numpoints];
-		for(int i = 0; i < numpoints; ++i)
-		{
-			xnew[nPoints] = x[i];
-			ynew[nPoints] = y[i];
-			++nPoints;
-			while((Math.abs(x[i] - xnew[nPoints - 1]) < 0.00001 && Math.abs(y[i] - ynew[nPoints - 1]) < 0.00001) || i == numpoints)
-			{
-				++i;
-			}
-			
-		}
 		
+		int nPoints = (int)obj2[0];
+		//System.out.println("Strip let: " + strip1 + "Strip num: " + paddle1 + " Numpoints: " + numpoints);
+		double[] xnew = new double[nPoints];
+		double[] ynew = new double[nPoints];
+		System.arraycopy( (double[])obj2[1], 0, xnew, 0, nPoints);
+		System.arraycopy( (double[])obj2[2], 0, ynew, 0, nPoints);
+
 		return(new Object[]{nPoints, xnew, ynew});
-		/*
-		int[] layer = {-1, -1, -1};
-		int lastcomponent = 67;
-
-		double x1, x2, y1, y2;
-		int numpoints = 0;
-        double x[] = new double [12];
-        double y[] = new double [12];
-        int numpointsA = 0;
-        double a[] = new double [12];
-        double b[] = new double [12];
-        double umup, umdown, ubup, ubdown;
-        double vmup, vbup;
-        double wmup, wmdown, wbup, wbdown;
-		
-		
-		if((strip1 == "u" || strip1 == "U"))
-		{
-			layer[0] = 0;
-		}
-		if((strip2 == "u" || strip2 == "U"))
-		{
-			layer[1] = 0;
-		}
-		if((strip1 == "v" || strip1 == "V"))
-		{
-			layer[0] = 1;
-		}
-		if((strip2 == "v" || strip2 == "V"))
-		{
-			layer[1] = 1;
-		}
-		if((strip1 == "w" || strip1 == "W"))
-		{
-			layer[0] = 2;
-		}
-		if((strip2 == "w" || strip2 == "W"))
-		{
-			layer[1] = 2;
-		}
-
-		if(layer[0] != 0 && layer[1] != 0) layer[2] = 0;
-		if(layer[0] != 1 && layer[1] != 1) layer[2] = 1;
-		if(layer[0] != 2 && layer[1] != 2) layer[2] = 2;
-		
-		if(layer[2] == 0)lastcomponent = 67;
-		else lastcomponent = 61;
-		
-		System.out.println("pad1: " + paddle1 + " pad2: " + paddle2);
-		
-		x1 = xPoint[sector][layer[0]][paddle1][0];
-        y1 = yPoint[sector][layer[0]][paddle1][0];
-        x2 = xPoint[sector][layer[0]][paddle1][1];
-        y2 = yPoint[sector][layer[0]][paddle1][1];
-        
-        umup = (y2-y1)/(x2-x1);
-        ubup = y1 - umup*x1;
-        
-        x1 = xPoint[sector][layer[0]][paddle1][2];
-        y1 = yPoint[sector][layer[0]][paddle1][2];
-        x2 = xPoint[sector][layer[0]][paddle1][3];
-        y2 = yPoint[sector][layer[0]][paddle1][3];
-        
-        umdown = (y2-y1)/(x2-x1);
-        ubdown = y1 - umdown*x1;
-        
-        System.out.println("umup: " + umup + " ubup: " + ubup);
-        System.out.println("umdown: " + umdown + " ubdown: " + ubdown);
-        
-        if(xPoint[sector][layer[2]][lastcomponent - 1][0] < xPoint[sector][layer[2]][lastcomponent][0] 
-        		&& xPoint[sector][layer[2]][lastcomponent][2] < xPoint[sector][layer[2]][lastcomponent][0])
-        {
-	        x1 = xPoint[sector][layer[2]][lastcomponent][0];
-	        y1 = yPoint[sector][layer[2]][lastcomponent][0];
-	        x2 = xPoint[sector][layer[2]][lastcomponent][1];
-	        y2 = yPoint[sector][layer[2]][lastcomponent][1];
-	        
-	        vmup = (y2-y1)/(x2-x1);
-	        vbup = y1 - vmup*x1;
-        }
-        else if(xPoint[sector][layer[2]][lastcomponent - 1][0] < xPoint[sector][layer[2]][lastcomponent][0] 
-        		&& xPoint[sector][layer[2]][lastcomponent][2] > xPoint[sector][layer[2]][lastcomponent][0])
-        {
-        	x1 = xPoint[sector][layer[2]][lastcomponent][2];
-	        y1 = yPoint[sector][layer[2]][lastcomponent][2];
-	        x2 = xPoint[sector][layer[2]][lastcomponent][3];
-	        y2 = yPoint[sector][layer[2]][lastcomponent][3];
-	        
-	        vmup = (y2-y1)/(x2-x1);
-	        vbup = y1 - vmup*x1;
-        }
-        else if(xPoint[sector][layer[2]][lastcomponent - 1][0] > xPoint[sector][layer[2]][lastcomponent][0] 
-        		&& xPoint[sector][layer[2]][lastcomponent][2] < xPoint[sector][layer[2]][lastcomponent][0])
-        {
-        	x1 = xPoint[sector][layer[2]][lastcomponent][2];
-	        y1 = yPoint[sector][layer[2]][lastcomponent][2];
-	        x2 = xPoint[sector][layer[2]][lastcomponent][3];
-	        y2 = yPoint[sector][layer[2]][lastcomponent][3];
-	        
-	        vmup = (y2-y1)/(x2-x1);
-	        vbup = y1 - vmup*x1;
-        }
-        else
-        {
-        	x1 = xPoint[sector][layer[2]][lastcomponent][0];
-	        y1 = yPoint[sector][layer[2]][lastcomponent][0];
-	        x2 = xPoint[sector][layer[2]][lastcomponent][1];
-	        y2 = yPoint[sector][layer[2]][lastcomponent][1];
-	        
-	        vmup = (y2-y1)/(x2-x1);
-	        vbup = y1 - vmup*x1;
-        }
-        System.out.println("vmup: " + vmup + " vbup: " + vbup);
-
-        x1 = xPoint[sector][layer[1]][paddle2][0];
-        y1 = yPoint[sector][layer[1]][paddle2][0];
-        x2 = xPoint[sector][layer[1]][paddle2][1];
-        y2 = yPoint[sector][layer[1]][paddle2][1];
-        
-        wmup = (y2-y1)/(x2-x1);
-        wbup = y1 - wmup*x1;
-        
-        
-        x1 = xPoint[sector][layer[1]][paddle2][2];
-        y1 = yPoint[sector][layer[1]][paddle2][2];
-        x2 = xPoint[sector][layer[1]][paddle2][3];
-        y2 = yPoint[sector][layer[1]][paddle2][3];
-        
-        wmdown = (y2-y1)/(x2-x1);
-        wbdown = y1 - wmdown*x1;
-        
-        System.out.println("wmup: " + wmup + " wbup: " + wbup);
-        System.out.println("wmdown: " + wmdown + " wbdown: " + wbdown);
-        
-        if(Math.abs(umup) > 90.0 || ((Double)umup).isInfinite() )
-        {
-        	//udown
-            a[0] = xPoint[sector][layer[0]][paddle1][2]; //udown and wdown
-            b[0] = wmdown * a[0] + wbdown; 
-            
-            a[1] = xPoint[sector][layer[0]][paddle1][2]; //udown and vup
-            b[1] = vmup * a[1] + vbup;
-            
-            a[2] = xPoint[sector][layer[0]][paddle1][2]; //udown and wup
-            b[2] = wmup * a[2] + wbup;
-            
-            //uup
-            a[3] = xPoint[sector][layer[0]][paddle1][0]; //uup and wdown
-            b[3] = wmdown * a[3] + wbdown;
-            
-            a[4] = xPoint[sector][layer[0]][paddle1][0]; //uup and vup
-            b[4] = vmup * a[4] + vbup;
-            
-            a[5] = xPoint[sector][layer[0]][paddle1][0]; //uup and wup
-            b[5] = wmup * a[5] + wbup;
-            
-            //vup
-            a[6] = (vbup - wbdown)/(wmdown - vmup); //vup and wdown
-            b[6] = vmup * a[6] + vbup;
-            
-            a[7] = (vbup - wbup)/(wmup - vmup); //vup and wup
-            b[7] = vmup * a[7] + vbup; 
-     
-        }
-        else if(Math.abs(wmup) > 90.0 || ((Double)wmup).isInfinite())
-        {
-        	//udown
-            a[0] = xPoint[sector][layer[1]][paddle2][2]; //udown and wdown
-            b[0] = umdown * a[0] + ubdown; 
-            
-            a[1] = (ubdown - vbup)/(vmup - umdown); //udown and vup
-            b[1] = umdown * a[1] + ubdown;
-            
-            a[2] = xPoint[sector][layer[1]][paddle2][0]; //udown and wup
-            b[2] = umdown * a[2] + ubdown;
-            
-            //uup
-            a[3] = xPoint[sector][layer[1]][paddle2][2]; //uup and wdown
-            b[3] = umup * a[3] + ubup;
-            
-            a[4] = (ubup - vbup)/(vmup - umup); //uup and vup
-            b[4] = umup * a[4] + ubup;
-            
-            a[5] = xPoint[sector][layer[1]][paddle2][0]; //uup and wup
-            b[5] = umup * a[5] + ubup;
-            
-            //vup
-            a[6] = xPoint[sector][layer[1]][paddle2][2];
-            b[6] = vmup * a[6] + vbup;
-            
-            a[7] = xPoint[sector][layer[1]][paddle2][0]; 
-            b[7] = vmup * a[7] + vbup; 
-     
-        }
-        else if(Math.abs(vmup) > 90.0 || ((Double)vmup).isInfinite())
-        {
-        	//udown
-            a[0] = (ubdown - wbdown)/(wmdown - umdown); //udown and wdown
-            b[0] = umdown * a[0] + ubdown; 
-            
-            a[1] = xPoint[sector][layer[2]][lastcomponent][0]; //udown and vup
-            b[1] = umdown * a[1] + ubdown;
-            
-            a[2] = (ubdown - wbup)/(wmup - umdown); //udown and wup
-            b[2] = umdown * a[2] + ubdown;
-            
-            //uup
-            a[3] = (ubup - wbdown)/(wmdown - umup); //uup and wdown
-            b[3] = umup * a[3] + ubup;
-            
-            a[4] = xPoint[sector][layer[2]][lastcomponent][0]; //uup and vup
-            b[4] = umup * a[4] + ubup;
-            
-            a[5] = (ubup - wbup)/(wmup - umup); //uup and wup
-            b[5] = umup * a[5] + ubup;
-            
-            //vup
-            a[6] = xPoint[sector][layer[2]][lastcomponent][0];
-            b[6] = wmdown * a[6] + wbdown;
-            
-            a[7] = xPoint[sector][layer[2]][lastcomponent][0]; 
-            b[7] = wmup * a[7] + wbup; 
-     
-        }
-        else
-        {
-            //udown
-            a[0] = (ubdown - wbdown)/(wmdown - umdown); //udown and wdown
-            b[0] = umdown * a[0] + ubdown; 
-            
-            a[1] = (ubdown - vbup)/(vmup - umdown); //udown and vup
-            b[1] = umdown * a[1] + ubdown;
-            
-            a[2] = (ubdown - wbup)/(wmup - umdown); //udown and wup
-            b[2] = umdown * a[2] + ubdown;
-            
-            //uup
-            a[3] = (ubup - wbdown)/(wmdown - umup); //uup and wdown
-            b[3] = umup * a[3] + ubup;
-            
-            a[4] = (ubup - vbup)/(vmup - umup); //uup and vup
-            b[4] = umup * a[4] + ubup;
-            
-            a[5] = (ubup - wbup)/(wmup - umup); //uup and wup
-            b[5] = umup * a[5] + ubup;
-            
-            //vup
-            a[6] = (vbup - wbdown)/(wmdown - vmup);
-            b[6] = vmup * a[6] + vbup;
-            
-            a[7] = (vbup - wbup)/(wmup - vmup); 
-            b[7] = vmup * a[7] + vbup; 
-        }
-		
-        System.out.println("       ");
-        System.out.println("       ");
-        //veto bad points by setting them = 999
-        for(numpointsA = 0; numpointsA < 8; ++numpointsA)
-        {
-        	System.out.println("x: " + a[numpointsA] + " y: " + b[numpointsA]);
-
-        	if(!this.isContained3Decimal(getStripShape(sector, strip1, paddle1), a[numpointsA], b[numpointsA]))
-        	{
-        		//System.out.println("This shouldn't fire");
-        		a[numpointsA] = 999;
-        		b[numpointsA] = 999;
-        	}
-        	if(!this.isContained3Decimal(getStripShape(sector, strip2, paddle2), a[numpointsA], b[numpointsA]))
-        	{
-        		//System.out.println("This shouldn't fire");
-        		a[numpointsA] = 999;
-        		b[numpointsA] = 999;
-        	}
-        	System.out.println("x: " + a[numpointsA] + " y: " + b[numpointsA]);
-        	
-        }
-		
-        //organize good points in x and y array, count with numpoints
-        numpoints = 0;
-        int count = 0;
-        int count2 = 0;
-        int index = 0;
-        double distance= 0.0;
-        double mindist = 9000.0;
-        double slopediff;
-        while(count < 8)
-        {
-        	if(a[count] < 900)
-        	{
-        		
-        		if(numpoints == 0)
-        		{
-        			//System.out.println("x: " + a[count] + " y: " + b[count]);
-        			x[numpoints] = a[count];
-        			y[numpoints] = b[count];
-        			++numpoints;
-        			a[count] = 999;
-        			b[count] = 999;
-        			
-        		}
-        		else
-        		{
-        			mindist = 9000.0;
-        			for(int i = 0; i < 8; ++i)
-        			{
-        				if(a[i] < 900 && b[i] < 900)
-        				{
-            				distance = Math.sqrt(Math.pow(a[i] - x[numpoints - 1], 2) + Math.pow(b[i] - y[numpoints - 1], 2));
-            				slopediff = Math.abs((b[i]-y[numpoints - 1])/(a[i]-x[numpoints - 1]));
-            				if(distance < 0.0001) //throws out the overlapping points...
-            				{
-            					a[i] = 999;
-		                		b[i] = 999;
-		                		distance = 999.0;
-            				}
-            				if(Math.abs(slopediff) > 90.0) //undefined slope
-            				{
-            					if(Math.abs(umup) < 90.0 && Math.abs(vmup) < 90.0 && Math.abs(wmup) < 90.0)
-                				{
-            						//not allowed if no strips have it
-            						distance = 999.0;
-                				}
-            				}
-            				else
-            				{
-            					if(Math.abs(Math.abs(slopediff) - Math.abs(umup)) > 0.001 && Math.abs(Math.abs(slopediff) - Math.abs(vmup)) > 0.001 && Math.abs(Math.abs(slopediff) - Math.abs(wmup)) > 0.001)
-            					{
-            						//doesn't follow any of the slopes
-            						distance = 999.0;
-            					}
-            				}
-            				//System.out.println(" distance: " + distance);
-            				if(distance < mindist) //keeping on a straight predefined line
-            				{
-            					mindist = distance;
-            					index = i;
-            				}
-        				}
-        			}
-        			//System.out.println("x: " + a[index] + " y: " + b[index]);
-        			if(mindist < 50.0)
-        			{
-        				//System.out.println("x: " + a[index] + " y: " + b[index]);
-        				x[numpoints] = a[index];
-            			y[numpoints] = b[index];
-            			++numpoints;
-            			a[index] = 999;
-            			b[index] = 999;
-        			}
-        		}
-        	}
-        	else
-        	{
-        		++count;
-        	}
-        	
-        	
-        	++count2;
-        	if(count2 == 8 && count != 8)
-        	{
-        		count = 0;
-        	}
-        	
-        }
-        */
-		//System.out.println("numpoints: " + numpoints);            
-		//return(new Object[]{numpoints, x, y});
 	}
 	
-	
-	//returns an Object array of size 3
-	//first element is the number of verticies (n) (int)
-	//second element is an array x-coordinates (double[]) of size n
-	//third element is an array y-coordinates (double[]) of size n
-	public Object[] getStripVerticiesLoc(int sector, String strip1, int paddle1){
-		int uPaddle = -1;
-		int vPaddle = -1;
-		int wPaddle = -1;
-		
-		
-		double x1, x2, y1, y2;
-		int numpoints = 0;
-        double x[] = new double [12];
-        double y[] = new double [12];
-        int numpointsA = 0;
-        double a[] = new double [12];
-        double b[] = new double [12];
-        double uyup, uydown;
-        double vmup, vmdown, vbup, vbdown;
-        double wmup, wmdown, wbup, wbdown;
-		
-		
-		if((strip1 == "u" || strip1 == "U"))
-		{
-			uPaddle = paddle1;
-		}
-		if((strip1 == "v" || strip1 == "V"))
-		{
-			vPaddle = paddle1;
-		}
-		if((strip1 == "w" || strip1 == "W"))
-		{
-			wPaddle = paddle1;
-		}
-		
-		//case 1: U strip
-		if(uPaddle != -1)
-		{ 
-			vPaddle = 61;
-		    wPaddle = 61;
-		                		                
-
-		                //convert strip numbers to slopes and intercepts
-		                // rsu 1-68  
-		                if(uPaddle + 1 > 52)
-		                {
-		                	uyup = (uPaddle + 1) - 52.0;
-		                	uyup = uyup * 2.0;
-		                	uyup = uyup + 52;
-		                	uyup = uyup - 1;
-		                	uydown = (83 - (uyup)) * length;
-		                	uyup = (83 - (uyup - 2)) * length;
-		                	//System.out.println("uyup: " + uyup);
-		                	//System.out.println("uydown: " + uydown);
-		                }
-		                else
-		                {
-		                	uyup = uPaddle + 1;
-		                	uydown = (84 - (uyup)) * length;
-		                	uyup = (84 - (uyup - 1)) * length;
-		                }
-		                // rsv 1-62  
-		                if(vPaddle + 1 >= 16)
-		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmup = (y2 - y1)/(x2 - x1);
-		            		vbup = -x1*vmup;
-		            		
-		            		//System.out.println("vxright: " + x1);
-		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmdown = (y2 - y1)/(x2 - x1);
-		            		vbdown = -x1*vmdown;
-		            		
-		            		//System.out.println("vxleft: " + x1);
-		                }
-		                else
-		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmdown = (y2 - y1)/(x2 - x1);
-		            		vbdown = -x1*vmdown;
-		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmup = (y2 - y1)/(x2 - x1);
-		            		vbup = -x1*vmup;
-		                }
-		                // rsw 1-62  
-		                if(wPaddle + 1 >= 16)
-		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmup = (y2 - y1)/(x2 - x1);
-		            		wbup = -x1*wmup;
-		            		
-		            		//System.out.println("wxright: " + x1);
-		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmdown = (y2 - y1)/(x2 - x1);
-		            		wbdown = -x1*wmdown;
-		            		
-		            		//System.out.println("wxleft: " + x1);
-		                }
-		                else
-		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmdown = (y2 - y1)/(x2 - x1);
-		            		wbdown = -x1*wmdown;
-		            		
-		            		//System.out.println("wxright: " + x1);
-		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmup = (y2 - y1)/(x2 - x1);
-		            		wbup = -x1*wmup;
-		            		
-		            		//System.out.println("wxleft: " + x1);
-		                }
-		                
-		                //maximum of 8 vertices for every 3 strips
-		                //most of which can be thrown out later
-		                //calculate all 8
-		                
-		                //udown
-		                a[0] = (uydown - vbup)/(vmup); //udown and vup, u slope = 0
-		                b[0] = uydown; //udown and vdown, u slope = 0
-		                
-		                a[1] = (uydown - wbup)/(wmup); //udown and wup, u slope = 0
-		                b[1] = uydown; //udown and vdown, u slope = 0
-		                
-		                //uup
-		                a[2] = (uyup - vbup)/(vmup); //uup and vup, u slope = 0
-		                b[2] = uyup; //uyup and vup, u slope = 0
-		                
-		                a[3] = (uyup - wbup)/(wmup); //uup and wup, u slope = 0
-		                b[3] = uyup; //uyup and wup, u slope = 0
-		                
-		                //vup
-		                a[4] = (vbup - wbup)/(wmup - vmup); 
-		                b[4] = vmup * a[4] + vbup; 
-		                
-		                
-		                //veto bad points by setting them = 999
-		                for(numpointsA = 0; numpointsA < 5; ++numpointsA)
-		                {
-		                	//System.out.println("x: " + a[numpointsA] + " y: " + b[numpointsA]);
-		                	if(b[numpointsA] < uydown - 0.0001)
-		                	{
-		                		a[numpointsA] = 999;
-		                		b[numpointsA] = 999;
-		                	}
-		                	if(b[numpointsA] > uyup + 0.0001)
-		                	{
-			                	a[numpointsA] = 999;
-			                	b[numpointsA] = 999;
-		                	}
-
-			                if(b[numpointsA] > vmup * a[numpointsA] + vbup + 0.0001)
-			                {
-				               	a[numpointsA] = 999;
-				                b[numpointsA] = 999;
-			                }
-				            if(b[numpointsA] > wmup * a[numpointsA] + wbup + 0.0001)
-				            {
-					            a[numpointsA] = 999;
-					            b[numpointsA] = 999;
-				            }
-				            //System.out.println("x: " + a[numpointsA] + " y: " + b[numpointsA]);
-				            
-		                }
-		                
-		                //organize good points in x and y array, count with numpoints
-		                numpoints = 0;
-		                int count = 0;
-		                int count2 = 0;
-		                int index = 0;
-		                double distance= 0.0;
-		                double mindist = 9000.0;
-		                double slopediff;
-		                int pass = 0;
-		                while(count < 5)
-		                {
-		                	//System.out.println("x: " + a[count] + " y: " + b[count]);
-		                	if(a[count] < 900)
-		                	{
-		                		
-		                		if(numpoints == 0)
-		                		{
-		                			//System.out.println("x: " + a[count] + " y: " + b[count]);
-		                			x[numpoints] = a[count];
-		                			y[numpoints] = b[count];
-		                			++numpoints;
-		                			a[count] = 999;
-		                			b[count] = 999;
-		                			
-		                		}
-		                		else
-		                		{
-		                			mindist = 9000.0;
-		                			for(int i = 0; i < 5; ++i)
-		                			{
-		                				if(a[i] < 900 && b[i] < 900)
-		                				{
-			                				distance = Math.sqrt(Math.pow(a[i] - x[numpoints - 1], 2) + Math.pow(b[i] - y[numpoints - 1], 2));
-			                				if(distance < 0.0001) //throws out the overlapping points...
-			                				{
-			                					a[i] = 999;
-						                		b[i] = 999;
-						                		distance = 999.0;
-			                				}
-			                				/*
-			                				else if(distance > 20.0) //throws out points really far away
-			                				{
-			                					a[i] = 999;
-						                		b[i] = 999;
-			                				}
-			                				*/
-			                				else
-			                				{
-			                					//test for on a straight line
-			                					pass = 0;
-				                				slopediff = Math.abs((b[i]-y[numpoints - 1])/(a[i]-x[numpoints - 1]));
-				                				//System.out.println("slope: " + slopediff + " distance: " + distance);
-				                				//System.out.println("vslope: " + vmup);
-				                				//System.out.println("wslope: " + wmup);
-				                				if( Math.abs(slopediff - Math.abs(vmup)) < 0.001) 
-			                					{
-			                						pass = 1;
-			                					}
-				                				else if( Math.abs(slopediff - Math.abs(wmup)) < 0.001) 
-			                					{
-			                						pass = 1;
-			                					}
-				                				else if( Math.abs(slopediff) < 0.0001 && Math.abs(b[i]/((int)(b[i]/4.5) * 4.5)) - 1.0 < 0.00001) 
-			                					{
-			                						pass = 1;
-			                						//System.out.println("x: " + a[index] + " y: " + b[index]);
-			                					}
-				                				else
-				                				{
-				                					distance = 999.0;
-				                				}
-			                				}
-
-			                				if(distance < mindist) //keeping on a straight predefined line
-			                				{
-			                					mindist = distance;
-			                					index = i;
-			                				}
-		                				}
-		                			}
-		                			//System.out.println("x: " + a[index] + " y: " + b[index]);
-		                			
-		                			if(mindist < 500.0)
-		                			{
-		                				//System.out.println("x: " + a[index] + " y: " + b[index]);
-		                				x[numpoints] = a[index];
-			                			y[numpoints] = b[index];
-			                			++numpoints;
-			                			a[index] = 999;
-			                			b[index] = 999;
-		                			}
-		                			
-		                		}
-		                	}
-		                	else
-		                	{
-		                		++count;
-		                	}
-		                	
-		                	
-		                	++count2;
-		                	if(count2 == 5 && count != 5)
-		                	{
-		                		count = 0;
-		                	}
-		                	
-		                }
-		                
-			}
-			//case 2: V strip
-			else if(vPaddle != -1)
-			{ 
-    			wPaddle = 61;
-    			uPaddle = 67;
-                
-                //System.out.println("Sector: " + sector + " u: " + uPaddle + " v: " + vPaddle);
-                
-                //convert strip numbers to slopes and intercepts
-                // rsu 1-68  
-                if(uPaddle + 1 > 52)
-                {
-                	uyup = (uPaddle + 1) - 52.0;
-                	uyup = uyup * 2.0;
-                	uyup = uyup + 52;
-                	uyup = uyup - 1;
-                	uydown = (83 - (uyup)) * length;
-                	uyup = (83 - (uyup - 2)) * length;
-                	//System.out.println("uyup: " + uyup);
-                	//System.out.println("uydown: " + uydown);
-                }
-                else
-                {
-                	uyup = uPaddle + 1;
-                	uydown = (84 - (uyup)) * length;
-                	uyup = (84 - (uyup - 1)) * length;
-                }
-                // rsv 1-62  
-                if(vPaddle + 1 >= 16)
-                {
-                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		vmup = (y2 - y1)/(x2 - x1);
-            		vbup = -x1*vmup;
-            		
-            		//System.out.println("vxright: " + x1);
-            		
-            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		vmdown = (y2 - y1)/(x2 - x1);
-            		vbdown = -x1*vmdown;
-            		
-            		//System.out.println("vxleft: " + x1);
-                }
-                else
-                {
-                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		vmdown = (y2 - y1)/(x2 - x1);
-            		vbdown = -x1*vmdown;
-            		
-            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		vmup = (y2 - y1)/(x2 - x1);
-            		vbup = -x1*vmup;
-                }
-                // rsw 1-62  
-                if(wPaddle + 1 >= 16)
-                {
-                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		wmup = (y2 - y1)/(x2 - x1);
-            		wbup = -x1*wmup;
-            		
-            		//System.out.println("wxright: " + x1);
-            		
-            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		wmdown = (y2 - y1)/(x2 - x1);
-            		wbdown = -x1*wmdown;
-            		
-            		//System.out.println("wxleft: " + x1);
-                }
-                else
-                {
-                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		wmdown = (y2 - y1)/(x2 - x1);
-            		wbdown = -x1*wmdown;
-            		
-            		//System.out.println("wxright: " + x1);
-            		
-            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		wmup = (y2 - y1)/(x2 - x1);
-            		wbup = -x1*wmup;
-            		
-            		//System.out.println("wxleft: " + x1);
-                }
-                
-                //maximum of 8 vertices for every 3 strips
-                //most of which can be thrown out later
-                //calculate all 8
-                
-                //udown
-                a[0] = (uydown - vbdown)/(vmdown); //udown and vdown, u slope = 0
-                b[0] = uydown; //udown and vdown, u slope = 0
-                
-                a[1] = (uydown - vbup)/(vmup); //udown and vup, u slope = 0
-                b[1] = uydown; //udown and vdown, u slope = 0
-                
-                a[2] = (uydown - wbup)/(wmup); //udown and wup, u slope = 0
-                b[2] = uydown; //udown and vdown, u slope = 0
-
-                //vup
-                a[3] = (vbup - wbup)/(wmup - vmup); 
-                b[3] = vmup * a[3] + vbup; 
-                
-                //vdown
-                a[4] = (vbdown - wbup)/(wmup - vmdown); 
-                b[4] = vmdown * a[4] + vbdown; 
-
-                
-                //veto bad points by setting them = 999
-                for(numpointsA = 0; numpointsA < 5; ++numpointsA)
-                {
-                	//System.out.println("x: " + a[numpointsA] + " y: " + b[numpointsA]);
-                	if(b[numpointsA] < uydown - 0.0001)
-                	{
-                		a[numpointsA] = 999;
-                		b[numpointsA] = 999;
-                	}                	
-	                if(b[numpointsA] < vmdown * a[numpointsA] + vbdown - 0.0001)
-	                {
-	                	a[numpointsA] = 999;
-	                	b[numpointsA] = 999;
-	                }
-	                if(b[numpointsA] > vmup * a[numpointsA] + vbup + 0.0001)
-	                {
-		               	a[numpointsA] = 999;
-		                b[numpointsA] = 999;
-	                }
-	                
-		            if(b[numpointsA] > wmup * a[numpointsA] + wbup + 0.0001)
-		            {
-			            a[numpointsA] = 999;
-			            b[numpointsA] = 999;
-		            }
-		            
-                }
-                
-                //organize good points in x and y array, count with numpoints
-                numpoints = 0;
-                int count = 0;
-                int count2 = 0;
-                int index = 0;
-                double distance= 0.0;
-                double mindist = 9000.0;
-                double slopediff;
-                int pass = 0;
-                while(count < 5)
-                {
-                	if(a[count] < 900)
-                	{
-                		
-                		if(numpoints == 0)
-                		{
-                			//System.out.println("x: " + a[count] + " y: " + b[count]);
-                			x[numpoints] = a[count];
-                			y[numpoints] = b[count];
-                			++numpoints;
-                			a[count] = 999;
-                			b[count] = 999;
-                			
-                		}
-                		else
-                		{
-                			mindist = 9000.0;
-                			for(int i = 0; i < 5; ++i)
-                			{
-                				if(a[i] < 900 && b[i] < 900)
-                				{
-	                				distance = Math.sqrt(Math.pow(a[i] - x[numpoints - 1], 2) + Math.pow(b[i] - y[numpoints - 1], 2));
-	                				if(distance < 0.0001) //throws out the overlapping points...
-	                				{
-	                					a[i] = 999;
-				                		b[i] = 999;
-				                		distance = 999.0;
-	                				}
-	                				/*
-	                				else if(distance > 20.0) //throws out points really far away
-	                				{
-	                					a[i] = 999;
-				                		b[i] = 999;
-	                				}
-	                				*/
-	                				else
-	                				{
-	                					//test for on a straight line
-	                					pass = 0;
-		                				slopediff = Math.abs((b[i]-y[numpoints - 1])/(a[i]-x[numpoints - 1]));
-		                				//System.out.println("slope: " + slopediff + " distance: " + distance);
-		                				//System.out.println("vslope: " + vmup);
-		                				//System.out.println("wslope: " + wmup);
-		                				if( Math.abs(slopediff - Math.abs(vmup)) < 0.001) 
-	                					{
-	                						pass = 1;
-	                					}
-		                				else if( Math.abs(slopediff - Math.abs(wmup)) < 0.001) 
-	                					{
-	                						pass = 1;
-	                					}
-		                				else if( Math.abs(slopediff) < 0.0001 && Math.abs(b[i]/((int)(b[i]/4.5) * 4.5)) - 1.0 < 0.00001) 
-	                					{
-	                						pass = 1;
-	                						//System.out.println("x: " + a[index] + " y: " + b[index]);
-	                					}
-		                				else
-		                				{
-		                					distance = 999.0;
-		                				}
-	                				}
-
-	                				if(distance < mindist) //keeping on a straight predefined line
-	                				{
-	                					mindist = distance;
-	                					index = i;
-	                				}
-                				}
-                			}
-                			//System.out.println("x: " + a[index] + " y: " + b[index]);
-                			if(mindist < 500.0)
-                			{
-                				//System.out.println("x: " + a[index] + " y: " + b[index]);
-                				x[numpoints] = a[index];
-	                			y[numpoints] = b[index];
-	                			++numpoints;
-	                			a[index] = 999;
-	                			b[index] = 999;
-                			}
-                		}
-                	}
-                	else
-                	{
-                		++count;
-                	}
-                	
-                	
-                	++count2;
-                	if(count2 == 5 && count != 5)
-                	{
-                		count = 0;
-                	}
-                	
-                }
-		                
-			}
-		//case 3: W strip
-		else if(wPaddle != -1)
-		{ 
-			uPaddle = 67;
-		    vPaddle = 61;
-		                		                
-		                //System.out.println("Sector: " + sector + " u: " + uPaddle + " w: " + wPaddle);
-		                
-		                //convert strip numbers to slopes and intercepts
-		                // rsu 1-68  
-		                if(uPaddle + 1 > 52)
-		                {
-		                	uyup = (uPaddle + 1) - 52.0;
-		                	uyup = uyup * 2.0;
-		                	uyup = uyup + 52;
-		                	uyup = uyup - 1;
-		                	uydown = (83 - (uyup)) * length;
-		                	uyup = (83 - (uyup - 2)) * length;
-		                	//System.out.println("uyup: " + uyup);
-		                	//System.out.println("uydown: " + uydown);
-		                }
-		                else
-		                {
-		                	uyup = uPaddle + 1;
-		                	uydown = (84 - (uyup)) * length;
-		                	uyup = (84 - (uyup - 1)) * length;
-		                }
-		                // rsv 1-62  
-		                if(vPaddle + 1 >= 16)
-		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmup = (y2 - y1)/(x2 - x1);
-		            		vbup = -x1*vmup;
-		            		
-		            		//System.out.println("vxright: " + x1);
-		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmdown = (y2 - y1)/(x2 - x1);
-		            		vbdown = -x1*vmdown;
-		            		
-		            		//System.out.println("vxleft: " + x1);
-		                }
-		                else
-		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmdown = (y2 - y1)/(x2 - x1);
-		            		vbdown = -x1*vmdown;
-		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmup = (y2 - y1)/(x2 - x1);
-		            		vbup = -x1*vmup;
-		                }
-		                // rsw 1-62  
-		                if(wPaddle + 1 >= 16)
-		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmup = (y2 - y1)/(x2 - x1);
-		            		wbup = -x1*wmup;
-		            		
-		            		//System.out.println("wxright: " + x1);
-		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmdown = (y2 - y1)/(x2 - x1);
-		            		wbdown = -x1*wmdown;
-		            		
-		            		//System.out.println("wxleft: " + x1);
-		                }
-		                else
-		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmdown = (y2 - y1)/(x2 - x1);
-		            		wbdown = -x1*wmdown;
-		            		
-		            		//System.out.println("wxright: " + x1);
-		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmup = (y2 - y1)/(x2 - x1);
-		            		wbup = -x1*wmup;
-		            		
-		            		//System.out.println("wxleft: " + x1);
-		                }
-		                
-		                //maximum of 8 vertices for every 3 strips
-		                //most of which can be thrown out later
-		                //calculate all 8
-		                
-		                //udown
-		                a[0] = (uydown - wbdown)/(wmdown); //udown and wdown, u slope = 0
-		                b[0] = uydown; //udown and vdown, u slope = 0
-		                
-		                a[1] = (uydown - vbup)/(vmup); //udown and vup, u slope = 0
-		                b[1] = uydown; //udown and vdown, u slope = 0
-		                
-		                a[2] = (uydown - wbup)/(wmup); //udown and wup, u slope = 0
-		                b[2] = uydown; //udown and vdown, u slope = 0
-
-		                //vup
-		                a[3] = (vbup - wbdown)/(wmdown - vmup);
-		                b[3] = vmup * a[3] + vbup;
-		                
-		                a[4] = (vbup - wbup)/(wmup - vmup); 
-		                b[4] = vmup * a[4] + vbup; 
-		                
-		                
-		                //veto bad points by setting them = 999
-		                for(numpointsA = 0; numpointsA < 5; ++numpointsA)
-		                {
-		                	//System.out.println("x: " + a[numpointsA] + " y: " + b[numpointsA]);
-		                	if(b[numpointsA] < uydown - 0.0001)
-		                	{
-		                		a[numpointsA] = 999;
-		                		b[numpointsA] = 999;
-		                	}
-			                if(b[numpointsA] > vmup * a[numpointsA] + vbup + 0.0001)
-			                {
-				               	a[numpointsA] = 999;
-				                b[numpointsA] = 999;
-			                }
-			                
-				            if(b[numpointsA] < wmdown * a[numpointsA] + wbdown - 0.0001)
-				            {
-				                a[numpointsA] = 999;
-				                b[numpointsA] = 999;
-				            }
-				            if(b[numpointsA] > wmup * a[numpointsA] + wbup + 0.0001)
-				            {
-					            a[numpointsA] = 999;
-					            b[numpointsA] = 999;
-				            }
-				            //System.out.println("x: " + a[numpointsA] + " y: " + b[numpointsA]);
-				            
-		                }
-		                
-		                //organize good points in x and y array, count with numpoints
-		                numpoints = 0;
-		                int count = 0;
-		                int count2 = 0;
-		                int index = 0;
-		                double distance= 0.0;
-		                double mindist = 9000.0;
-		                double slopediff;
-		                int pass = 0;
-		                while(count < 5)
-		                {
-		                	if(a[count] < 900)
-		                	{
-		                		
-		                		if(numpoints == 0)
-		                		{
-		                			//System.out.println("x: " + a[count] + " y: " + b[count]);
-		                			x[numpoints] = a[count];
-		                			y[numpoints] = b[count];
-		                			++numpoints;
-		                			a[count] = 999;
-		                			b[count] = 999;
-		                			
-		                		}
-		                		else
-		                		{
-		                			mindist = 9000.0;
-		                			for(int i = 0; i < 5; ++i)
-		                			{
-		                				if(a[i] < 900 && b[i] < 900)
-		                				{
-			                				distance = Math.sqrt(Math.pow(a[i] - x[numpoints - 1], 2) + Math.pow(b[i] - y[numpoints - 1], 2));
-			                				if(distance < 0.0001) //throws out the overlapping points...
-			                				{
-			                					a[i] = 999;
-						                		b[i] = 999;
-						                		distance = 999.0;
-			                				}
-			                				/*
-			                				else if(distance > 20.0) //throws out points really far away
-			                				{
-			                					a[i] = 999;
-						                		b[i] = 999;
-			                				}
-			                				*/
-			                				else
-			                				{
-			                					//test for on a straight line
-			                					pass = 0;
-				                				slopediff = Math.abs((b[i]-y[numpoints - 1])/(a[i]-x[numpoints - 1]));
-				                				//System.out.println("slope: " + slopediff + " distance: " + distance);
-				                				//System.out.println("vslope: " + vmup);
-				                				//System.out.println("wslope: " + wmup);
-				                				if( Math.abs(slopediff - Math.abs(vmup)) < 0.001) 
-			                					{
-			                						pass = 1;
-			                					}
-				                				else if( Math.abs(slopediff - Math.abs(wmup)) < 0.001) 
-			                					{
-			                						pass = 1;
-			                					}
-				                				else if( Math.abs(slopediff) < 0.0001 && Math.abs(b[i]/((int)(b[i]/4.5) * 4.5)) - 1.0 < 0.00001) 
-			                					{
-			                						pass = 1;
-			                						//System.out.println("x: " + a[index] + " y: " + b[index]);
-			                					}
-				                				else
-				                				{
-				                					distance = 999.0;
-				                				}
-			                				}
-
-			                				if(distance < mindist) //keeping on a straight predefined line
-			                				{
-			                					mindist = distance;
-			                					index = i;
-			                				}
-		                				}
-		                			}
-		                			
-		                			//System.out.println("x: " + a[index] + " y: " + b[index]);
-		                			if(mindist < 500.0)
-		                			{
-		                				//System.out.println("x: " + a[index] + " y: " + b[index]);
-		                				x[numpoints] = a[index];
-			                			y[numpoints] = b[index];
-			                			++numpoints;
-			                			a[index] = 999;
-			                			b[index] = 999;
-		                			}
-		                			
-		                		}
-		                	}
-		                	else
-		                	{
-		                		++count;
-		                	}
-		                	
-		                	
-		                	++count2;
-		                	if(count2 == 8 && count != 8)
-		                	{
-		                		count = 0;
-		                	}
-		                	
-		                }
-		                
-			}
-		//System.out.println("numpoints: " + numpoints);            
-		return(new Object[]{numpoints, x, y});
-	}
 
 	public Object[] getStripVerticies(int sector, String strip1, int paddle1){
 		int numpoints = 4;
@@ -3106,27 +1030,6 @@ public class PCALDrawDB {
 	}
 	
 	
-	private Boolean isWithinLines(double x, double y, double slope1, double b1, double slope2, double b2){
-		
-		Boolean value = false;
-		
-		//System.out.println("x: " + x + " y: " + y);
-		double calcy1 = slope1 * x + b1;
-		double calcy2 = slope2 * x + b2;
-		//System.out.println("calc y1: " + calcy1);
-		//System.out.println("calc y2: " + calcy2);
-    	if(y < slope1 * x + b1 + 0.0001 && y > slope2 * x + b2 - 0.0001)
-    	{
-    		value = true;
-    	}
-    	else if(y > slope1 * x + b1 - 0.0001 && y < slope2 * x + b2 + 0.0001)
-    	{
-    		value = true;
-    	}
-    	
-		return value;
-	}
-	
 	private void initVert()
 	{
 		ScintillatorPaddle paddle;
@@ -3158,11 +1061,11 @@ public class PCALDrawDB {
 		
 		        
 		        //calculate plane from 3 points
-		        Point3D ab = new Point3D(point2);
-		        Point3D ac = new Point3D(point3);
+		        //Point3D ab = new Point3D(point2);
+		        //Point3D ac = new Point3D(point3);
 		
-		        ab.translateXYZ(-point1.x(),-point1.y(),-point1.z());
-		        ac.translateXYZ(-point1.x(),-point1.y(),-point1.z());
+		        //ab.translateXYZ(-point1.x(),-point1.y(),-point1.z());
+		        //ac.translateXYZ(-point1.x(),-point1.y(),-point1.z());
 		        
 		        double a = (point2.y() - point1.y())*(point3.z() - point1.z()) - (point3.y() - point1.y())*(point2.z() - point1.z());
 		        double b = (point2.z() - point1.z())*(point3.x() - point1.x()) - (point3.z() - point1.z())*(point2.x() - point1.x());
@@ -3187,11 +1090,11 @@ public class PCALDrawDB {
 		        point3.rotateX(xrotation[sector]);
 		        
 		        //calculate 2nd plane from the rotated points
-		        ab = new Point3D(point2);
-		        ac = new Point3D(point3);
+		        //ab = new Point3D(point2);
+		        //ac = new Point3D(point3);
 		
-		        ab.translateXYZ(-point1.x(),-point1.y(),-point1.z());
-		        ac.translateXYZ(-point1.x(),-point1.y(),-point1.z());
+		        //ab.translateXYZ(-point1.x(),-point1.y(),-point1.z());
+		        //ac.translateXYZ(-point1.x(),-point1.y(),-point1.z());
 		        
 		        a = (point2.y() - point1.y())*(point3.z() - point1.z()) - (point3.y() - point1.y())*(point2.z() - point1.z());
 		        b = (point2.z() - point1.z())*(point3.x() - point1.x()) - (point3.z() - point1.z())*(point2.x() - point1.x());
@@ -3259,45 +1162,26 @@ public class PCALDrawDB {
         }
 	}
 	
+	
 	public boolean isContained3Decimal(DetectorShape2D shape, double x, double y){
         int i, j;
+        double scale = 1.01;
         boolean c = false;
         int nvert = shape.getShapePath().size();
         for (i = 0, j = nvert-1; i < nvert; j = i++) {
-        	if ( ( ( shape.getShapePath().point(i).y()  > y ) !=  ( shape.getShapePath().point(j).y() > y  ) ) )
-            {
-                    if((        x  < 
-                    		 (   shape.getShapePath().point(j).x() 
-                    		           -shape.getShapePath().point(i).x()   ) 
-                    		       * (  y 
-                    		           -shape.getShapePath().point(j).y()   ) 
-                    		       / (  shape.getShapePath().point(j).y()
-                    		           -shape.getShapePath().point(i).y()   ) 
-                    		       + shape.getShapePath().point(j).x()       )   )
-                    {
-                    	c = !c;
-                    }
-            }
-        	if( (int)(shape.getShapePath().point(i).y() * 1000.0) == (int)(y * 1000.0) || (int)(shape.getShapePath().point(j).y() * 1000.0) == (int)(y * 1000.0)  )
-            {
-                    if((        (int)(x * 1000.0) == 
-                    		 (int)(( (  shape.getShapePath().point(j).x() 
-                    		           -shape.getShapePath().point(i).x()   ) 
-                    		       * (  y 
-                    		           -shape.getShapePath().point(j).y()   ) 
-                    		       / (  shape.getShapePath().point(j).y()
-                    		           -shape.getShapePath().point(i).y()   ) 
-                    		       + shape.getShapePath().point(j).x()    ) * 1000.0)  )   )
-                    {
-                    	c = true;
-                    }
-            }
+            if ( (( shape.getShapePath().point(i).y()*scale>y) != (shape.getShapePath().point(j).y()*scale>y)) &&
+                    (x < ( shape.getShapePath().point(j).x()*scale-shape.getShapePath().point(i).x()*scale) * 
+                    (y-shape.getShapePath().point(i).y()*scale) / (shape.getShapePath().point(j).y()*scale-shape.getShapePath().point(i).y()*scale) +
+                    shape.getShapePath().point(i).x()*scale))
+                c = !c;
         }
         return c;
+        //return false;
     }
 	
 	public Object[] getVerticies(DetectorShape2D shape1, DetectorShape2D shape2){
 		int numpoints = 0;
+		int count = 0;
 		int nPoints = 0;
 		Point3D point1A = new Point3D();
 		Point3D point1B = new Point3D();
@@ -3319,7 +1203,7 @@ public class PCALDrawDB {
 				point1A.copy(shape1.getShapePath().point(i));
 				point1B.copy(shape1.getShapePath().point(0));
 			}
-			for(int j = 0; j < shape2.getShapePath().size() - 1; ++j)
+			for(int j = 0; j < shape2.getShapePath().size(); ++j)
 			{
 				if(j+1 < shape2.getShapePath().size())
 				{
@@ -3340,60 +1224,110 @@ public class PCALDrawDB {
 				//calculate line 2
 		        m2 = (point2A.y()-point2B.y())/(point2A.x()-point2B.x());
 		        b2 = point2A.y() - m2*point2A.x();
-				
-		        if(Math.abs(m1 - m2) > 0.00001)
+		        //System.out.println( "i: " + i + " j: " + j);
+		        //System.out.println( "points1a: " +"x: " + point1A.x() + " y: " + point1A.y());
+		        //System.out.println( "points1b: " +"x: " + point1B.x() + " y: " + point1B.y());
+		        //System.out.println( "                                                      ");
+		        //System.out.println( "points2a: " +"x: " + point2A.x() + " y: " + point2A.y());
+		        //System.out.println( "points2b: " +"x: " + point2B.x() + " y: " + point2B.y());
+		        //System.out.println( "                                                      ");
+		        
+		        //System.out.println( "m2: " + m2 + " m1: " + m1);
+		        //System.out.println( "                                                      ");
+		        if(Math.abs(m1 - m2) > 0.001 && !(  (((Double)m1).isInfinite() || Math.abs(m1) > 9000.0)  && (((Double)m2).isInfinite()  || Math.abs(m2) > 9000.0) )  )
 		        {
 		        	//not parallel
-			        if(((Double)m1).isInfinite())
+			        if(((Double)m1).isInfinite() || Math.abs(m1) > 9000.0)
 			        {
 			        	xtemp[numpoints] = point1A.x();
 			        	ytemp[numpoints] = m2 * xtemp[numpoints] + b2;
+			        	//System.out.println( "Inf slope1: " +"x: " + xtemp[numpoints] + " y: " + ytemp[numpoints]);
+			        	++numpoints;
 			        }
-			        else if(((Double)m2).isInfinite())
+			        else if(((Double)m2).isInfinite() || Math.abs(m2) > 9000.0)
 			        {
 			        	xtemp[numpoints] = point2A.x();
 			        	ytemp[numpoints] = m1 * xtemp[numpoints] + b1;
+			        	//System.out.println( "Inf slope2: " +"x: " + xtemp[numpoints] + " y: " + ytemp[numpoints]);
+			        	++numpoints;
 			        }
 			        else
 			        {
 			        	xtemp[numpoints] = (b1 - b2)/(m2 - m1); 
 			        	ytemp[numpoints] = m1 * xtemp[numpoints] + b1; 
+			        	//System.out.println( "Norm slope: " +"x: " + xtemp[numpoints] + " y: " + ytemp[numpoints]);
+			        	++numpoints;
 			        }
-			        ++numpoints;
+			        
 		        }
+		        ++count;
 				
 				
 			}
 		}
+		
+		//System.out.println( "count: " + count);
 		
 		double[] x = new double[numpoints];
 		double[] y = new double[numpoints];
 		
 		for(int i = 0; i < numpoints; ++i)
 		{
-			System.out.println( "Found: " +"x: " + xtemp[i] + " y: " + ytemp[i]);
-			if(isContained3Decimal(shape1, xtemp[i], ytemp[i]) && isContained3Decimal(shape2, xtemp[i], ytemp[i]))
+			Point3D point = new Point3D();
+			Point3D centerA = new Point3D();
+			centerA.set((double)getShapeCenter(shape1)[0],(double)getShapeCenter(shape1)[1],0.0);
+			Point3D centerB = new Point3D();
+			centerB.set((double)getShapeCenter(shape2)[0],(double)getShapeCenter(shape2)[1],0.0);
+			DetectorShape2D shapeA = new DetectorShape2D();
+			DetectorShape2D shapeB = new DetectorShape2D();
+			for(int j = 0; j < shape1.getShapePath().size(); ++j)
 			{
-				System.out.println( "Accepted: " +"x: " + xtemp[i] + " y: " + ytemp[i]);
-				x[nPoints] = xtemp[i];
-				y[nPoints] = ytemp[i];
-				++nPoints;
+				point.copy(shape1.getShapePath().point(j));
+				point.translateXYZ(-centerA.x(), -centerA.y(), 0.0);
+				shapeA.getShapePath().addPoint(point);
+			}
+			for(int j = 0; j < shape2.getShapePath().size(); ++j)
+			{
+				point.copy(shape2.getShapePath().point(j));
+				point.translateXYZ(-centerB.x(), -centerB.y(), 0.0);
+				shapeB.getShapePath().addPoint(point);
+			}
+			//System.out.println( "Found: " +"x: " + xtemp[i] + " y: " + ytemp[i]);
+			if(isContained3Decimal(shapeA, xtemp[i]-centerA.x(), ytemp[i]-centerA.y()))// || wn_PnPoly( new Point3D(xtemp[i]-(double)getShapeCenter(shape1)[0],ytemp[i]-(double)getShapeCenter(shape1)[1],0.0), shapeA) != 0)
+			{
+				//System.out.println( "Accepted1: " +"x: " + xtemp[i] + " y: " + ytemp[i]);
+				if(isContained3Decimal(shapeB, xtemp[i]-centerB.x(), ytemp[i]-centerB.y()))// || wn_PnPoly( new Point3D(xtemp[i]-(double)getShapeCenter(shape2)[0],ytemp[i]-(double)getShapeCenter(shape2)[1],0.0), shapeB) != 0)
+				{
+					//System.out.println( "Accepted-Both: " +"x: " + xtemp[i] + " y: " + ytemp[i]);
+					x[nPoints] = xtemp[i];
+					y[nPoints] = ytemp[i];
+					++nPoints;
+				}
 				
 			}
 		}
 		
-		return(new Object[]{numpoints, x, y});
+		return(new Object[]{nPoints, x, y});
 	}
 	
 	public Object[] sortVerticies(int num, double[] x, double[] y)
 	{
+		System.out.println("Sorting points");
 		double[] xnew = new double[num];
 		double[] ynew = new double[num];
 		int[] used = new int[num];
 		
 		double ymin = 0;
+		double xmin = 0;
+		double ymax = 0;
+		double xmax = 0;
 		double minangle = 0;
+		double prevdist = 9000;
+		double curdist = 9000;
 		int index = 0;
+		int xmini = 0;
+		int ymaxi = 0;
+		int xmaxi = 0;
 		int numpoints = 0;
 		int i = 0;
 		
@@ -3401,21 +1335,55 @@ public class PCALDrawDB {
 		{
 			if(i == 0)
 			{
+				xmax = x[i];
+				xmin = x[i];
 				ymin = y[i];
+				ymax = y[i];
 				index = i;
+				xmini = i;
 			}
-			else if(ymin > y[i])
+			
+			if(ymin > y[i])
 			{
 				ymin = y[i];
 				index = i;
 			}
+			
+			if(ymax < y[i])
+			{
+				ymax = y[i];
+				ymaxi = i;
+			}
+
+			if(xmin > x[i])
+			{
+				xmin = x[i];
+				xmini = i;
+			}
+			
+			if(xmax < x[i])
+			{
+				xmax = x[i];
+				xmaxi = i;
+			}
+			
 			used[i] = 0;
+			//System.out.println("ymin: " + ymin + " y: " + y[i]);
+			//System.out.println("xmin: " + xmin + " x: " + x[i]);
 		}
 		
 		//start with minimum y
 		//look to -x as a function of theta
-		while(numpoints < num)
+		numpoints = 0;
+		int count = 0;
+		int count2 = 0;
+		boolean xminreached = false;
+		boolean ymaxreached = false;
+		boolean xmaxreached = false;
+		while(count < num)
 		{
+			++count2;
+			//make starting point
 			for(i = 0; i < num; ++i)
 			{
 				if(used[i] == 0) //only loop through unused points
@@ -3426,76 +1394,595 @@ public class PCALDrawDB {
 						ynew[numpoints] = y[i];
 						xnew[numpoints] = x[i];
 						used[i] = 1;
+						if(index == ymaxi) ymaxreached = true;
+						if(index == xmaxi) xmaxreached = true;
+						if(index == xmini) xminreached = true;
 						index = -1;
 						++numpoints;
-						System.out.println("x: " + xnew[numpoints] + " y: " + ynew[numpoints]);
+						++count;
+						//System.out.println("truths: " + xminreached + "  " + ymaxreached + "  " + xmaxreached);
+						//System.out.println("Sorted: " + "x: " + xnew[numpoints - 1] + " y: " + ynew[numpoints -1]);
 					}
+					//if(count2 == 50)System.out.println("Stuck: " + "x: " + x[i] + " y: " + y[i]);
 				}
 			}
 			
+			curdist = 90000.0;
+			prevdist = 90000.0;
 			minangle = 90000.0;
-			for(i = 0; i < num; ++i)
+			if(!xminreached)
 			{
-				if(used[i] == 0) //only loop through unused points
+				//lowerleft
+				if(index == -1)
 				{
-					if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) )))
+					for(i = 0; i < num; ++i)
 					{
-						//look in clockwise direction from 6 o' clock
-						minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-						index = i;
-					}
-				}
-			}
-			
-			if(index == -1)
-			{
-				for(i = 0; i < num; ++i)
-				{
-					if(used[i] == 0) //only loop through unused points
-					{
-						if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) )))
+						if(used[i] == 0) //only loop through unused points
 						{
-							//look in clockwise direction from 6 o' clock
-							minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-							index = i;
+							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001)
+							{
+								//duplicate
+								used[i] = 1;
+								++count;
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(  (x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )*100.0) ))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
 						}
 					}
 				}
-			}
-			
-			if(index == -1)
-			{
-				for(i = 0; i < num; ++i)
+				
+				//upper left
+				if(index == -1)
 				{
-					if(used[i] == 0) //only loop through unused points
+					for(i = 0; i < num; ++i)
 					{
-						if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] > 0 && minangle > Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) )))
+						if(used[i] == 0) //only loop through unused points
 						{
-							//look in clockwise direction from 6 o' clock
-							minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-							index = i;
+							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && x[i] - xnew[numpoints - 1] < 0)
+							{
+								minangle = 0;
+								index = i;
+							}
+							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(   (y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]))  *100.0)  ) )
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
 						}
 					}
 				}
-			}
-			
-			if(index == -1)
-			{
-				for(i = 0; i < num; ++i)
+				
+				//upper right
+				if(index == -1)
 				{
-					if(used[i] == 0) //only loop through unused points
+					for(i = 0; i < num; ++i)
 					{
-						if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && minangle > Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) )))
+						if(used[i] == 0) //only loop through unused points
 						{
-							//look in clockwise direction from 6 o' clock
-							minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-							index = i;
+							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] > 0)
+							{
+								minangle = 0;
+								index = i;
+							}
+							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1])) *100.0)))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
 						}
 					}
 				}
+				
+				//lower right
+				if(index == -1)
+				{
+					for(i = 0; i < num; ++i)
+					{
+						if(used[i] == 0) //only loop through unused points
+						{
+							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] < 0)
+							{
+								minangle = 0;
+								index = i;
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && minangle > Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1])) *100.0)))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
+						}
+					}
+				}
+				if(index == ymaxi) ymaxreached = true;
+				if(index == xmaxi) xmaxreached = true;
+				if(index == xmini) xminreached = true;
+			}
+			else if(!ymaxreached)
+			{				
+				//upper left
+				if(index == -1)
+				{
+					for(i = 0; i < num; ++i)
+					{
+						if(used[i] == 0) //only loop through unused points
+						{
+							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && x[i] - xnew[numpoints - 1] < 0)
+							{
+								minangle = 0;
+								index = i;
+							}
+							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(   (y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]))  *100.0)  ) )
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
+						}
+					}
+				}
+				
+				//upper right
+				if(index == -1)
+				{
+					for(i = 0; i < num; ++i)
+					{
+						if(used[i] == 0) //only loop through unused points
+						{
+							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] > 0)
+							{
+								minangle = 0;
+								index = i;
+							}
+							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1])) *100.0)))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
+						}
+					}
+				}
+				
+				//lower right
+				if(index == -1)
+				{
+					for(i = 0; i < num; ++i)
+					{
+						if(used[i] == 0) //only loop through unused points
+						{
+							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] < 0)
+							{
+								minangle = 0;
+								index = i;
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && minangle > Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1])) *100.0)))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
+						}
+					}
+				}
+				
+				//lowerleft
+				if(index == -1)
+				{
+					for(i = 0; i < num; ++i)
+					{
+						if(used[i] == 0) //only loop through unused points
+						{
+							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001)
+							{
+								//duplicate
+								used[i] = 1;
+								++count;
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(  (x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )*100.0) ))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
+						}
+					}
+				}
+				if(index == ymaxi) ymaxreached = true;
+				if(index == xmaxi) xmaxreached = true;
+				if(index == xmini) xminreached = true;
+			}
+			else if(!xmaxreached)
+			{				
+				//upper right
+				if(index == -1)
+				{
+					for(i = 0; i < num; ++i)
+					{
+						if(used[i] == 0) //only loop through unused points
+						{
+							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] > 0)
+							{
+								minangle = 0;
+								index = i;
+							}
+							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1])) *100.0)))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
+						}
+					}
+				}
+				
+				//lower right
+				if(index == -1)
+				{
+					for(i = 0; i < num; ++i)
+					{
+						if(used[i] == 0) //only loop through unused points
+						{
+							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] < 0)
+							{
+								minangle = 0;
+								index = i;
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && minangle > Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1])) *100.0)))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
+						}
+					}
+				}
+				
+				//lowerleft
+				if(index == -1)
+				{
+					for(i = 0; i < num; ++i)
+					{
+						if(used[i] == 0) //only loop through unused points
+						{
+							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001)
+							{
+								//duplicate
+								used[i] = 1;
+								++count;
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(  (x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )*100.0) ))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
+						}
+					}
+				}
+				
+				//upper left
+				if(index == -1)
+				{
+					for(i = 0; i < num; ++i)
+					{
+						if(used[i] == 0) //only loop through unused points
+						{
+							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && x[i] - xnew[numpoints - 1] < 0)
+							{
+								minangle = 0;
+								index = i;
+							}
+							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(   (y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]))  *100.0)  ) )
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
+						}
+					}
+				}
+				if(index == ymaxi) ymaxreached = true;
+				if(index == xmaxi) xmaxreached = true;
+				if(index == xmini) xminreached = true;
+			}
+			else
+			{
+				//upper right
+				if(index == -1)
+				{
+					for(i = 0; i < num; ++i)
+					{
+						if(used[i] == 0) //only loop through unused points
+						{
+							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] > 0)
+							{
+								minangle = 0;
+								index = i;
+							}
+							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]))*100.0 )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) );
+							}
+						}
+					}
+				}
+				
+				//lower right
+				if(index == -1)
+				{
+					for(i = 0; i < num; ++i)
+					{
+						if(used[i] == 0) //only loop through unused points
+						{
+							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] < 0)
+							{
+								minangle = 0;
+								index = i;
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && minangle > Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(  Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]))   *100.0 )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) );
+							}
+						}
+					}
+				}
+				
+				//lowerleft
+				if(index == -1)
+				{
+					for(i = 0; i < num; ++i)
+					{
+						if(used[i] == 0) //only loop through unused points
+						{
+							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001)
+							{
+								//duplicate
+								used[i] = 1;
+								++count;
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )*100.0) ))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
+						}
+					}
+				}
+				
+				//upper left
+				if(index == -1)
+				{
+					for(i = 0; i < num; ++i)
+					{
+						if(used[i] == 0) //only loop through unused points
+						{
+							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && x[i] - xnew[numpoints - 1] < 0)
+							{
+								minangle = 0;
+								index = i;
+							}
+							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1])*100.0))  ) )
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+								if(curdist < prevdist)
+								{
+									prevdist = curdist;
+									index = i;
+								}
+							}
+							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]) )))
+							{
+								//look in clockwise direction from 6 o' clock
+								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
+								index = i;
+								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
+							}
+						}
+					}
+				}
+			
 			}
 		}
+		//System.out.println(" Done sorting points");
 		
+		for(i = 0; i < numpoints; ++i)
+		{
+			System.out.println("i: " + i + " x: " + xnew[i] + " y: " + ynew[i]);
+		}
 		return(new Object[]{numpoints, xnew, ynew});
 	}
 	
@@ -3510,6 +1997,7 @@ public class PCALDrawDB {
 		String cstring2 = ""+stripLetter2[0];//Character.toString(stripLetter2[0]);
 		int strip = 38;
 		int crossStrip = 31;
+		double x,y;
 		//System.out.println("pad1: " + strip + " pad2: " + crossStrip);
 		//double x = pcaltest.getOverlapDistance(cstring1,strip,cstring2,crossStrip);
 		//System.out.println("x: " + x);
@@ -3523,16 +2011,46 @@ public class PCALDrawDB {
 		EmbeddedCanvas canvas = new EmbeddedCanvas();
 		
 		DetectorShapeTabView  view   = new DetectorShapeTabView();
+		
+		
 		//draw U strips
 		/*
-    	DetectorShapeView2D[]  dv = new DetectorShapeView2D[6];
-    	for(int i = 0; i < 2; ++i)
+		
+		DetectorShape2D shape = new DetectorShape2D();
+	 	DetectorShapeView2D Umap= new DetectorShapeView2D("PCAL U");
+	 	for(int sector = 0; sector < 6; sector++)
     	{
-    		dv[i] = new DetectorShapeView2D("PCAL UW " + i);
-    		dv[i] = pcaltest.drawWU(i);
-    		view.addDetectorLayer(dv[i]);
+	 		for(int uPaddle = 0; uPaddle < 68; uPaddle++)
+	 		{
+	            shape = pcaltest.getStripShape(sector, "u", uPaddle);
+	            for(int i = 0; i < shape.getShapePath().size(); ++i)
+        		{
+	            	
+	            	if(uPaddle == 0)System.out.println(shape.getShapePath().point(i).x());
+	            	if(uPaddle == 0)System.out.println(xPoint[sector][0][uPaddle][i]);
+	            	
+        			if(uPaddle == 0)System.out.println(shape.getShapePath().point(i).y());
+	            	
+	            	x = shape.getShapePath().point(i).x();// * 1000.0;
+	            	y = shape.getShapePath().point(i).y();// * 1000.0;
+	            	if(sector == 0){ x += 302.0; y += 0.0;}
+	            	if(sector == 1){ x += 141.0; y += 259.0;}
+	            	if(sector == 2){ x += -141.0; y += 259.0;}
+	            	if(sector == 3){ x += -302.0; y += 0.0;}
+	            	if(sector == 4){ x += -141.0; y += -259.0;}
+	            	if(sector == 5){ x += 141.0; y += -259.0;}
+	            	x *= 1000.0;
+	            	y *= 1000.0;
+        			shape.getShapePath().point(i).set(x, y, 0.0);
+        			//if(i == 0 && uPaddle == 67)System.out.println(shape.getShapePath().point(i).x());
+        			
+        		}
+	            Umap.addShape(shape);
+
+
+	 		}
     	}
-    	canvas.add(view);
+	    view.addDetectorLayer(Umap);
 		*/
 		
 		/*
@@ -3544,24 +2062,77 @@ public class PCALDrawDB {
 		System.arraycopy( (double[])obj[2], 0, y, 0, numpoints);
 		System.out.println("numpoints: " + numpoints);
 		*/
+		
+		
 		//draw UW pane
-	    //DetectorShapeView2D  dv5 = new DetectorShapeView2D("PCAL WU");
-	    //dv5 = pcaltest.drawWU(0);
-    	
-    	
-		DetectorShape2D shape = new DetectorShape2D();
-    	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL UW");
-	    	for(int uPaddle = 0; uPaddle < 1; uPaddle++){
-	            for(int wPaddle = 61; wPaddle < 62; wPaddle++){
-	            	if(pcaltest.isValidOverlap(0, "u", uPaddle, "w", wPaddle))
-	            		shape = pcaltest.getOverlapShape(0, "u", uPaddle, "w", wPaddle);
+		/*
+	    DetectorShape2D shape = new DetectorShape2D();
+	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL UW");
+	 	for(int sector = 0; sector < 6; sector++)
+    	{
+    	for(int uPaddle = 0; uPaddle < 68; uPaddle++)
+    	{
+    		//for(int vPaddle = 0; vPaddle < 62; vPaddle++)
+            //{
+	            for(int wPaddle = 0; wPaddle < 62; wPaddle++)
+	            {
+	            	if(pcaltest.isValidOverlap(sector, "u", uPaddle, "w", wPaddle))
+	            	{
+	            		shape = pcaltest.getOverlapShape(sector, "u", uPaddle, "w", wPaddle);
 	            		for(int i = 0; i < shape.getShapePath().size(); ++i)
         				{
-        					shape.getShapePath().point(i).set(shape.getShapePath().point(i).x() * 1000.0, shape.getShapePath().point(i).y() * 1000.0, 0.0);
+	        				x = shape.getShapePath().point(i).x();// * 1000.0;
+			            	y = shape.getShapePath().point(i).y();// * 1000.0;
+			            	if(sector == 0){ x += 302.0; y += 0.0;}
+			            	if(sector == 1){ x += 141.0; y += 259.0;}
+			            	if(sector == 2){ x += -141.0; y += 259.0;}
+			            	if(sector == 3){ x += -302.0; y += 0.0;}
+			            	if(sector == 4){ x += -141.0; y += -259.0;}
+			            	if(sector == 5){ x += 141.0; y += -259.0;}
+			            	x *= 1000.0;
+			            	y *= 1000.0;
+        					shape.getShapePath().point(i).set(x, y, 0.0);
+        					if(i == 0 && uPaddle == 67 && wPaddle == 30)System.out.println(shape.getShapePath().point(i).x());
         				}
 	            		UWmap.addShape(shape);
+	            	}
+	            }
+           // }
+
+    	}
+    	}
+	    view.addDetectorLayer(UWmap);
+	    */
+	    
+	    
+    	
+		
+		
+		//Draw pixels
+		
+		DetectorShape2D shape = new DetectorShape2D();
+    	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL UW");
+    	 	for(int sector = 1; sector < 2; sector++)
+	    	{
+	    	for(int uPaddle = 0; uPaddle < 1; uPaddle++)
+	    	{
+	    		for(int vPaddle = 59; vPaddle < 62; vPaddle++)
+	            {
+		            for(int wPaddle = 59; wPaddle < 62; wPaddle++)
+		            {
+		            	if(pcaltest.isValidPixel(sector, uPaddle, vPaddle, wPaddle))
+		            	{
+		            		shape = pcaltest.getPixelShape(sector, uPaddle, vPaddle, wPaddle);
+		            		for(int i = 0; i < shape.getShapePath().size(); ++i)
+	        				{
+	        					shape.getShapePath().point(i).set(shape.getShapePath().point(i).x() * 1000.0, shape.getShapePath().point(i).y() * 1000.0, 0.0);
+	        				}
+		            		UWmap.addShape(shape);
+		            	}
+		            }
 	            }
 
+	    	}
 	    	}
 	    	view.addDetectorLayer(UWmap);
 	    	

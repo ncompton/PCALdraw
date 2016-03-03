@@ -21,17 +21,22 @@ public class TestBug {
 
 	public TestBug() {
 		// TODO Auto-generated constructor stub
-			GraphErrors g1, g2;
+			GraphErrors g1, g2, g3;
 			H1D hist1;
 			double[] x1 = {10.0, 20.0};
 			double[] ex1 = {1.0, 0.0};
 			double[] y1 = {10.0, 0.0};
-			double[] ey1 = {1.0, 0.0};
+			double[] ey1 = {0.5, 1.0};
 			
 			double[] x2 = {10.0, 20.0};
 			double[] ex2 = {1.0, 1.0};
 			double[] y2 = {10.0, 20.0};
 			double[] ey2 = {1.0, 1.0};
+			
+			double[] x3 = {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5};
+			double[] ex3 = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+			double[] y3 = {1, 1, 1, 1, 8, 1, 1, 1, 1, 1};
+			double[] ey3 = {1, 1, 1, 1, Math.sqrt(8), 1, 1, 1, 1, 1};
 			
 			F1D fitfunc1 = new F1D("p0",9.0,21.0);
 			fitfunc1.setName("test_of_fit1");
@@ -40,6 +45,10 @@ public class TestBug {
 			F1D fitfunc2 = new F1D("p0",9.0,11.0);
 			fitfunc2.setName("test_of_fit2");
 			fitfunc2.setParameter(0, 9.0);
+			
+			F1D fitfunc3g = new F1D("p0",0.0,10.0);
+			fitfunc3g.setName("test_of_fit3");
+			fitfunc3g.setParameter(0, 1.0);
 			
 			
 		
@@ -52,6 +61,8 @@ public class TestBug {
 			test1.setAxisRange(0.0, 25.0, 0.0, 25.0);
 			test1.draw(fitfunc1,"same");
 			
+			
+			System.out.println("chi squared: " + fitfunc1.getChiSquare(g1,"E") + " ndf: " + fitfunc1.getNDF(g1));
 			//test1.save("test1.png");
 			
 			//test 2
@@ -61,6 +72,17 @@ public class TestBug {
 			test2.draw(g2);
 			test2.setAxisRange(0.0, 25.0, 0.0, 25.0);
 			test2.draw(fitfunc2,"same");
+			
+			//test2.save("test2.png");
+			
+			
+			//test 2
+			TGCanvas test3g = new TGCanvas("test3g", "test3g", 500, 500,1,1);
+			g3 = new GraphErrors(x3,y3,ex3,ey3);
+			g3.fit(fitfunc3g,"REQ"); //creates graph with a name and 2 points
+			test3g.draw(g3);
+			test3g.setAxisRange(0.0, 25.0, 0.0, 25.0);
+			test3g.draw(fitfunc3g,"same");
 			
 			//test2.save("test2.png");
 			
@@ -93,11 +115,13 @@ public class TestBug {
 			hist1.fill(4.5);
 			
 			
-			hist1.fit(fitfunc3,"REQ"); //creates graph with a name and 2 points
+			hist1.fit(fitfunc3,"RE"); //creates graph with a name and 2 points
 			
 			test3.draw(hist1);
 			test3.setAxisRange(0.0, 10.0, 0.0, 10.0);
 			test3.draw(fitfunc3,"same");
+			
+			System.out.println("chi squared: " + fitfunc3.getChiSquare(hist1.getDataSet(),"E") + " ndf: " + fitfunc3.getNDF(hist1.getDataSet()));
 			
 			//for(int i = 0; i < 10; ++i)
 			//{
@@ -121,13 +145,16 @@ public class TestBug {
 	        hist4.fill(4.5);
 	        //hist4.fill(4.5,0.6);
 
-	        hist4.fit(fitfunc4,"REQ"); //creates graph with a name and 2 points
+	        hist4.fit(fitfunc4,"RE"); //creates graph with a name and 2 points
 	        test4.draw(hist4);
 	        
 	        //System.out.println("median: " + hist4.getMedian());
 	        test4.setAxisRange(0.0, 10.0, 0.0, 5.0);
 	        fitfunc4.setLineColor(2);
 	        test4.draw(fitfunc4,"same");
+	        
+	        
+	        
 
 	        //test4.save("test4.png");
 			
@@ -139,6 +166,20 @@ public class TestBug {
         boolean c = false;
         int nvert = shape.getShapePath().size();
         for (i = 0, j = nvert-1; i < nvert; j = i++) {
+        	if( (int)(shape.getShapePath().point(i).y() * 1000.0) == (int)(y * 1000.0) || (int)(shape.getShapePath().point(j).y() * 1000.0) == (int)(y * 1000.0)  )
+            {
+                    if((        (int)(x * 1000.0) == 
+                    		 (int)(( (  shape.getShapePath().point(j).x() 
+                    		           -shape.getShapePath().point(i).x()   ) 
+                    		       * (  y 
+                    		           -shape.getShapePath().point(j).y()   ) 
+                    		       / (  shape.getShapePath().point(j).y()
+                    		           -shape.getShapePath().point(i).y()   ) 
+                    		       + shape.getShapePath().point(j).x()    ) * 1000.0)  )   )
+                    {
+                    	return true;
+                    }
+            }
         	if ( ( ( shape.getShapePath().point(i).y()  > y ) !=  ( shape.getShapePath().point(j).y() > y  ) ) )
             {
                     if((        x  < 
@@ -155,20 +196,49 @@ public class TestBug {
             }
         	if( (int)(shape.getShapePath().point(i).y() * 1000.0) == (int)(y * 1000.0) || (int)(shape.getShapePath().point(j).y() * 1000.0) == (int)(y * 1000.0)  )
             {
-                    if((        (int)(x * 1000.0) == 
-                    		 (int)(( (  shape.getShapePath().point(j).x() 
-                    		           -shape.getShapePath().point(i).x()   ) 
-                    		       * (  y 
-                    		           -shape.getShapePath().point(j).y()   ) 
-                    		       / (  shape.getShapePath().point(j).y()
-                    		           -shape.getShapePath().point(i).y()   ) 
-                    		       + shape.getShapePath().point(j).x()    ) * 1000.0)  )   )
-                    {
-                    	c = true;
-                    }
+	                if((        x  < 
+	               		 (   shape.getShapePath().point(j).x() 
+	               		           -shape.getShapePath().point(i).x()   ) 
+	               		       * (  y 
+	               		           -shape.getShapePath().point(j).y()   ) 
+	               		       / (  shape.getShapePath().point(j).y()
+	               		           -shape.getShapePath().point(i).y()   ) 
+	               		       + shape.getShapePath().point(j).x()       )   )
+	               {
+	               	c = !c;
+	               }
             }
+        	if( (int)(shape.getShapePath().point(i).x() * 1000.0) == (int)(x * 1000.0) || (int)(shape.getShapePath().point(j).x() * 1000.0) == (int)(x * 1000.0)  )
+            {
+	                if((        y  < 
+	               		 (   shape.getShapePath().point(j).y() 
+	               		           -shape.getShapePath().point(i).y()   ) 
+	               		       * (  x 
+	               		           -shape.getShapePath().point(j).x()   ) 
+	               		       / (  shape.getShapePath().point(j).x()
+	               		           -shape.getShapePath().point(i).x()   ) 
+	               		       + shape.getShapePath().point(j).y()       )   )
+	               {
+	               	c = !c;
+	               }
+            }
+        	
         }
         return c;
+    }
+	public boolean isContained(DetectorShape2D shape, double x, double y){
+        int i, j;
+        boolean c = false;
+        int nvert = shape.getShapePath().size();
+        for (i = 0, j = nvert-1; i < nvert; j = i++) {
+            if ( (( shape.getShapePath().point(i).y()*1.0001>y) != (shape.getShapePath().point(j).y()*1.0001>y)) &&
+                    (x < ( shape.getShapePath().point(j).x()*1.0001-shape.getShapePath().point(i).x()*1.0001) * 
+                    (y-shape.getShapePath().point(i).y()*1.0001) / (shape.getShapePath().point(j).y()*1.0001-shape.getShapePath().point(i).y()*1.0001) +
+                    shape.getShapePath().point(i).x()*1.0001))
+                c = !c;
+        }
+        return c;
+        //return false;
     }
 	
 	public Object[] getVerticies(DetectorShape2D shape1, DetectorShape2D shape2){
@@ -370,6 +440,67 @@ public class TestBug {
 		return(new Object[]{numpoints, xnew, ynew});
 	}
 	
+	
+	// isLeft(): tests if a point is Left|On|Right of an infinite line.
+//  Input:  three points P0, P1, and P2
+//  Return: >0 for P2 left of the line through P0 and P1
+//          =0 for P2  on the line
+//          <0 for P2  right of the line
+//  See: Algorithm 1 "Area of Triangles and Polygons"
+public int isLeft( Point3D P0, Point3D P1, Point3D P2 )
+{
+  return ( (int)((P1.x()*1001.0 - P0.x()*1001.0) * (P2.y()*1000.0 - P0.y()*1001.0)
+          - (P2.x()*1000.0 -  P0.x()*1001.0) * (P1.y()*1001.0 - P0.y()*1001.0)) );
+}
+//===================================================================
+
+
+
+//wn_PnPoly(): winding number test for a point in a polygon
+//    Input:   P = a point,
+//             V[] = vertex points of a polygon V[n+1] with V[n]=V[0]
+//    Return:  wn = the winding number (=0 only when P is outside)
+public int wn_PnPoly( Point3D P, DetectorShape2D shape)
+{
+	Point3D[] V = new Point3D[shape.getShapePath().size() + 1];
+	for(int i=0; i<shape.getShapePath().size() + 1; i++)
+	{
+		V[i] = new Point3D();
+	}
+	int n = shape.getShapePath().size();
+	for(int i=0; i<shape.getShapePath().size(); i++)
+	{
+		if(i == 0) 
+		{
+			V[0].copy(shape.getShapePath().point(i));
+			V[shape.getShapePath().size()].copy(shape.getShapePath().point(0));
+		}
+		else
+		{
+			V[i].copy(shape.getShapePath().point(i));
+		}
+	}
+	
+	int    wn = 0;    // the  winding number counter
+
+  // loop through all edges of the polygon
+  for(int i=0; i<n; i++) {   // edge from V[i] to  V[i+1]
+      if(V[i].y()*1.001 <= P.y()) {          // start y <= P.y
+          if(V[i+1].y()*1.001  > P.y())      // an upward crossing
+               if (isLeft( V[i], V[i+1], P) > 0)  // P left of  edge
+                   ++wn;            // have  a valid up intersect
+      }
+      else 
+      {                        // start y > P.y (no test needed)
+          if (V[i+1].y()*1.001  <= P.y())     // a downward crossing
+               if (isLeft( V[i], V[i+1], P) < 0)  // P right of  edge
+                   --wn;            // have  a valid down intersect
+      }
+  }
+  return wn;
+}
+//===================================================================
+	
 	public void testcontained()
 	{
     	TGCanvas canvas = new TGCanvas();
@@ -422,8 +553,9 @@ public class TestBug {
     	shape4.getShapePath().addPoint(2.0,  0.0,  0.0); 
     	shape4.getShapePath().addPoint(1.0,  2.0,  0.0); 
 
-        if(isContained3Decimal(shape,1.0, 1.0))System.out.println("Contained!");
-
+        if(isContained(shape4,-0.1, 0.0))System.out.println("Contained!");
+        System.out.println(wn_PnPoly( new Point3D(-0.1,0.0,0.0), shape4));
+        
     	//dv1.addShape(shape); 
     	//dv1.addShape(shape1);  
     	//dv1.addShape(shape2);  
@@ -461,7 +593,7 @@ public class TestBug {
 	public static void main(String[] args){   
 		
 		TestBug test = new TestBug();
-		test.testcontained();
+		//test.testcontained();
 	}
 
 }

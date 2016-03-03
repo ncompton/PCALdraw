@@ -69,14 +69,14 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	 * 
 	 */
 	//private static final long serialVersionUID = 1L;
-	DetectorCollection<MyH1D>  tdcH = new DetectorCollection<MyH1D>();
-    DetectorCollection<MyH1D>  adcH = new DetectorCollection<MyH1D>();
+	//DetectorCollection<MyH1D>  tdcH = new DetectorCollection<MyH1D>();
+    //DetectorCollection<MyH1D>  adcH = new DetectorCollection<MyH1D>();
     
     //public EventDecoder     decoder = new EventDecoder();
 	//FADCConfigLoader          fadc  = new FADCConfigLoader();
     
-    public String laba[] = {"monitor/pcal/adc","monitor/ecinner/adc","monitor/ecouter/adc"}; 
-	public String labt[] = {"monitor/pcal/tdc","monitor/ecinner/tdc","monitor/ecouter/tdc"};
+    //public String laba[] = {"monitor/pcal/adc","monitor/ecinner/adc","monitor/ecouter/adc"}; 
+	//public String labt[] = {"monitor/pcal/tdc","monitor/ecinner/tdc","monitor/ecouter/tdc"};
     
 	PCALDraw pcal = new PCALDraw();
     DetectorShapeTabView  view   = new DetectorShapeTabView();
@@ -91,7 +91,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     int numsectors = 1;
     int numpaddles = 68 * 10000 + 62 * 100 + 62;
     
-    private String inputFileName = "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-500k.evio";
+    private String inputFileName = "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-3M-s2.evio";
     //sector2_000251_mode7.evio.0
     //fc-muon-3M-s2.evio  "sector 2"
     //fc-muon-500k.evio "sector 5"
