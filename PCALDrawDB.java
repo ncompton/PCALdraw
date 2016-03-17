@@ -1,10 +1,20 @@
 package org.jlab.calib;
 
 import java.awt.BorderLayout;
+import java.awt.Polygon;
+import java.awt.Shape;
+import java.awt.geom.Area;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
 import java.util.Arrays;
 
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
+
+import math.geom2d.*;
+import math.geom2d.polygon.Polygon2D;
+import math.geom2d.polygon.Polygons2D;
+import math.geom2d.polygon.SimplePolygon2D;
 
 import org.jlab.clas.detector.DetectorType;
 import org.jlab.clas12.calib.DetectorShape2D;
@@ -16,14 +26,11 @@ import org.jlab.geom.detector.ec.ECDetector;
 import org.jlab.geom.detector.ec.ECLayer;
 import org.jlab.geom.prim.Point3D;
 import org.root.pad.EmbeddedCanvas;
-import org.root.pad.TGCanvas;
 
 public class PCALDrawDB {
 	
-	private double length;
-	private double angle;
 	private double anglewidth;
-	private double slightshift;
+
 	
 	private double[] xrotation = new double [6];
 	private double[] yrotation = new double [6];
@@ -33,21 +40,7 @@ public class PCALDrawDB {
 
 	public PCALDrawDB() {
 		initVert();
-		length = 4.5;
-		angle = 62.8941;
-		anglewidth = length/Math.sin(Math.toRadians(angle));
-		slightshift = length/Math.tan(Math.toRadians(angle));
 	}
-	
-	public PCALDrawDB(double inlength, double inangle) {
-		initVert();
-		length = inlength;
-		angle = inangle;
-		anglewidth = length/Math.sin(Math.toRadians(angle));
-		slightshift = length/Math.tan(Math.toRadians(angle));
-	}
-	
-	
 	
 	
 	//collects all possible pixels into a DetectorShapeView2D
@@ -64,10 +57,6 @@ public class PCALDrawDB {
             }
             return pixelmap;
 	}
-	
-	
-	
-	
 	
 	
 	//collects all possible UW intersections into a DetectorShapeView2D
@@ -114,8 +103,6 @@ public class PCALDrawDB {
 	
 	
 	
-	
-	
 	//collects all U strips into a DetectorShapeView2D
 	public DetectorShapeView2D drawUStrips(int sector)
 	{
@@ -149,9 +136,7 @@ public class PCALDrawDB {
 		    return Wmap;
 	}
 	
-	
-	
-	
+
 	
 	//calls getPixelVerticies
 	//uses those 3 verticies to make a shape
@@ -159,23 +144,11 @@ public class PCALDrawDB {
 		
 		Object[] obj = getPixelVerticies(sector, uPaddle, vPaddle, wPaddle);
 		int numpoints = (int)obj[0];
-		//double[] x = (double[])obj[1];//new double[numpoints];
-		//double[] y = (double[])obj[2];//new double[numpoints];
 		double[] x = new double[numpoints];
 		double[] y = new double[numpoints];
-		//System.out.println("numpoints: " + numpoints);
 		System.arraycopy( (double[])obj[1], 0, x, 0, numpoints);
 		System.arraycopy( (double[])obj[2], 0, y, 0, numpoints);
-		
-		/*
-        for(int i = 0; i< numpoints; ++i)
-        {
-        	y[i] -= 400.0;
-        }
-        */
-        //if(numpoints < 2)System.out.println("Didn't work");
-      
-        	
+	
         
         DetectorShape2D  pixel = new DetectorShape2D(DetectorType.PCAL,sector,2,uPaddle * 10000 + vPaddle * 100 + wPaddle);
     	pixel.getShapePath().clear(); 
@@ -184,8 +157,6 @@ public class PCALDrawDB {
         	for(int i = 0; i < numpoints; ++i){ 
         		pixel.getShapePath().addPoint(x[i],  y[i],  0.0); 
         	} 
-
-        	//pixel.getShapePath().rotateZ(Math.toRadians(sector*60.0));
            
             /*
             if(paddle%2==0){
@@ -194,8 +165,11 @@ public class PCALDrawDB {
                 shape.setColor(180, 180, 255);
             }
             */
+        	return pixel;
         }
-		return pixel;		
+        else
+        	return null;
+				
 	}
 
 	//calls getOverlapVerticies
@@ -237,40 +211,30 @@ public class PCALDrawDB {
 		System.arraycopy( (double[])obj[1], 0, x, 0, numpoints);
 		System.arraycopy( (double[])obj[2], 0, y, 0, numpoints);
 			
-		/*
-	    for(int i = 0; i< numpoints; ++i)
-	    {
-	        y[i] -= 400.0;
-	    }
-	    */
-		/*
-		System.out.println("Blah!");
-		for(int i = 0; i < numpoints; ++i){ 
-        	System.out.println("i: " + i + " x: " + x[i] + " y: " + y[i]);
-        } 
-        */
-
-	      
-	        	
+	      	
 		DetectorShape2D  overlapShape;
-	    if(uPaddle == paddle1 && wPaddle == paddle2)
-	    	overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,3,uPaddle * 100 + wPaddle);
-	    else if(vPaddle == paddle1 && uPaddle == paddle2)
-    		overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,4,uPaddle * 100 + vPaddle);
-	    else if(wPaddle == paddle1 && uPaddle == paddle2)
-	    	overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,5,uPaddle * 100 + wPaddle);
-	    else
-	    	overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,6,vPaddle * 100 + wPaddle);
+		
+		if(numpoints > 2)
+		{
+		    if(uPaddle == paddle1 && wPaddle == paddle2)
+		    	overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,3,uPaddle * 100 + wPaddle);
+		    else if(uPaddle == paddle1 && vPaddle == paddle2)
+	    		overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,4,uPaddle * 100 + vPaddle);
+		    else if(vPaddle == paddle1 && uPaddle == paddle2)
+	    		overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,4,uPaddle * 100 + vPaddle);
+		    else if(wPaddle == paddle1 && uPaddle == paddle2)
+		    	overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,5,uPaddle * 100 + wPaddle);
+		    else
+		    	overlapShape = new DetectorShape2D(DetectorType.PCAL,sector,6,vPaddle * 100 + wPaddle);
+
 	    
-	    overlapShape.getShapePath().clear(); 
-	    if(numpoints > 2) 
-	    {
+		    overlapShape.getShapePath().clear(); 
+
 	        for(int i = 0; i < numpoints; ++i){ 
 	        	overlapShape.getShapePath().addPoint(x[i],  y[i],  0.0); 
 	        	//System.out.println("i: " + i + " x: " + x[i] + " y: " + y[i]);
 	        } 
 
-	        //overlapShape.getShapePath().rotateZ(Math.toRadians(sector*60.0));
 	           
 	         /*
 	         if(paddle%2==0){
@@ -279,8 +243,14 @@ public class PCALDrawDB {
 	             shape.setColor(180, 180, 255);
 	         }
 	         */
+	        return overlapShape;
 	     }
-	    return overlapShape;		
+		 else
+		 {
+			System.out.println("Not a valid overlap shape");
+			return null;
+		 }
+	    		
 	}
 	
 	
@@ -354,9 +324,7 @@ public class PCALDrawDB {
 	}
 	
 	
-	
-	
-	
+
 	
 	//calls getPixelVerticies to check
 	//that at least 3 points exist,
@@ -386,10 +354,6 @@ public class PCALDrawDB {
 	}
 
 	
-	
-
-	
-	
 	//returns an Object array of size 3
 	//first element is the number of verticies (n) (int)
 	//second element is an array x-coordinates (double[]) of size n
@@ -397,9 +361,14 @@ public class PCALDrawDB {
 	//                                     0-5         0-67         0-61          0-61
 	public Object[] getPixelVerticies(int sector, int uPaddle, int vPaddle, int wPaddle){
 		
-		if(isValidOverlap(sector, "u", uPaddle,"w",wPaddle))
+		if(isValidOverlap(sector, "u", uPaddle,"w",wPaddle) && isValidOverlap(sector, "u", uPaddle,"v",wPaddle) && isValidOverlap(sector, "v", vPaddle,"w",wPaddle))
 		{
-			Object[] obj = getVerticies(getOverlapShape(sector, "u", uPaddle,"w",wPaddle),getStripShape(sector, "v", vPaddle));
+		//DetectorShape2D shape1 = getOverlapShape(sector, "u", uPaddle,"w",wPaddle);
+		//DetectorShape2D shape2 = getOverlapShape(sector, "v", vPaddle,"w",wPaddle);
+		//DetectorShape2D shape3 = getOverlapShape(sector, "u", uPaddle,"v",vPaddle);
+		//if(shape1 != null && shape2 != null && shape3 != null)
+		//{
+			Object[] obj = getVerticies(getOverlapShape(sector, "u", uPaddle,"w",wPaddle),getStripShape(sector, "v",vPaddle));
 			
 			int numpoints = (int)obj[0];
 			//System.out.println("Strip let: " + strip1 + "Strip num: " + paddle1 + " Numpoints: " + numpoints);
@@ -407,7 +376,8 @@ public class PCALDrawDB {
 			double[] y = new double[numpoints];
 			System.arraycopy( (double[])obj[1], 0, x, 0, numpoints);
 			System.arraycopy( (double[])obj[2], 0, y, 0, numpoints);
-	
+			return(new Object[]{numpoints, x, y});
+			/*
 			Object[] obj2 = sortVerticies(numpoints, x, y);
 			
 			int nPoints = (int)obj2[0];
@@ -418,6 +388,7 @@ public class PCALDrawDB {
 			System.arraycopy( (double[])obj2[2], 0, ynew, 0, nPoints);
 			
 			return(new Object[]{nPoints, xnew, ynew});
+			*/
 		}
 		else
 		{
@@ -441,7 +412,9 @@ public class PCALDrawDB {
 		double[] y = new double[numpoints];
 		System.arraycopy( (double[])obj[1], 0, x, 0, numpoints);
 		System.arraycopy( (double[])obj[2], 0, y, 0, numpoints);
-
+		
+		return(new Object[]{numpoints, x, y});
+		/*
 		Object[] obj2 = sortVerticies(numpoints, x, y);
 		
 		int nPoints = (int)obj2[0];
@@ -452,6 +425,7 @@ public class PCALDrawDB {
 		System.arraycopy( (double[])obj2[2], 0, ynew, 0, nPoints);
 
 		return(new Object[]{nPoints, xnew, ynew});
+		*/
 	}
 	
 
@@ -474,10 +448,6 @@ public class PCALDrawDB {
         
         return(new Object[]{numpoints, xPoint[sector][l][paddle1], yPoint[sector][l][paddle1]});
 	}
-	
-	
-	
-	
 	
 	//estimates the shape center by calculating average x, y, z
 	//from all verticies in the shape
@@ -507,13 +477,9 @@ public class PCALDrawDB {
 		int vPaddle = -1;
 		int wPaddle = -1;
 		
-		
-		double x1, x2, y1, y2;
-        double x = 0.0;
-        double y = 0.0;
-        double uyup, uydown;
-        double vmup, vmdown, vbup, vbdown;
-        double wmup, wmdown, wbup, wbdown;
+        double[] xyz1 = new double[3];
+        double[] xyz2 = new double[3];
+        Point3D dist = new Point3D();
 		
 		
 		if((strip1 == "u" || strip1 == "U"))
@@ -532,340 +498,41 @@ public class PCALDrawDB {
 		//case 1: U strip
 		if(uPaddle != -1)
 		{ 
-			vPaddle = 61;
-		    wPaddle = 61;
-		                		                
-
-		                //convert strip numbers to slopes and intercepts
-		                // rsu 1-68  
-		                if(uPaddle + 1 > 52)
-		                {
-		                	uyup = (uPaddle + 1) - 52.0;
-		                	uyup = uyup * 2.0;
-		                	uyup = uyup + 52;
-		                	uyup = uyup - 1;
-		                	uydown = (83 - (uyup)) * length;
-		                	uyup = (83 - (uyup - 2)) * length;
-		                	//System.out.println("uyup: " + uyup);
-		                	//System.out.println("uydown: " + uydown);
-		                }
-		                else
-		                {
-		                	uyup = uPaddle + 1;
-		                	uydown = (84 - (uyup)) * length;
-		                	uyup = (84 - (uyup - 1)) * length;
-		                }
-		                // rsv 1-62  
-		                if(vPaddle + 1 >= 16)
-		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmup = (y2 - y1)/(x2 - x1);
-		            		vbup = -x1*vmup;
-		            		
-		            		//System.out.println("vxright: " + x1);
-		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmdown = (y2 - y1)/(x2 - x1);
-		            		vbdown = -x1*vmdown;
-		            		
-		            		//System.out.println("vxleft: " + x1);
-		                }
-		                else
-		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmdown = (y2 - y1)/(x2 - x1);
-		            		vbdown = -x1*vmdown;
-		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmup = (y2 - y1)/(x2 - x1);
-		            		vbup = -x1*vmup;
-		                }
-		                // rsw 1-62  
-		                if(wPaddle + 1 >= 16)
-		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmup = (y2 - y1)/(x2 - x1);
-		            		wbup = -x1*wmup;
-		            		
-		            		//System.out.println("wxright: " + x1);
-		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmdown = (y2 - y1)/(x2 - x1);
-		            		wbdown = -x1*wmdown;
-		            		
-		            		//System.out.println("wxleft: " + x1);
-		                }
-		                else
-		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmdown = (y2 - y1)/(x2 - x1);
-		            		wbdown = -x1*wmdown;
-		            		
-		            		//System.out.println("wxright: " + x1);
-		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmup = (y2 - y1)/(x2 - x1);
-		            		wbup = -x1*wmup;
-		            		
-		            		//System.out.println("wxleft: " + x1);
-		                }
-		                
-		                y = (uydown + uyup)/2.0; 
-		                x = (y - wbup)/(wmup); 
-		                
+			xyz1 = getShapeCenter(getOverlapShape(0, "u", paddle1, "w", 61)); //last strip
+			xyz2 = getShapeCenter(getOverlapShape(0, "u", paddle1, "w", 60)); //second to last
+			for(int i = 0; i < 3; ++i)
+			{
+				xyz1[i] = xyz1[i] + (xyz1[i] - xyz2[i]);
+			}
+			dist.set(xyz1[0],xyz1[1],xyz1[2]);		                
 		}
 		//case 2: V strip
 		else if(vPaddle != -1)
 		{ 
-    			wPaddle = 61;
-    			uPaddle = 67;
-                
-                //System.out.println("Sector: " + sector + " u: " + uPaddle + " v: " + vPaddle);
-                
-                //convert strip numbers to slopes and intercepts
-                // rsu 1-68  
-                if(uPaddle + 1 > 52)
-                {
-                	uyup = (uPaddle + 1) - 52.0;
-                	uyup = uyup * 2.0;
-                	uyup = uyup + 52;
-                	uyup = uyup - 1;
-                	uydown = (83 - (uyup)) * length;
-                	uyup = (83 - (uyup - 2)) * length;
-                	//System.out.println("uyup: " + uyup);
-                	//System.out.println("uydown: " + uydown);
-                }
-                else
-                {
-                	uyup = uPaddle + 1;
-                	uydown = (84 - (uyup)) * length;
-                	uyup = (84 - (uyup - 1)) * length;
-                }
-                // rsv 1-62  
-                if(vPaddle + 1 >= 16)
-                {
-                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		vmup = (y2 - y1)/(x2 - x1);
-            		vbup = -x1*vmup;
-            		
-            		//System.out.println("vxright: " + x1);
-            		
-            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		vmdown = (y2 - y1)/(x2 - x1);
-            		vbdown = -x1*vmdown;
-            		
-            		//System.out.println("vxleft: " + x1);
-                }
-                else
-                {
-                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		vmdown = (y2 - y1)/(x2 - x1);
-            		vbdown = -x1*vmdown;
-            		
-            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
-            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		vmup = (y2 - y1)/(x2 - x1);
-            		vbup = -x1*vmup;
-                }
-                // rsw 1-62  
-                if(wPaddle + 1 >= 16)
-                {
-                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		wmup = (y2 - y1)/(x2 - x1);
-            		wbup = -x1*wmup;
-            		
-            		//System.out.println("wxright: " + x1);
-            		
-            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		wmdown = (y2 - y1)/(x2 - x1);
-            		wbdown = -x1*wmdown;
-            		
-            		//System.out.println("wxleft: " + x1);
-                }
-                else
-                {
-                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		wmdown = (y2 - y1)/(x2 - x1);
-            		wbdown = -x1*wmdown;
-            		
-            		//System.out.println("wxright: " + x1);
-            		
-            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
-            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
-            		y1 = 0.0;
-            		y2 = length;
-            		wmup = (y2 - y1)/(x2 - x1);
-            		wbup = -x1*wmup;
-            		
-            		//System.out.println("wxleft: " + x1);
-                }
-                
-                y = uydown;
-                x1 = (y - vbdown)/(vmdown);
-                x2 = (y - vbup)/(vmup);
-                x = (x1 + x2)/2.0;
-                
+			xyz1 = getShapeCenter(getOverlapShape(0, "v", paddle1, "u", 67)); //last strip
+			xyz2 = getShapeCenter(getOverlapShape(0, "v", paddle1, "u", 66)); //second to last
+			for(int i = 0; i < 3; ++i)
+			{
+				xyz1[i] = xyz1[i] + (xyz1[i] - xyz2[i]);
+			}
+			dist.set(xyz1[0],xyz1[1],xyz1[2]);	
             
 		}
 		//case 3: W strip
 		else if(wPaddle != -1)
 		{ 
-			uPaddle = 67;
-		    vPaddle = 61;
-		                		                
-		                //System.out.println("Sector: " + sector + " u: " + uPaddle + " w: " + wPaddle);
-		                
-		                //convert strip numbers to slopes and intercepts
-		                // rsu 1-68  
-		                if(uPaddle + 1 > 52)
-		                {
-		                	uyup = (uPaddle + 1) - 52.0;
-		                	uyup = uyup * 2.0;
-		                	uyup = uyup + 52;
-		                	uyup = uyup - 1;
-		                	uydown = (83 - (uyup)) * length;
-		                	uyup = (83 - (uyup - 2)) * length;
-		                	//System.out.println("uyup: " + uyup);
-		                	//System.out.println("uydown: " + uydown);
-		                }
-		                else
-		                {
-		                	uyup = uPaddle + 1;
-		                	uydown = (84 - (uyup)) * length;
-		                	uyup = (84 - (uyup - 1)) * length;
-		                }
-		                // rsv 1-62  
-		                if(vPaddle + 1 >= 16)
-		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmup = (y2 - y1)/(x2 - x1);
-		            		vbup = -x1*vmup;
-		            		
-		            		//System.out.println("vxright: " + x1);
-		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (76.0 - (vPaddle + 15 - 1))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmdown = (y2 - y1)/(x2 - x1);
-		            		vbdown = -x1*vmdown;
-		            		
-		            		//System.out.println("vxleft: " + x1);
-		                }
-		                else
-		                {
-		                	x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0) + 2.0)*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmdown = (y2 - y1)/(x2 - x1);
-		            		vbdown = -x1*vmdown;
-		            		
-		            		x1 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth;
-		            		x2 = 77.0 * anglewidth / 2.0 - (77.0 - ((vPaddle + 1) * 2.0))*anglewidth - slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		vmup = (y2 - y1)/(x2 - x1);
-		            		vbup = -x1*vmup;
-		                }
-		                // rsw 1-62  
-		                if(wPaddle + 1 >= 16)
-		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmup = (y2 - y1)/(x2 - x1);
-		            		wbup = -x1*wmup;
-		            		
-		            		//System.out.println("wxright: " + x1);
-		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (76.0 - (wPaddle + 15 - 1))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmdown = (y2 - y1)/(x2 - x1);
-		            		wbdown = -x1*wmdown;
-		            		
-		            		//System.out.println("wxleft: " + x1);
-		                }
-		                else
-		                {
-		                	x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0) + 2.0)*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmdown = (y2 - y1)/(x2 - x1);
-		            		wbdown = -x1*wmdown;
-		            		
-		            		//System.out.println("wxright: " + x1);
-		            		
-		            		x1 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth;
-		            		x2 = -77.0 * anglewidth / 2.0 + (77.0 - ((wPaddle + 1) * 2.0))*anglewidth + slightshift;
-		            		y1 = 0.0;
-		            		y2 = length;
-		            		wmup = (y2 - y1)/(x2 - x1);
-		            		wbup = -x1*wmup;
-		            		
-		            		//System.out.println("wxleft: " + x1);
-		                }
-		                
-		                y = uydown;
-		                x1 = (y - wbdown)/(wmdown);
-		                x2 = (y - wbup)/(wmup);
-		                x = (x1 + x2)/2.0;
-
+			xyz1 = getShapeCenter(getOverlapShape(0, "w", paddle1, "u", 67)); //last strip
+			xyz2 = getShapeCenter(getOverlapShape(0, "w", paddle1, "u", 66)); //second to last
+			for(int i = 0; i < 3; ++i)
+			{
+				xyz1[i] = xyz1[i] + (xyz1[i] - xyz2[i]);
 			}
+			dist.set(xyz1[0],xyz1[1],xyz1[2]);	
+
+		}
 		
-		center[0] = x;
-		center[1] = y;
+		center[0] = dist.x();
+		center[1] = dist.y();
 		center[2] = 0.0;
 		
 		return center;
@@ -916,8 +583,7 @@ public class PCALDrawDB {
 		return distance;
 	}
 	
-	
-	
+
 	
 	//get attenuation distance
 	//                              main strip let,    main num, cross strip let, cross num
@@ -1036,7 +702,9 @@ public class PCALDrawDB {
 		ECLayer  ecLayer;
 		int sector = 0;
 		int lastcomponent = 67;
-		Point3D point1 = new Point3D(), point2 = new Point3D(), point3  = new Point3D();
+		Point3D point1 = new Point3D();
+		Point3D point2 = new Point3D();
+		Point3D point3 = new Point3D();
         ECDetector detector  = (ECDetector) CLASGeometryLoader.createDetector(DetectorType.EC, 10, "default", "local");
         for(sector = 0; sector < 6; ++sector)
         {
@@ -1126,33 +794,37 @@ public class PCALDrawDB {
 	        	ecLayer = detector.getSector(sector).getSuperlayer(0).getLayer(l);
 	            for(ScintillatorPaddle paddle2 : ecLayer.getAllComponents())
 	            {													//0-67
-	            	point1 = paddle2.getVolumePoint(0);
+	            	point1.copy(paddle2.getVolumePoint(0));
 	            	point1.rotateX(xrotation[sector]);
 	            	point1.rotateY(yrotation[sector]);
+	            	//point1.rotateZ(Math.PI/2.0);
 	            	//if(paddle2.getComponentId() == 61)System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
 	            	//System.out.println("Component ID: " + paddle2.getComponentId());
 	            	xPoint[sector][l][paddle2.getComponentId()][0] = point1.x();
 	            	yPoint[sector][l][paddle2.getComponentId()][0] = point1.y();
 	            	
-	            	point1 = paddle2.getVolumePoint(4);
+	            	point1.copy(paddle2.getVolumePoint(4));
 	            	point1.rotateX(xrotation[sector]);
 	            	point1.rotateY(yrotation[sector]);
+	            	//point1.rotateZ(Math.PI/2.0);
 	            	//if(paddle2.getComponentId() == 61)System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
 	            	//System.out.println("Component ID: " + paddle2.getComponentId());
 	            	xPoint[sector][l][paddle2.getComponentId()][1] = point1.x();
 	            	yPoint[sector][l][paddle2.getComponentId()][1] = point1.y();
 	            	
-	            	point1 = paddle2.getVolumePoint(5);
+	            	point1.copy(paddle2.getVolumePoint(5));
 	            	point1.rotateX(xrotation[sector]);
 	            	point1.rotateY(yrotation[sector]);
+	            	//point1.rotateZ(Math.PI/2.0);
 	            	//System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
 	            	//System.out.println("Component ID: " + paddle2.getComponentId());
 	            	xPoint[sector][l][paddle2.getComponentId()][2] = point1.x();
 	            	yPoint[sector][l][paddle2.getComponentId()][2] = point1.y();
 	            	
-	            	point1 = paddle2.getVolumePoint(1);
+	            	point1.copy(paddle2.getVolumePoint(1));
 	            	point1.rotateX(xrotation[sector]);
 	            	point1.rotateY(yrotation[sector]);
+	            	//point1.rotateZ(Math.PI/2.0);
 	            	//System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
 	            	//System.out.println("Component ID: " + paddle2.getComponentId());
 	            	xPoint[sector][l][paddle2.getComponentId()][3] = point1.x();
@@ -1162,828 +834,101 @@ public class PCALDrawDB {
         }
 	}
 	
-	
-	public boolean isContained3Decimal(DetectorShape2D shape, double x, double y){
-        int i, j;
-        double scale = 1.01;
-        boolean c = false;
-        int nvert = shape.getShapePath().size();
-        for (i = 0, j = nvert-1; i < nvert; j = i++) {
-            if ( (( shape.getShapePath().point(i).y()*scale>y) != (shape.getShapePath().point(j).y()*scale>y)) &&
-                    (x < ( shape.getShapePath().point(j).x()*scale-shape.getShapePath().point(i).x()*scale) * 
-                    (y-shape.getShapePath().point(i).y()*scale) / (shape.getShapePath().point(j).y()*scale-shape.getShapePath().point(i).y()*scale) +
-                    shape.getShapePath().point(i).x()*scale))
-                c = !c;
-        }
-        return c;
-        //return false;
-    }
-	
 	public Object[] getVerticies(DetectorShape2D shape1, DetectorShape2D shape2){
-		int numpoints = 0;
-		int count = 0;
 		int nPoints = 0;
-		Point3D point1A = new Point3D();
-		Point3D point1B = new Point3D();
-		Point3D point2A = new Point3D();
-		Point3D point2B = new Point3D();
-		double m1, b1, m2, b2;
-		double[] xtemp = new double[shape1.getShapePath().size() * shape2.getShapePath().size()];
-		double[] ytemp = new double[shape1.getShapePath().size() * shape2.getShapePath().size()];
 		
-		for(int i = 0; i < shape1.getShapePath().size(); ++i)
+		int vert1size = shape1.getShapePath().size();
+		int vert2size = shape2.getShapePath().size();
+		
+		double[] x = new double[vert1size * vert2size];
+		double[] y = new double[vert1size * vert2size];
+		
+		double[] xtemp1 = new double[vert1size];
+		double[] ytemp1 = new double[vert1size];
+		
+		double[] xtemp2 = new double[vert2size];
+		double[] ytemp2 = new double[vert2size];
+
+		for(int i = 0; i < vert1size; ++i)
 		{
-			if(i+1 < shape1.getShapePath().size())
-			{
-				point1A.copy(shape1.getShapePath().point(i));
-				point1B.copy(shape1.getShapePath().point(i + 1));
-			}
-			else
-			{
-				point1A.copy(shape1.getShapePath().point(i));
-				point1B.copy(shape1.getShapePath().point(0));
-			}
-			for(int j = 0; j < shape2.getShapePath().size(); ++j)
-			{
-				if(j+1 < shape2.getShapePath().size())
-				{
-					point2A.copy(shape2.getShapePath().point(j));
-					point2B.copy(shape2.getShapePath().point(j + 1));
-				}
-				else
-				{
-					point2A.copy(shape2.getShapePath().point(j));
-					point2B.copy(shape2.getShapePath().point(0));
-				}
-				
-				
-				//calculate line 1
-				m1 = (point1A.y()-point1B.y())/(point1A.x()-point1B.x());
-		        b1 = point1A.y() - m1*point1A.x();
-				
-				//calculate line 2
-		        m2 = (point2A.y()-point2B.y())/(point2A.x()-point2B.x());
-		        b2 = point2A.y() - m2*point2A.x();
-		        //System.out.println( "i: " + i + " j: " + j);
-		        //System.out.println( "points1a: " +"x: " + point1A.x() + " y: " + point1A.y());
-		        //System.out.println( "points1b: " +"x: " + point1B.x() + " y: " + point1B.y());
-		        //System.out.println( "                                                      ");
-		        //System.out.println( "points2a: " +"x: " + point2A.x() + " y: " + point2A.y());
-		        //System.out.println( "points2b: " +"x: " + point2B.x() + " y: " + point2B.y());
-		        //System.out.println( "                                                      ");
-		        
-		        //System.out.println( "m2: " + m2 + " m1: " + m1);
-		        //System.out.println( "                                                      ");
-		        if(Math.abs(m1 - m2) > 0.001 && !(  (((Double)m1).isInfinite() || Math.abs(m1) > 9000.0)  && (((Double)m2).isInfinite()  || Math.abs(m2) > 9000.0) )  )
-		        {
-		        	//not parallel
-			        if(((Double)m1).isInfinite() || Math.abs(m1) > 9000.0)
-			        {
-			        	xtemp[numpoints] = point1A.x();
-			        	ytemp[numpoints] = m2 * xtemp[numpoints] + b2;
-			        	//System.out.println( "Inf slope1: " +"x: " + xtemp[numpoints] + " y: " + ytemp[numpoints]);
-			        	++numpoints;
-			        }
-			        else if(((Double)m2).isInfinite() || Math.abs(m2) > 9000.0)
-			        {
-			        	xtemp[numpoints] = point2A.x();
-			        	ytemp[numpoints] = m1 * xtemp[numpoints] + b1;
-			        	//System.out.println( "Inf slope2: " +"x: " + xtemp[numpoints] + " y: " + ytemp[numpoints]);
-			        	++numpoints;
-			        }
-			        else
-			        {
-			        	xtemp[numpoints] = (b1 - b2)/(m2 - m1); 
-			        	ytemp[numpoints] = m1 * xtemp[numpoints] + b1; 
-			        	//System.out.println( "Norm slope: " +"x: " + xtemp[numpoints] + " y: " + ytemp[numpoints]);
-			        	++numpoints;
-			        }
-			        
-		        }
-		        ++count;
-				
-				
-			}
+			xtemp1[i] = shape1.getShapePath().point(i).x();
+			ytemp1[i] = shape1.getShapePath().point(i).y();
 		}
 		
-		//System.out.println( "count: " + count);
-		
-		double[] x = new double[numpoints];
-		double[] y = new double[numpoints];
-		
-		for(int i = 0; i < numpoints; ++i)
+		for(int i = 0; i < vert2size; ++i)
 		{
-			Point3D point = new Point3D();
-			Point3D centerA = new Point3D();
-			centerA.set((double)getShapeCenter(shape1)[0],(double)getShapeCenter(shape1)[1],0.0);
-			Point3D centerB = new Point3D();
-			centerB.set((double)getShapeCenter(shape2)[0],(double)getShapeCenter(shape2)[1],0.0);
-			DetectorShape2D shapeA = new DetectorShape2D();
-			DetectorShape2D shapeB = new DetectorShape2D();
-			for(int j = 0; j < shape1.getShapePath().size(); ++j)
+			xtemp2[i] = shape2.getShapePath().point(i).x();
+			ytemp2[i] = shape2.getShapePath().point(i).y();
+		}
+		
+		
+		/////////////////////////////////////////////////////////////
+		
+		SimplePolygon2D pol1 = new SimplePolygon2D(xtemp1,ytemp1);
+		SimplePolygon2D pol2 = new SimplePolygon2D(xtemp2,ytemp2);
+		Polygon2D pol3 = Polygons2D.intersection(pol1,pol2);
+		
+		nPoints = pol3.vertexNumber();
+		for(int i = 0; i < pol3.vertexNumber(); ++i)
+		{
+			x[i] = pol3.vertex(i).getX();
+			y[i] = pol3.vertex(i).getY();
+			
+			//System.out.println("x: " + pol3.vertex(i).getX() + " y: " + pol3.vertex(i).getY());
+		}
+		
+		/////////////////////////////////////////////////////////////////
+		
+		/////////////////////////////////////////////////////////////
+		
+		
+		/*
+		Path2D path1 = new Path2D.Double();
+		path1.moveTo(xtemp1[0], ytemp1[0]);
+		for(int i = 1; i < vert1size; ++i) {
+		   path1.lineTo(xtemp1[i], ytemp1[i]);
+		}
+		path1.closePath();
+		Shape pol1 = (Shape)path1;
+		
+		Path2D path2 = new Path2D.Double();
+		path2.moveTo(xtemp2[0], ytemp2[0]);
+		for(int i = 1; i < vert2size; ++i) {
+		   path2.lineTo(xtemp2[i], ytemp2[i]);
+		}
+		path2.closePath();
+		Shape pol2 = (Shape)path2;
+		
+		Area a1 = new Area(pol1);
+		Area a2 = new Area(pol2);
+		
+		a1.intersect(a2);
+		
+		//a1.isPolygonal()
+		nPoints = 0;
+		double[] data = new double[6];
+		if(a1.isEmpty())
+			nPoints = 0;
+		else
+		{
+			//pol1 = (Shape) a1;
+			PathIterator pi = a1.getPathIterator(null);
+			while(!pi.isDone())
 			{
-				point.copy(shape1.getShapePath().point(j));
-				point.translateXYZ(-centerA.x(), -centerA.y(), 0.0);
-				shapeA.getShapePath().addPoint(point);
-			}
-			for(int j = 0; j < shape2.getShapePath().size(); ++j)
-			{
-				point.copy(shape2.getShapePath().point(j));
-				point.translateXYZ(-centerB.x(), -centerB.y(), 0.0);
-				shapeB.getShapePath().addPoint(point);
-			}
-			//System.out.println( "Found: " +"x: " + xtemp[i] + " y: " + ytemp[i]);
-			if(isContained3Decimal(shapeA, xtemp[i]-centerA.x(), ytemp[i]-centerA.y()))// || wn_PnPoly( new Point3D(xtemp[i]-(double)getShapeCenter(shape1)[0],ytemp[i]-(double)getShapeCenter(shape1)[1],0.0), shapeA) != 0)
-			{
-				//System.out.println( "Accepted1: " +"x: " + xtemp[i] + " y: " + ytemp[i]);
-				if(isContained3Decimal(shapeB, xtemp[i]-centerB.x(), ytemp[i]-centerB.y()))// || wn_PnPoly( new Point3D(xtemp[i]-(double)getShapeCenter(shape2)[0],ytemp[i]-(double)getShapeCenter(shape2)[1],0.0), shapeB) != 0)
+				if(pi.currentSegment(data) != pi.SEG_CLOSE)
 				{
-					//System.out.println( "Accepted-Both: " +"x: " + xtemp[i] + " y: " + ytemp[i]);
-					x[nPoints] = xtemp[i];
-					y[nPoints] = ytemp[i];
+					//int type = pi.currentSegment(data);
+					x[nPoints] = data[0];
+					y[nPoints] = data[1];
 					++nPoints;
 				}
-				
+				pi.next();
 			}
 		}
 		
+		*/
+		/////////////////////////////////////////////////////////////////
 		return(new Object[]{nPoints, x, y});
-	}
-	
-	public Object[] sortVerticies(int num, double[] x, double[] y)
-	{
-		System.out.println("Sorting points");
-		double[] xnew = new double[num];
-		double[] ynew = new double[num];
-		int[] used = new int[num];
-		
-		double ymin = 0;
-		double xmin = 0;
-		double ymax = 0;
-		double xmax = 0;
-		double minangle = 0;
-		double prevdist = 9000;
-		double curdist = 9000;
-		int index = 0;
-		int xmini = 0;
-		int ymaxi = 0;
-		int xmaxi = 0;
-		int numpoints = 0;
-		int i = 0;
-		
-		for(i = 0; i < num; ++i)
-		{
-			if(i == 0)
-			{
-				xmax = x[i];
-				xmin = x[i];
-				ymin = y[i];
-				ymax = y[i];
-				index = i;
-				xmini = i;
-			}
-			
-			if(ymin > y[i])
-			{
-				ymin = y[i];
-				index = i;
-			}
-			
-			if(ymax < y[i])
-			{
-				ymax = y[i];
-				ymaxi = i;
-			}
-
-			if(xmin > x[i])
-			{
-				xmin = x[i];
-				xmini = i;
-			}
-			
-			if(xmax < x[i])
-			{
-				xmax = x[i];
-				xmaxi = i;
-			}
-			
-			used[i] = 0;
-			//System.out.println("ymin: " + ymin + " y: " + y[i]);
-			//System.out.println("xmin: " + xmin + " x: " + x[i]);
-		}
-		
-		//start with minimum y
-		//look to -x as a function of theta
-		numpoints = 0;
-		int count = 0;
-		int count2 = 0;
-		boolean xminreached = false;
-		boolean ymaxreached = false;
-		boolean xmaxreached = false;
-		while(count < num)
-		{
-			++count2;
-			//make starting point
-			for(i = 0; i < num; ++i)
-			{
-				if(used[i] == 0) //only loop through unused points
-				{
-					if(index == i)
-					{
-						//first point
-						ynew[numpoints] = y[i];
-						xnew[numpoints] = x[i];
-						used[i] = 1;
-						if(index == ymaxi) ymaxreached = true;
-						if(index == xmaxi) xmaxreached = true;
-						if(index == xmini) xminreached = true;
-						index = -1;
-						++numpoints;
-						++count;
-						//System.out.println("truths: " + xminreached + "  " + ymaxreached + "  " + xmaxreached);
-						//System.out.println("Sorted: " + "x: " + xnew[numpoints - 1] + " y: " + ynew[numpoints -1]);
-					}
-					//if(count2 == 50)System.out.println("Stuck: " + "x: " + x[i] + " y: " + y[i]);
-				}
-			}
-			
-			curdist = 90000.0;
-			prevdist = 90000.0;
-			minangle = 90000.0;
-			if(!xminreached)
-			{
-				//lowerleft
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001)
-							{
-								//duplicate
-								used[i] = 1;
-								++count;
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(  (x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )*100.0) ))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				
-				//upper left
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && x[i] - xnew[numpoints - 1] < 0)
-							{
-								minangle = 0;
-								index = i;
-							}
-							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(   (y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]))  *100.0)  ) )
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				
-				//upper right
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] > 0)
-							{
-								minangle = 0;
-								index = i;
-							}
-							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1])) *100.0)))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				
-				//lower right
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] < 0)
-							{
-								minangle = 0;
-								index = i;
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && minangle > Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1])) *100.0)))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				if(index == ymaxi) ymaxreached = true;
-				if(index == xmaxi) xmaxreached = true;
-				if(index == xmini) xminreached = true;
-			}
-			else if(!ymaxreached)
-			{				
-				//upper left
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && x[i] - xnew[numpoints - 1] < 0)
-							{
-								minangle = 0;
-								index = i;
-							}
-							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(   (y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]))  *100.0)  ) )
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				
-				//upper right
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] > 0)
-							{
-								minangle = 0;
-								index = i;
-							}
-							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1])) *100.0)))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				
-				//lower right
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] < 0)
-							{
-								minangle = 0;
-								index = i;
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && minangle > Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1])) *100.0)))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				
-				//lowerleft
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001)
-							{
-								//duplicate
-								used[i] = 1;
-								++count;
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(  (x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )*100.0) ))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				if(index == ymaxi) ymaxreached = true;
-				if(index == xmaxi) xmaxreached = true;
-				if(index == xmini) xminreached = true;
-			}
-			else if(!xmaxreached)
-			{				
-				//upper right
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] > 0)
-							{
-								minangle = 0;
-								index = i;
-							}
-							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1])) *100.0)))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				
-				//lower right
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] < 0)
-							{
-								minangle = 0;
-								index = i;
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && minangle > Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1])) *100.0)))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				
-				//lowerleft
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001)
-							{
-								//duplicate
-								used[i] = 1;
-								++count;
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(  (x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )*100.0) ))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				
-				//upper left
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && x[i] - xnew[numpoints - 1] < 0)
-							{
-								minangle = 0;
-								index = i;
-							}
-							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(   (y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]))  *100.0)  ) )
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				if(index == ymaxi) ymaxreached = true;
-				if(index == xmaxi) xmaxreached = true;
-				if(index == xmini) xminreached = true;
-			}
-			else
-			{
-				//upper right
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] > 0)
-							{
-								minangle = 0;
-								index = i;
-							}
-							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]))*100.0 )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] > 0 && x[i] - xnew[numpoints - 1] >= 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				
-				//lower right
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001 && y[i] - ynew[numpoints - 1] < 0)
-							{
-								minangle = 0;
-								index = i;
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && minangle > Math.abs(Math.atan(Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] > 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan(  Math.abs(y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]))   *100.0 )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				
-				//lowerleft
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && Math.abs(x[i] - xnew[numpoints - 1]) < 0.0001)
-							{
-								//duplicate
-								used[i] = 1;
-								++count;
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )*100.0) ))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] < 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((x[i] - xnew[numpoints - 1])/(y[i] - ynew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-				
-				//upper left
-				if(index == -1)
-				{
-					for(i = 0; i < num; ++i)
-					{
-						if(used[i] == 0) //only loop through unused points
-						{
-							if(Math.abs(y[i] - ynew[numpoints - 1]) < 0.0001 && x[i] - xnew[numpoints - 1] < 0)
-							{
-								minangle = 0;
-								index = i;
-							}
-							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && (int)(minangle*100.0) == (int)(Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1])*100.0))  ) )
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								curdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-								if(curdist < prevdist)
-								{
-									prevdist = curdist;
-									index = i;
-								}
-							}
-							else if(y[i] - ynew[numpoints - 1] >= 0 && x[i] - xnew[numpoints - 1] < 0 && minangle > Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/Math.abs(x[i] - xnew[numpoints - 1]) )))
-							{
-								//look in clockwise direction from 6 o' clock
-								minangle = Math.abs(Math.atan((y[i] - ynew[numpoints - 1])/(x[i] - xnew[numpoints - 1]) ));
-								index = i;
-								prevdist = Math.sqrt( Math.pow((x[i] - xnew[numpoints - 1]),2) + Math.pow((y[i] - ynew[numpoints - 1]),2) );
-							}
-						}
-					}
-				}
-			
-			}
-		}
-		//System.out.println(" Done sorting points");
-		
-		for(i = 0; i < numpoints; ++i)
-		{
-			System.out.println("i: " + i + " x: " + xnew[i] + " y: " + ynew[i]);
-		}
-		return(new Object[]{numpoints, xnew, ynew});
 	}
 	
 	public static void main(String[] args){ 
@@ -2014,22 +959,22 @@ public class PCALDrawDB {
 		
 		
 		//draw U strips
-		/*
 		
+		/*
 		DetectorShape2D shape = new DetectorShape2D();
 	 	DetectorShapeView2D Umap= new DetectorShapeView2D("PCAL U");
-	 	for(int sector = 0; sector < 6; sector++)
+	 	for(int sector = 0; sector < 1; sector++)
     	{
-	 		for(int uPaddle = 0; uPaddle < 68; uPaddle++)
+	 		for(int vPaddle = 0; vPaddle < 68; vPaddle++)
 	 		{
-	            shape = pcaltest.getStripShape(sector, "u", uPaddle);
+	            shape = pcaltest.getStripShape(sector, "v", vPaddle);
 	            for(int i = 0; i < shape.getShapePath().size(); ++i)
         		{
 	            	
-	            	if(uPaddle == 0)System.out.println(shape.getShapePath().point(i).x());
-	            	if(uPaddle == 0)System.out.println(xPoint[sector][0][uPaddle][i]);
+	            	if(vPaddle == 0)System.out.println(shape.getShapePath().point(i).x());
+	            	if(vPaddle == 0)System.out.println(xPoint[sector][1][vPaddle][i]);
 	            	
-        			if(uPaddle == 0)System.out.println(shape.getShapePath().point(i).y());
+        			if(vPaddle == 0)System.out.println(shape.getShapePath().point(i).y());
 	            	
 	            	x = shape.getShapePath().point(i).x();// * 1000.0;
 	            	y = shape.getShapePath().point(i).y();// * 1000.0;
@@ -2068,67 +1013,82 @@ public class PCALDrawDB {
 		/*
 	    DetectorShape2D shape = new DetectorShape2D();
 	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL UW");
-	 	for(int sector = 0; sector < 6; sector++)
+	 	for(int sector = 0; sector < 1; sector++)
     	{
     	for(int uPaddle = 0; uPaddle < 68; uPaddle++)
     	{
-    		//for(int vPaddle = 0; vPaddle < 62; vPaddle++)
-            //{
-	            for(int wPaddle = 0; wPaddle < 62; wPaddle++)
-	            {
-	            	if(pcaltest.isValidOverlap(sector, "u", uPaddle, "w", wPaddle))
+    		for(int vPaddle = 0; vPaddle < 62; vPaddle++)
+            {
+	            //for(int wPaddle = 0; wPaddle < 62; wPaddle++)
+	            //{
+	            	if(pcaltest.isValidOverlap(sector, "u", uPaddle, "v", vPaddle))
 	            	{
-	            		shape = pcaltest.getOverlapShape(sector, "u", uPaddle, "w", wPaddle);
+	            		
+	            		System.out.println("u: " + uPaddle + " v: " + vPaddle);
+	            		shape = pcaltest.getOverlapShape(sector, "u", uPaddle, "v", vPaddle);
 	            		for(int i = 0; i < shape.getShapePath().size(); ++i)
         				{
 	        				x = shape.getShapePath().point(i).x();// * 1000.0;
 			            	y = shape.getShapePath().point(i).y();// * 1000.0;
-			            	if(sector == 0){ x += 302.0; y += 0.0;}
-			            	if(sector == 1){ x += 141.0; y += 259.0;}
-			            	if(sector == 2){ x += -141.0; y += 259.0;}
-			            	if(sector == 3){ x += -302.0; y += 0.0;}
-			            	if(sector == 4){ x += -141.0; y += -259.0;}
-			            	if(sector == 5){ x += 141.0; y += -259.0;}
-			            	x *= 1000.0;
-			            	y *= 1000.0;
+			            	
+			            	//if(sector == 0){ x += 302.0; y += 0.0;}
+			            	//if(sector == 1){ x += 140.0; y += 260.0;}
+			            	//if(sector == 2){ x += -140.0; y += 260.0;}
+			            	//if(sector == 3){ x += -302.0; y += 0.0;}
+			            	//if(sector == 4){ x += -140.0; y += -260.0;}
+			            	//if(sector == 5){ x += 140.0; y += -260.0;}
+			            	//x *= 1000.0;
+			            	//y *= 1000.0;
+			            	
         					shape.getShapePath().point(i).set(x, y, 0.0);
-        					if(i == 0 && uPaddle == 67 && wPaddle == 30)System.out.println(shape.getShapePath().point(i).x());
+        					//if(i == 0 && vPaddle == 67 && wPaddle == 30)System.out.println(shape.getShapePath().point(i).x());
         				}
 	            		UWmap.addShape(shape);
-	            	}
+	            	//}
 	            }
-           // }
+            }
 
     	}
     	}
 	    view.addDetectorLayer(UWmap);
 	    */
-	    
-	    
-    	
+		
 		
 		
 		//Draw pixels
 		
 		DetectorShape2D shape = new DetectorShape2D();
-    	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL UW");
-    	 	for(int sector = 1; sector < 2; sector++)
+    	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL Pixel");
+    	 	for(int sector = 0; sector < 1; sector++)
 	    	{
-	    	for(int uPaddle = 0; uPaddle < 1; uPaddle++)
+	    	for(int uPaddle = 0; uPaddle < 68; uPaddle++)
 	    	{
-	    		for(int vPaddle = 59; vPaddle < 62; vPaddle++)
+	    		for(int vPaddle = 0; vPaddle < 62; vPaddle++)
 	            {
-		            for(int wPaddle = 59; wPaddle < 62; wPaddle++)
+		            for(int wPaddle = 0; wPaddle < 62; wPaddle++)
 		            {
+		            	//System.out.println("u: " + uPaddle + " v: " + vPaddle + " w: " + wPaddle);
 		            	if(pcaltest.isValidPixel(sector, uPaddle, vPaddle, wPaddle))
 		            	{
-		            		shape = pcaltest.getPixelShape(sector, uPaddle, vPaddle, wPaddle);
+		            		//System.out.println("u: " + uPaddle + " v: " + vPaddle + " w: " + wPaddle);
+		            	shape = pcaltest.getPixelShape(sector, uPaddle, vPaddle, wPaddle);
+		            	//if(shape != null)
+		            	//{
 		            		for(int i = 0; i < shape.getShapePath().size(); ++i)
 	        				{
-	        					shape.getShapePath().point(i).set(shape.getShapePath().point(i).x() * 1000.0, shape.getShapePath().point(i).y() * 1000.0, 0.0);
+		            			x = shape.getShapePath().point(i).x();
+				            	y = shape.getShapePath().point(i).y();
+		            			if(sector == 0){ x +=  302.0; y +=    0.0;}
+				            	if(sector == 1){ x +=  140.0; y +=  265.0;}
+				            	if(sector == 2){ x += -140.0; y +=  265.0;}
+				            	if(sector == 3){ x += -302.0; y +=    0.0;}
+				            	if(sector == 4){ x += -140.0; y += -265.0;}
+				            	if(sector == 5){ x +=  140.0; y += -265.0;}
+	        					shape.getShapePath().point(i).set(x * 1000.0, y * 1000.0, 0.0);
 	        				}
 		            		UWmap.addShape(shape);
 		            	}
+		            	//}
 		            }
 	            }
 
