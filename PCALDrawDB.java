@@ -29,8 +29,10 @@ import org.root.pad.EmbeddedCanvas;
 
 public class PCALDrawDB {
 	
+	private double length;
+	private double angle;
 	private double anglewidth;
-
+	private double slightshift;
 	
 	private double[] xrotation = new double [6];
 	private double[] yrotation = new double [6];
@@ -40,6 +42,10 @@ public class PCALDrawDB {
 
 	public PCALDrawDB() {
 		initVert();
+		length = 4.5;
+		angle = 62.8941;
+		anglewidth = length/Math.sin(Math.toRadians(angle));
+		slightshift = length/Math.tan(Math.toRadians(angle));
 	}
 	
 	

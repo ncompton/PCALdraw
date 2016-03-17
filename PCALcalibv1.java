@@ -66,7 +66,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
     //public String laba[] = {"monitor/pcal/adc","monitor/ecinner/adc","monitor/ecouter/adc"}; 
 	//public String labt[] = {"monitor/pcal/tdc","monitor/ecinner/tdc","monitor/ecouter/tdc"};
     
-	PCALDraw pcal = new PCALDraw();
+	PCALDrawDB pcal = new PCALDrawDB();
     DetectorShapeTabView  view   = new DetectorShapeTabView();
     public CanvasViewPanel        canvasView;
 	public EmbeddedCanvas         canvas,canvas1;
@@ -79,7 +79,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
     int numsectors = 1;
     int numpaddles = 68 * 10000 + 62 * 100 + 62;
     
-    private String inputFileName = "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-3M-s2.evio";
+    private String inputFileName = "/home/ncompton/Work/workspace/Calibration/data/fc-muon-3M-s2.evio";
     //sector2_000251_mode7.evio.0
     //fc-muon-500k-s2-noatt.evio 
     //fc-muon-3M-s2.evio  "sector 2"
@@ -178,7 +178,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
         		for(int wpaddle = 0; wpaddle < 62; wpaddle++){
         			if(pcal.isValidPixel(sector, upaddle, vpaddle, wpaddle))
         			{
-        				DetectorShape2D shape = pcal.getPixelShape(sector, upaddle, vpaddle, wpaddle);
+        				DetectorShape2D shape = pcal.getPixelShape(CurrentSector, upaddle, vpaddle, wpaddle);
         				for(int i = 0; i < shape.getShapePath().size(); ++i)
         				{
         					shape.getShapePath().point(i).set(shape.getShapePath().point(i).x() * 1000.0, shape.getShapePath().point(i).y() * 1000.0, 0.0);
@@ -205,19 +205,19 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
     	
     	//draw UW pane
     	DetectorShapeView2D  dv3 = new DetectorShapeView2D("PCAL UW");
-    	dv3 = pcal.drawUW(sector);
+    	dv3 = pcal.drawUW(CurrentSector);
     	this.view.addDetectorLayer(dv3);
     	view.addDetectorListener(this);
     	
     	//draw UV pane
     	DetectorShapeView2D  dv4 = new DetectorShapeView2D("PCAL VU");
-    	dv4 = pcal.drawVU(sector);
+    	dv4 = pcal.drawVU(CurrentSector);
     	this.view.addDetectorLayer(dv4);
     	view.addDetectorListener(this);
     	
     	//draw UW pane
 	    DetectorShapeView2D  dv5 = new DetectorShapeView2D("PCAL WU");
-	    dv5 = pcal.drawWU(sector);
+	    dv5 = pcal.drawWU(CurrentSector);
 	    this.view.addDetectorLayer(dv5);
 	    view.addDetectorListener(this);
 
@@ -225,20 +225,20 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
     	
     	//draw U strips
     	DetectorShapeView2D  dv7 = new DetectorShapeView2D("PCAL U Strips");
-    	dv7 = pcal.drawUStrips(sector);
+    	dv7 = pcal.drawUStrips(CurrentSector);
     	this.view.addDetectorLayer(dv7);
     	view.addDetectorListener(this);
 
     	
     	//draw V strips
     	DetectorShapeView2D  dv8 = new DetectorShapeView2D("PCAL V Strips");
-    	dv8 = pcal.drawVStrips(sector);
+    	dv8 = pcal.drawVStrips(CurrentSector);
     	this.view.addDetectorLayer(dv8);
     	view.addDetectorListener(this);
  
     	//draw W strips
     	DetectorShapeView2D  dv9 = new DetectorShapeView2D("PCAL W Strips");
-    	dv9 = pcal.drawWStrips(sector);
+    	dv9 = pcal.drawWStrips(CurrentSector);
     	this.view.addDetectorLayer(dv9);
     	view.addDetectorListener(this);
     	
@@ -1517,7 +1517,9 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
 						x[counter] = pcal.CalcDistance(stripLetter[il], xTemp[counter], xTempEr[counter])[0];
 						ex[counter] = pcal.CalcDistance(stripLetter[il], xTemp[counter], xTempEr[counter])[1];
 						//centroids[counter] = ProjHadc[crossStrip].getMean();
-						
+						if(stripLetter[il] == 'u' && x[counter] > umaxX[strip]) umaxX[strip] = x[counter] + 5;
+						if(stripLetter[il] == 'v' && x[counter] > vmaxX[strip]) vmaxX[strip] = x[counter] + 5;
+						if(stripLetter[il] == 'w' && x[counter] > wmaxX[strip]) wmaxX[strip] = x[counter] + 5;
 						ey[counter] = 1.0;
 						counter++;
 					}
@@ -1602,7 +1604,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
 				{
 					ijunk = scanner.nextInt();
 					stripnum = scanner.nextInt();
-					//umaxX[stripnum - 1] = scanner.nextDouble();
+					//vmaxX[stripnum - 1] = scanner.nextDouble();
 					genvA[stripnum - 1] = scanner.nextDouble();
 					genvB[stripnum - 1] = scanner.nextDouble();
 					genvC[stripnum - 1] = scanner.nextDouble();
@@ -1615,7 +1617,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
 				{
 					ijunk = scanner.nextInt();
 					stripnum = scanner.nextInt();
-					//umaxX[stripnum - 1] = scanner.nextDouble();
+					//wmaxX[stripnum - 1] = scanner.nextDouble();
 					genwA[stripnum - 1] = scanner.nextDouble();
 					genwB[stripnum - 1] = scanner.nextDouble();
 					genwC[stripnum - 1] = scanner.nextDouble();
@@ -1709,7 +1711,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
 		
     }
 	
-	
+
     public static void main(String[] args){    	
     	//PCALcalib detview = new PCALcalib("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-100k.evio");
     	//PCALcalib detview = new PCALcalib("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-500k.evio");

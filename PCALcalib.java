@@ -91,7 +91,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     int numsectors = 1;
     int numpaddles = 68 * 10000 + 62 * 100 + 62;
     
-    private String inputFileName = "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-3M-s2.evio";
+    private String inputFileName = "/home/ncompton/Work/workspace/Calibration/data/fc-muon-3M-s2.evio";
     //sector2_000251_mode7.evio.0
     //fc-muon-3M-s2.evio  "sector 2"
     //fc-muon-500k.evio "sector 5"
