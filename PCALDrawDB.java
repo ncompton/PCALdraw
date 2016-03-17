@@ -801,26 +801,26 @@ public class PCALDrawDB {
 	            for(ScintillatorPaddle paddle2 : ecLayer.getAllComponents())
 	            {													//0-67
 	            	point1.copy(paddle2.getVolumePoint(0));
-	            	point1.rotateX(xrotation[sector]);
-	            	point1.rotateY(yrotation[sector]);
+	            	//point1.rotateX(xrotation[sector]);
+	            	//point1.rotateY(yrotation[sector]);
 	            	//point1.rotateZ(Math.PI/2.0);
-	            	//if(paddle2.getComponentId() == 61)System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
+	            	if(paddle2.getComponentId() == 61)System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
 	            	//System.out.println("Component ID: " + paddle2.getComponentId());
 	            	xPoint[sector][l][paddle2.getComponentId()][0] = point1.x();
 	            	yPoint[sector][l][paddle2.getComponentId()][0] = point1.y();
 	            	
 	            	point1.copy(paddle2.getVolumePoint(4));
-	            	point1.rotateX(xrotation[sector]);
-	            	point1.rotateY(yrotation[sector]);
+	            	//point1.rotateX(xrotation[sector]);
+	            	//point1.rotateY(yrotation[sector]);
 	            	//point1.rotateZ(Math.PI/2.0);
-	            	//if(paddle2.getComponentId() == 61)System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
+	            	if(paddle2.getComponentId() == 61)System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
 	            	//System.out.println("Component ID: " + paddle2.getComponentId());
 	            	xPoint[sector][l][paddle2.getComponentId()][1] = point1.x();
 	            	yPoint[sector][l][paddle2.getComponentId()][1] = point1.y();
 	            	
 	            	point1.copy(paddle2.getVolumePoint(5));
-	            	point1.rotateX(xrotation[sector]);
-	            	point1.rotateY(yrotation[sector]);
+	            	//point1.rotateX(xrotation[sector]);
+	            	//point1.rotateY(yrotation[sector]);
 	            	//point1.rotateZ(Math.PI/2.0);
 	            	//System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
 	            	//System.out.println("Component ID: " + paddle2.getComponentId());
@@ -828,10 +828,10 @@ public class PCALDrawDB {
 	            	yPoint[sector][l][paddle2.getComponentId()][2] = point1.y();
 	            	
 	            	point1.copy(paddle2.getVolumePoint(1));
-	            	point1.rotateX(xrotation[sector]);
-	            	point1.rotateY(yrotation[sector]);
+	            	//point1.rotateX(xrotation[sector]);
+	            	//point1.rotateY(yrotation[sector]);
 	            	//point1.rotateZ(Math.PI/2.0);
-	            	//System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
+	            	System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
 	            	//System.out.println("Component ID: " + paddle2.getComponentId());
 	            	xPoint[sector][l][paddle2.getComponentId()][3] = point1.x();
 	            	yPoint[sector][l][paddle2.getComponentId()][3] = point1.y();
@@ -966,24 +966,25 @@ public class PCALDrawDB {
 		
 		//draw U strips
 		
-		/*
+		
 		DetectorShape2D shape = new DetectorShape2D();
 	 	DetectorShapeView2D Umap= new DetectorShapeView2D("PCAL U");
-	 	for(int sector = 0; sector < 1; sector++)
+	 	for(int sector = 0; sector < 6; sector++)
     	{
-	 		for(int vPaddle = 0; vPaddle < 68; vPaddle++)
+	 		for(int uPaddle = 0; uPaddle < 68; uPaddle++)
 	 		{
-	            shape = pcaltest.getStripShape(sector, "v", vPaddle);
+	            shape = pcaltest.getStripShape(sector, "u", uPaddle);
 	            for(int i = 0; i < shape.getShapePath().size(); ++i)
         		{
 	            	
-	            	if(vPaddle == 0)System.out.println(shape.getShapePath().point(i).x());
-	            	if(vPaddle == 0)System.out.println(xPoint[sector][1][vPaddle][i]);
+	            	//if(vPaddle == 0)System.out.println(shape.getShapePath().point(i).x());
+	            	//if(vPaddle == 0)System.out.println(xPoint[sector][1][vPaddle][i]);
 	            	
-        			if(vPaddle == 0)System.out.println(shape.getShapePath().point(i).y());
+        			//if(vPaddle == 0)System.out.println(shape.getShapePath().point(i).y());
 	            	
 	            	x = shape.getShapePath().point(i).x();// * 1000.0;
 	            	y = shape.getShapePath().point(i).y();// * 1000.0;
+	            	/*
 	            	if(sector == 0){ x += 302.0; y += 0.0;}
 	            	if(sector == 1){ x += 141.0; y += 259.0;}
 	            	if(sector == 2){ x += -141.0; y += 259.0;}
@@ -992,6 +993,7 @@ public class PCALDrawDB {
 	            	if(sector == 5){ x += 141.0; y += -259.0;}
 	            	x *= 1000.0;
 	            	y *= 1000.0;
+	            	*/
         			shape.getShapePath().point(i).set(x, y, 0.0);
         			//if(i == 0 && uPaddle == 67)System.out.println(shape.getShapePath().point(i).x());
         			
@@ -1002,7 +1004,7 @@ public class PCALDrawDB {
 	 		}
     	}
 	    view.addDetectorLayer(Umap);
-		*/
+		
 		
 		/*
 		Object[] obj = pcaltest.getOverlapVerticies(2, "u", 67, "w", 42);
@@ -1062,10 +1064,10 @@ public class PCALDrawDB {
 		
 		
 		//Draw pixels
-		
+		/*
 		DetectorShape2D shape = new DetectorShape2D();
     	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL Pixel");
-    	 	for(int sector = 0; sector < 1; sector++)
+    	 	for(int sector = 0; sector < 6; sector++)
 	    	{
 	    	for(int uPaddle = 0; uPaddle < 68; uPaddle++)
 	    	{
@@ -1084,13 +1086,15 @@ public class PCALDrawDB {
 	        				{
 		            			x = shape.getShapePath().point(i).x();
 				            	y = shape.getShapePath().point(i).y();
+				            	
 		            			if(sector == 0){ x +=  302.0; y +=    0.0;}
 				            	if(sector == 1){ x +=  140.0; y +=  265.0;}
 				            	if(sector == 2){ x += -140.0; y +=  265.0;}
 				            	if(sector == 3){ x += -302.0; y +=    0.0;}
 				            	if(sector == 4){ x += -140.0; y += -265.0;}
 				            	if(sector == 5){ x +=  140.0; y += -265.0;}
-	        					shape.getShapePath().point(i).set(x * 1000.0, y * 1000.0, 0.0);
+				            	
+	        					shape.getShapePath().point(i).set(x, y, 0.0);
 	        				}
 		            		UWmap.addShape(shape);
 		            	}
@@ -1101,6 +1105,7 @@ public class PCALDrawDB {
 	    	}
 	    	}
 	    	view.addDetectorLayer(UWmap);
+	    	*/
 	    	
 	       // return UWmap;
 	    	
