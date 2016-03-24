@@ -66,7 +66,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
     //public String laba[] = {"monitor/pcal/adc","monitor/ecinner/adc","monitor/ecouter/adc"}; 
 	//public String labt[] = {"monitor/pcal/tdc","monitor/ecinner/tdc","monitor/ecouter/tdc"};
     
-	PCALDrawDB pcal = new PCALDrawDB();
+	PCALDraw pcal = new PCALDraw();
     DetectorShapeTabView  view   = new DetectorShapeTabView();
     public CanvasViewPanel        canvasView;
 	public EmbeddedCanvas         canvas,canvas1;

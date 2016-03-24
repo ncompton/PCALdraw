@@ -1,5 +1,8 @@
 package org.jlab.calib;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
 import org.jlab.clas.detector.DetectorType;
 import org.jlab.clas12.calib.DetectorShape2D;
 import org.jlab.clas12.calib.DetectorShapeView2D;
@@ -2679,6 +2682,50 @@ public class PCALDraw {
 		x = pcaltest.CalcDistinStrips('u',32)[0];
 		x = pcaltest.CalcDistance('u',x,0)[0];
 		System.out.println("x: " + x);
+		
+		
+		PrintWriter writer = null;
+		try 
+		{
+			writer = new PrintWriter("uvwpix.dat");
+		} 
+		catch (FileNotFoundException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		int num1, num2, num3;
+		
+    	 for(int sector = 0; sector < 1; sector++)
+	    {
+	    	for(int uPaddle = 0; uPaddle < 68; uPaddle++)
+	    	{
+	    		for(int vPaddle = 0; vPaddle < 62; vPaddle++)
+	            {
+		            for(int wPaddle = 0; wPaddle < 62; wPaddle++)
+		            {
+		            	System.out.println("u: " + uPaddle + " v: " + vPaddle + " w: " + wPaddle);
+		            	if(pcaltest.isValidPixel(sector, uPaddle, vPaddle, wPaddle))
+		            	{
+
+		            		
+		            		num1 = uPaddle + 1;
+		            		num2 = vPaddle + 1;
+		            		num3 = wPaddle + 1;
+		            		writer.println(num1  + "   " + num2 + "   " + num3 + "   " 
+									+ pcaltest.getUPixelDistance(uPaddle, vPaddle, wPaddle) + "   " 
+									+ pcaltest.getVPixelDistance(uPaddle, vPaddle, wPaddle) + "   "
+									+ pcaltest.getWPixelDistance(uPaddle, vPaddle, wPaddle));
+		            		
+		            	}
+
+		            }
+	            }
+
+	    	}
+	    }
+	    	
+	    writer.close();
 		
 	
 	}

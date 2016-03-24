@@ -29,7 +29,7 @@ import org.jlab.geom.detector.ec.ECLayer;
 import org.jlab.geom.prim.Point3D;
 import org.root.pad.EmbeddedCanvas;
 
-public class PCALDrawDB {
+public class ECDrawDB {
 	
 	private double length;
 	private double angle;
@@ -42,7 +42,7 @@ public class PCALDrawDB {
 	private static double[][][][] xPoint = new double [6][3][68][4];
 	private static double[][][][] yPoint = new double [6][3][68][4];
 
-	public PCALDrawDB() {
+	public ECDrawDB() {
 		initVert();
 		length = 4.5;
 		angle = 62.8941;
@@ -487,6 +487,7 @@ public class PCALDrawDB {
 		
         double[] xyz1 = new double[3];
         double[] xyz2 = new double[3];
+        double[] xyz3 = new double[3];
         Point3D dist = new Point3D();
 		
 		
@@ -506,8 +507,22 @@ public class PCALDrawDB {
 		//case 1: U strip
 		if(uPaddle != -1)
 		{ 
-			xyz1 = getShapeCenter(getOverlapShape(0, "u", paddle1, "w", 61)); //last strip
-			xyz2 = getShapeCenter(getOverlapShape(0, "u", paddle1, "w", 60)); //second to last
+			if(paddle1 != 0)
+			{
+				xyz1 = getShapeCenter(getOverlapShape(0, "u", paddle1, "w", 35)); //last strip
+				xyz2 = getShapeCenter(getOverlapShape(0, "u", paddle1, "w", 34)); //second to last
+			}
+			else
+			{
+				xyz1 = getShapeCenter(getOverlapShape(0, "u", paddle1, "w", 35)); //last strip
+				
+				xyz2 = getShapeCenter(getOverlapShape(0, "u", 1, "w", 34)); //second to last
+				xyz3 = getShapeCenter(getOverlapShape(0, "u", 1, "w", 35)); //second to last
+				
+				xyz2[0] = xyz1[0] + xyz2[0]-xyz3[0];
+				xyz2[1] = xyz1[1] + xyz2[1]-xyz3[1];
+				xyz2[2] = xyz1[2] + xyz2[2]-xyz3[2];
+			}
 			for(int i = 0; i < 3; ++i)
 			{
 				xyz1[i] = xyz1[i] + (xyz1[i] - xyz2[i])/2.0;
@@ -517,8 +532,22 @@ public class PCALDrawDB {
 		//case 2: V strip
 		else if(vPaddle != -1)
 		{ 
-			xyz1 = getShapeCenter(getOverlapShape(0, "v", paddle1, "u", 67)); //last strip
-			xyz2 = getShapeCenter(getOverlapShape(0, "v", paddle1, "u", 66)); //second to last
+			if(paddle1 != 0)
+			{
+				xyz1 = getShapeCenter(getOverlapShape(0, "v", paddle1, "u", 35)); //last strip
+				xyz2 = getShapeCenter(getOverlapShape(0, "v", paddle1, "u", 34)); //second to last
+			}
+			else
+			{
+				xyz1 = getShapeCenter(getOverlapShape(0, "v", paddle1, "u", 35)); //last strip
+				
+				xyz2 = getShapeCenter(getOverlapShape(0, "v", 1, "u", 34)); //second to last
+				xyz3 = getShapeCenter(getOverlapShape(0, "v", 1, "u", 35)); //second to last
+				
+				xyz2[0] = xyz1[0] + xyz2[0]-xyz3[0];
+				xyz2[1] = xyz1[1] + xyz2[1]-xyz3[1];
+				xyz2[2] = xyz1[2] + xyz2[2]-xyz3[2];
+			}
 			for(int i = 0; i < 3; ++i)
 			{
 				xyz1[i] = xyz1[i] + (xyz1[i] - xyz2[i])/2.0;
@@ -529,8 +558,22 @@ public class PCALDrawDB {
 		//case 3: W strip
 		else if(wPaddle != -1)
 		{ 
-			xyz1 = getShapeCenter(getOverlapShape(0, "w", paddle1, "u", 67)); //last strip
-			xyz2 = getShapeCenter(getOverlapShape(0, "w", paddle1, "u", 66)); //second to last
+			if(paddle1 != 0)
+			{
+				xyz1 = getShapeCenter(getOverlapShape(0, "w", paddle1, "v", 35)); //last strip
+				xyz2 = getShapeCenter(getOverlapShape(0, "w", paddle1, "v", 34)); //second to last
+			}
+			else
+			{
+				xyz1 = getShapeCenter(getOverlapShape(0, "w", paddle1, "v", 35)); //last strip
+				
+				xyz2 = getShapeCenter(getOverlapShape(0, "w", 1, "v", 34)); //second to last
+				xyz3 = getShapeCenter(getOverlapShape(0, "w", 1, "v", 35)); //second to last
+				
+				xyz2[0] = xyz1[0] + xyz2[0]-xyz3[0];
+				xyz2[1] = xyz1[1] + xyz2[1]-xyz3[1];
+				xyz2[2] = xyz1[2] + xyz2[2]-xyz3[2];
+			}
 			for(int i = 0; i < 3; ++i)
 			{
 				xyz1[i] = xyz1[i] + (xyz1[i] - xyz2[i])/2.0;
@@ -572,7 +615,8 @@ public class PCALDrawDB {
 		shapecenter = getShapeCenter(getPixelShape(0,uPaddle,vPaddle,wPaddle));
 		PMTloc = getPMTLocation("v", vPaddle);
 		
-		distance = Math.sqrt(Math.pow(shapecenter[0] - PMTloc[0],2) + Math.pow(shapecenter[1] - PMTloc[1],2) + Math.pow(shapecenter[2] - PMTloc[2],2));
+		distance = Math.sqrt(Math.pow(shapecenter[0] - PMTloc[0],2) + Math.pow(shapecenter[1] - PMTloc[1],2));
+		//distance = Math.sqrt(Math.pow(shapecenter[0] - PMTloc[0],2) + Math.pow(shapecenter[1] - PMTloc[1],2) + Math.pow(shapecenter[2] - PMTloc[2],2));
 		
 		return distance;
 	}
@@ -587,7 +631,8 @@ public class PCALDrawDB {
 		shapecenter = getShapeCenter(getPixelShape(0,uPaddle,vPaddle,wPaddle));
 		PMTloc = getPMTLocation("w", wPaddle);
 		
-		distance = Math.sqrt(Math.pow(shapecenter[0] - PMTloc[0],2) + Math.pow(shapecenter[1] - PMTloc[1],2) + Math.pow(shapecenter[2] - PMTloc[2],2));
+		distance = Math.sqrt(Math.pow(shapecenter[0] - PMTloc[0],2) + Math.pow(shapecenter[1] - PMTloc[1],2));
+		//distance = Math.sqrt(Math.pow(shapecenter[0] - PMTloc[0],2) + Math.pow(shapecenter[1] - PMTloc[1],2) + Math.pow(shapecenter[2] - PMTloc[2],2));
 		
 		return distance;
 	}
@@ -710,8 +755,8 @@ public class PCALDrawDB {
 		ScintillatorPaddle paddle;
 		ECLayer  ecLayer;
 		int sector = 0;
-		int suplay = 0; //PCAL ==0  
-		int lastcomponent = 67;
+		int suplay = 2; //PCAL ==0  
+		int lastcomponent = 35;
 		Point3D tranpoint = new Point3D();
 		Point3D tranpointA = new Point3D();
 		Point3D tranpointB = new Point3D();
@@ -734,8 +779,10 @@ public class PCALDrawDB {
 		        //get point 2
 		        paddle = ecLayer.getComponent(lastcomponent);
 		        point2.copy(paddle.getVolumePoint(0));
-		        //System.out.println("x: " + point2.x() + " y: " + point2.y() + " z: " + point2.z());
-			
+		        if(sector == 0) System.out.println("x: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(0).getComponent(0).getVolumePoint(0).x() + " y: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(0).getComponent(0).getVolumePoint(0).y() + " z: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(0).getComponent(0).getVolumePoint(0).z());
+		        if(sector == 0) System.out.println("x: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(1).getComponent(0).getVolumePoint(0).x() + " y: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(1).getComponent(0).getVolumePoint(0).y() + " z: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(1).getComponent(0).getVolumePoint(0).z());
+		        if(sector == 0) System.out.println("x: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(2).getComponent(0).getVolumePoint(0).x() + " y: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(2).getComponent(0).getVolumePoint(0).y() + " z: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(2).getComponent(0).getVolumePoint(0).z());
+		        
 		        //get point 3
 		        paddle = ecLayer.getComponent((lastcomponent - 1)/2);
 		        point3.copy(paddle.getVolumePoint(4));
@@ -806,10 +853,6 @@ public class PCALDrawDB {
             	else if(Math.abs(yrotation[sector]) > Math.PI && yrotation[sector] > 0.0) yrotation[sector] -= Math.PI;
 		        //System.out.println("y rot: " + yrotation[sector]);
 		        
-		        //use plane and slopes to find rotation quantities of PCAL unit
-		        // constant z term
-		        //xrotation[sector] = Math.atan(b/c); //slope for z of y
-		        //yrotation[sector] = Math.atan(-a/c);
 		       
 			     //find translation coordinates
 			     tranpointA.copy(detector.getSector(sector).getSuperlayer(suplay).getLayer(0).getComponent(0).getVolumePoint(0));
@@ -822,7 +865,7 @@ public class PCALDrawDB {
 	             point1.rotateY(yrotation[sector]);
 	             
 			     //tranpoint.set(detector.getSector(sector).getSuperlayer(0).getLayer(0).getComponent(0).getVolumePoint(0).x(),detector.getSector(sector).getSuperlayer(0).getLayer(0).getComponent(0).getVolumePoint(0).y(), 0.0);
-			     tranpoint.set(tranpoint.x() - point1.x(), tranpoint.y() - point1.y(), 0.0);
+			     tranpoint.set(tranpoint.x() - point1.x(), tranpoint.y() - point1.y(), tranpoint.z() - point1.z());
 			     
 			     //System.out.println("x: " + tranpointA.x() + " y: " + tranpointA.y() + " z: " + tranpointA.z());
 			     //System.out.println("x: " + tranpointB.x() + " y: " + tranpointB.y() + " z: " + tranpointB.z());
@@ -841,7 +884,7 @@ public class PCALDrawDB {
 	            	point1.rotateY(yrotation[sector]);
 	            	point1.translateXYZ(tranpoint.x(), tranpoint.y(),0.0);
 	            	//point1.rotateZ(Math.PI/2.0);
-	            	//if(paddle2.getComponentId() == 61)System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
+	            	//if(paddle2.getComponentId() == 35 && l == 0)System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
 	            	//System.out.println("Component ID: " + paddle2.getComponentId());
 	            	xPoint[sector][l][paddle2.getComponentId()][0] = point1.x();
 	            	yPoint[sector][l][paddle2.getComponentId()][0] = point1.y();
@@ -851,7 +894,7 @@ public class PCALDrawDB {
 	            	point1.rotateY(yrotation[sector]);
 	            	point1.translateXYZ(tranpoint.x(), tranpoint.y(),0.0);
 	            	//point1.rotateZ(Math.PI/2.0);
-	            	//if(paddle2.getComponentId() == 61)System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
+	            	//if(paddle2.getComponentId() == 35 && l == 0)System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
 	            	//System.out.println("Component ID: " + paddle2.getComponentId());
 	            	xPoint[sector][l][paddle2.getComponentId()][1] = point1.x();
 	            	yPoint[sector][l][paddle2.getComponentId()][1] = point1.y();
@@ -861,7 +904,7 @@ public class PCALDrawDB {
 	            	point1.rotateY(yrotation[sector]);
 	            	point1.translateXYZ(tranpoint.x(), tranpoint.y(),0.0);
 	            	//point1.rotateZ(Math.PI/2.0);
-	            	//System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
+	            	//if(paddle2.getComponentId() == 35 && l == 0) System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
 	            	//System.out.println("Component ID: " + paddle2.getComponentId());
 	            	xPoint[sector][l][paddle2.getComponentId()][2] = point1.x();
 	            	yPoint[sector][l][paddle2.getComponentId()][2] = point1.y();
@@ -871,11 +914,14 @@ public class PCALDrawDB {
 	            	point1.rotateY(yrotation[sector]);
 	            	point1.translateXYZ(tranpoint.x(), tranpoint.y(),0.0);
 	            	//point1.rotateZ(Math.PI/2.0);
-	            	//System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
+	            	//if(paddle2.getComponentId() == 35 && l == 0) System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
 	            	//System.out.println("Component ID: " + paddle2.getComponentId());
 	            	xPoint[sector][l][paddle2.getComponentId()][3] = point1.x();
 	            	yPoint[sector][l][paddle2.getComponentId()][3] = point1.y();
+	            	
+	            	
 	            }
+	            System.out.println("     ");
 	        }
         }
 	}
@@ -974,12 +1020,30 @@ public class PCALDrawDB {
 		
 		*/
 		/////////////////////////////////////////////////////////////////
-		return(new Object[]{nPoints, x, y});
+		int nPoints2 = 0;
+		double[] x2 = new double[nPoints];
+		double[] y2 = new double[nPoints];
+		
+		for(int i = 0; i < nPoints; ++i)
+		{
+			x2[nPoints2] = x[i];
+			y2[nPoints2] = y[i];
+			
+			while(i != nPoints && Math.abs(x2[nPoints2] - x[i+1]) < 0.0001 && Math.abs(y2[nPoints2] - y[i+1])< 0.0001)
+			{
+				++i;
+			}
+			++nPoints2;
+
+		}
+		
+		
+		return(new Object[]{nPoints2, x2, y2});
 	}
 	
 	public static void main(String[] args){ 
 		
-		PCALDrawDB pcaltest = new PCALDrawDB();
+		ECDrawDB pcaltest = new ECDrawDB();
 		
 		
 		char stripLetter[] = {'u','v','w'};
@@ -989,6 +1053,16 @@ public class PCALDrawDB {
 		int strip = 38;
 		int crossStrip = 31;
 		double x,y;
+		
+		//x: 360.9626941103118 y: 240.25231320773017 z: 625.7122498447577
+		//x rot: 0.3838074126117121
+		//y rot: -0.21291414121808772
+		//Point3D testp = new Point3D(388.5459536110259, -192.47670631413644, 625.7122498447577);
+		//testp.rotateX(0.3838074126117121);
+		//testp.rotateY(-0.43633231299858166);
+		//System.out.println("x: " + testp.x() + " y: " + testp.y() + " z: " + testp.z());
+		
+		
 		//System.out.println("pad1: " + strip + " pad2: " + crossStrip);
 		//double x = pcaltest.getOverlapDistance(cstring1,strip,cstring2,crossStrip);
 		//System.out.println("x: " + x);
@@ -1105,16 +1179,17 @@ public class PCALDrawDB {
 			e.printStackTrace();
 		}
 		int num1, num2, num3;
+		//double total;
 		
 		DetectorShape2D shape = new DetectorShape2D();
     	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL Pixel");
-    	 	for(int sector = 0; sector < 1; sector++)
+    	 	for(int sector = 0; sector < 6; sector++)
 	    	{
-	    	for(int uPaddle = 0; uPaddle < 68; uPaddle++)
+	    	for(int uPaddle = 0; uPaddle < 36; uPaddle++)
 	    	{
-	    		for(int vPaddle = 0; vPaddle < 62; vPaddle++)
+	    		for(int vPaddle = 0; vPaddle < 36; vPaddle++)
 	            {
-		            for(int wPaddle = 0; wPaddle < 62; wPaddle++)
+		            for(int wPaddle = 0; wPaddle < 36; wPaddle++)
 		            {
 		            	//System.out.println("u: " + uPaddle + " v: " + vPaddle + " w: " + wPaddle);
 		            	if(pcaltest.isValidPixel(sector, uPaddle, vPaddle, wPaddle))
@@ -1127,11 +1202,13 @@ public class PCALDrawDB {
 		            		num1 = uPaddle + 1;
 		            		num2 = vPaddle + 1;
 		            		num3 = wPaddle + 1;
+		            		//total = pcaltest.getUPixelDistance(uPaddle, vPaddle, wPaddle) + pcaltest.getVPixelDistance(uPaddle, vPaddle, wPaddle) + pcaltest.getWPixelDistance(uPaddle, vPaddle, wPaddle);
 		            		
 		            		writer.println(num1  + "   " + num2 + "   " + num3 + "   " 
 									+ pcaltest.getUPixelDistance(uPaddle, vPaddle, wPaddle) + "   " 
 									+ pcaltest.getVPixelDistance(uPaddle, vPaddle, wPaddle) + "   "
-									+ pcaltest.getWPixelDistance(uPaddle, vPaddle, wPaddle));
+									+ pcaltest.getWPixelDistance(uPaddle, vPaddle, wPaddle)); 
+		            				//+ "   "	+ total);
 		            		
 		            		for(int i = 0; i < shape.getShapePath().size(); ++i)
 	        				{
