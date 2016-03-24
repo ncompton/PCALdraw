@@ -922,7 +922,17 @@ public class PCALDrawDB {
 			
 			//System.out.println("x: " + pol3.vertex(i).getX() + " y: " + pol3.vertex(i).getY());
 		}
-		
+		/*
+		if(nPoints > 2 && Math.abs(Polygons2D.computeArea(pol3)) < 1.0)
+		{
+			nPoints = 0;
+			System.out.println("area: " + Polygons2D.computeArea(pol3));
+		}
+		else if(nPoints > 2 && Math.abs(Polygons2D.computeArea(pol3)) < 2.0)
+		{
+			//System.out.println("area: " + Polygons2D.computeArea(pol3));
+		}
+		*/
 		/////////////////////////////////////////////////////////////////
 		
 		/////////////////////////////////////////////////////////////

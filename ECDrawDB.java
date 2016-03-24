@@ -369,7 +369,7 @@ public class ECDrawDB {
 	//                                     0-5         0-67         0-61          0-61
 	public Object[] getPixelVerticies(int sector, int uPaddle, int vPaddle, int wPaddle){
 		
-		if(isValidOverlap(sector, "u", uPaddle,"w",wPaddle) && isValidOverlap(sector, "u", uPaddle,"v",wPaddle) && isValidOverlap(sector, "v", vPaddle,"w",wPaddle))
+		if(isValidOverlap(sector, "u", uPaddle,"w",wPaddle) && isValidOverlap(sector, "u", uPaddle,"v",vPaddle) && isValidOverlap(sector, "v", vPaddle,"w",wPaddle))
 		{
 		//DetectorShape2D shape1 = getOverlapShape(sector, "u", uPaddle,"w",wPaddle);
 		//DetectorShape2D shape2 = getOverlapShape(sector, "v", vPaddle,"w",wPaddle);
@@ -947,6 +947,7 @@ public class ECDrawDB {
 			ytemp1[i] = shape1.getShapePath().point(i).y();
 		}
 		
+		
 		for(int i = 0; i < vert2size; ++i)
 		{
 			xtemp2[i] = shape2.getShapePath().point(i).x();
@@ -958,7 +959,10 @@ public class ECDrawDB {
 		
 		SimplePolygon2D pol1 = new SimplePolygon2D(xtemp1,ytemp1);
 		SimplePolygon2D pol2 = new SimplePolygon2D(xtemp2,ytemp2);
+		//System.out.println("area: " + Polygons2D.computeArea(pol1));
+
 		Polygon2D pol3 = Polygons2D.intersection(pol1,pol2);
+		
 		
 		nPoints = pol3.vertexNumber();
 		for(int i = 0; i < pol3.vertexNumber(); ++i)
@@ -968,6 +972,14 @@ public class ECDrawDB {
 			
 			//System.out.println("x: " + pol3.vertex(i).getX() + " y: " + pol3.vertex(i).getY());
 		}
+		
+		//if(nPoints > 2 && Polygons2D.computeArea(pol3) < 100.0)System.out.println("area: " + Polygons2D.computeArea(pol3));
+		if(nPoints > 2 && Math.abs(Polygons2D.computeArea(pol3)) < 2.0)
+		{
+			nPoints = 0;
+			//System.out.println("area: " + Polygons2D.computeArea(pol3));
+		}
+		//if(!pol3.contains(pol3.centroid())) nPoints = 0;
 		
 		/////////////////////////////////////////////////////////////////
 		
@@ -1020,6 +1032,7 @@ public class ECDrawDB {
 		
 		*/
 		/////////////////////////////////////////////////////////////////
+		/*
 		int nPoints2 = 0;
 		double[] x2 = new double[nPoints];
 		double[] y2 = new double[nPoints];
@@ -1029,16 +1042,18 @@ public class ECDrawDB {
 			x2[nPoints2] = x[i];
 			y2[nPoints2] = y[i];
 			
-			while(i != nPoints && Math.abs(x2[nPoints2] - x[i+1]) < 0.0001 && Math.abs(y2[nPoints2] - y[i+1])< 0.0001)
+			while(i != nPoints - 1 && Math.abs(x2[nPoints2] - x[i+1]) < 2.0 && Math.abs(y2[nPoints2] - y[i+1])< 2.0 && Math.sqrt(Math.pow(x2[nPoints2] - x[i+1],2) + Math.pow(y2[nPoints2] - y[i+1],2))< 2.0)
 			{
 				++i;
 			}
 			++nPoints2;
 
 		}
+		*/
 		
 		
-		return(new Object[]{nPoints2, x2, y2});
+		
+		return(new Object[]{nPoints, x, y});
 	}
 	
 	public static void main(String[] args){ 
@@ -1183,7 +1198,7 @@ public class ECDrawDB {
 		
 		DetectorShape2D shape = new DetectorShape2D();
     	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL Pixel");
-    	 	for(int sector = 0; sector < 6; sector++)
+    	 	for(int sector = 0; sector < 1; sector++)
 	    	{
 	    	for(int uPaddle = 0; uPaddle < 36; uPaddle++)
 	    	{
@@ -1214,7 +1229,7 @@ public class ECDrawDB {
 	        				{
 		            			x = shape.getShapePath().point(i).x();
 				            	y = shape.getShapePath().point(i).y();
-
+				            	if(uPaddle == 3 && vPaddle == 35 && wPaddle == 31) System.out.println("x: " + x + " y: " + y);
 	        					shape.getShapePath().point(i).set(x, y, 0.0);
 	        				}
 		            		UWmap.addShape(shape);
