@@ -660,6 +660,40 @@ public class MyH3D implements EvioWritableTree,IDataSet {
 
 		return projY;
 	}
+	
+	/**
+	 * Creates a projection of the 3D histogram onto the Z Axis, adding up all
+	 * the x and y bins (in a range, inclusive) for each x bin
+	 * 
+	 * @return a H1D object that is a projection of the Histogram3D
+	 *         object onto the y-axis
+	 */
+	public MyH1D projectionZ(String name, int bxmin, int bxmax, int bymin, int bymax) {
+		//String name = "X Projection";
+		double zMin = zAxis.min();
+		double zMax = zAxis.max();
+		int zNum = zAxis.getNBins();
+		
+		if(bxmin < 0) bxmin = 0;
+		if(bxmax >= xAxis.getNBins()) bxmax = xAxis.getNBins() - 1;
+		if(bymin < 0) bymin = 0;
+		if(bymax >= yAxis.getNBins()) bymax = yAxis.getNBins() - 1;
+		
+		MyH1D projZ = new MyH1D(name, zNum, zMin, zMax);
+
+		double height = 0.0;
+		for (int z = 0; z < zAxis.getNBins(); z++) {
+			height = 0.0;
+			for (int x = bxmin; x <= bxmax; x++) {
+				for (int y = bymin; y <= bymax; y++) {
+					height += this.getBinContent(x, y, z);
+				}
+			}
+			projZ.setBinContent(z, height);
+		}
+
+		return projZ;
+	}
 
 	/**
 	 * Creates a 1-D Histogram slice of the specified y Bin

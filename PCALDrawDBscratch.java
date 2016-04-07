@@ -25,7 +25,7 @@ import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.geom.detector.ec.ECDetector;
 import org.jlab.geom.detector.ec.ECLayer;
 import org.jlab.geom.prim.Point3D;
-import org.root.pad.EmbeddedCanvas;
+import org.root.pad.TEmbeddedCanvas;
 import org.root.pad.TGCanvas;
 
 public class PCALDrawDBscratch {
@@ -2198,7 +2198,7 @@ public class PCALDrawDBscratch {
 		//System.out.println("x: " + x);
 		
 		
-		EmbeddedCanvas canvas = new EmbeddedCanvas();
+		TEmbeddedCanvas canvas = new TEmbeddedCanvas();
 		
 		DetectorShapeTabView  view   = new DetectorShapeTabView();
 		

@@ -48,7 +48,7 @@ import org.root.group.TDirectory;
 //import org.root.histogram.MyGraphErrors;
 //import org.root.histogram.MyH1D;
 //import org.root.histogram.MyH2D;
-import org.root.pad.EmbeddedCanvas;
+import org.root.pad.TEmbeddedCanvas;
 
 /**
  *
@@ -69,7 +69,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
 	PCALDraw pcal = new PCALDraw();
     DetectorShapeTabView  view   = new DetectorShapeTabView();
     public CanvasViewPanel        canvasView;
-	public EmbeddedCanvas         canvas,canvas1;
+	public TEmbeddedCanvas         canvas,canvas1,canshape;
 	
     
     int nProcessed = 3000000;
@@ -158,11 +158,13 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
     }
     
     private void initCanvases(){
-    	canvas = new EmbeddedCanvas();
-		canvas1 = new EmbeddedCanvas();
+    	canvas = new TEmbeddedCanvas();
+		canvas1 = new TEmbeddedCanvas();
+		canshape = new TEmbeddedCanvas();
 		canvasView = new CanvasViewPanel();
 		canvasView.addCanvasLayer("Attenuation",canvas);
 		canvasView.addCanvasLayer("Average Energy",canvas1);
+		canvasView.addCanvasLayer("Shape Information",canshape);
     }
     
     /**
@@ -263,6 +265,14 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
         F1D genexp1 = null;
         F1D genexp2 = null;
         MyGraphErrors g1;
+        
+        Object[] obj = new Object[3];
+        double[] xvert = new double[20];
+        double[] xverte = new double[20];
+        double[] yvert = new double[20];
+        double[] yverte = new double[20];
+        int size;
+        MyGraphErrors gshape;
         
         TStyle.setStatBoxFont("Helvetica", 12);
             
@@ -383,6 +393,41 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
 	        hsum3  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
 	        hsum3.setLineColor(4);
 	        canvas1.draw(hsum3,"same");
+	        
+	        
+	       //////////// Shape Information //////////////////////////
+	        obj = pcal.getPixelVerticies(desc.getSector(), u, v, w);
+			size = (int)obj[0];
+			System.arraycopy( (double[])obj[1], 0, xvert, 0, size);
+			System.arraycopy( (double[])obj[2], 0, yvert, 0, size);
+	        
+	        canshape.divide(2,2);
+	        canshape.cd(0);
+	        gshape = graphn("shapeoutline", size, xvert, yvert, xverte, yverte);
+	        canshape.draw(gshape);
+	        
+	        /*
+	        canshape.cd(1);
+	        namedir = String.format("pixelsignal%02d", iteration-1);
+	        name = String.format("Uen_%02d_%02d_%02d", u + 1, v + 1, w + 1);
+	        hsum1  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+	        hsum1.setLineColor(2);
+	        canshape.draw(hsum1,"same");
+	        
+	        canshape.cd(2);
+	        namedir = String.format("pixelsignal%02d", iteration-1);
+	        name = String.format("Ven_%02d_%02d_%02d", u + 1, v + 1, w + 1);
+	        hsum2  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+	        hsum2.setLineColor(3);
+	        canshape.draw(hsum2,"same");
+	        
+	        canshape.cd(3);
+	        namedir = String.format("pixelsignal%02d", iteration-1);
+	        name = String.format("Wen_%02d_%02d_%02d", u + 1, v + 1, w + 1);
+	        hsum3  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+	        hsum3.setLineColor(4);
+	        canshape.draw(hsum3,"same");
+	        */
 			
         }
         if(desc.getLayer() == 3) //UW

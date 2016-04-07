@@ -5,7 +5,7 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import org.root.pad.EmbeddedCanvas;
+import org.root.pad.TEmbeddedCanvas;
 
 //Routine stolen(directly copied) from L.C. Smith
 //package org.jlab.ecmon.utils
@@ -25,7 +25,7 @@ public class CanvasViewPanel extends JPanel {
         this.add(tabbedPane,BorderLayout.CENTER);
     }
     
-    public void addCanvasLayer(String name, EmbeddedCanvas panel){
+    public void addCanvasLayer(String name, TEmbeddedCanvas panel){
         tabbedPane.addTab(name, panel);
     }
 }

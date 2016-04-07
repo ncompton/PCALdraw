@@ -13,7 +13,7 @@ import org.jlab.geom.prim.Point3D;
 import org.root.func.F1D;
 import org.root.histogram.GraphErrors;
 import org.root.histogram.H1D;
-import org.root.pad.EmbeddedCanvas;
+import org.root.pad.TEmbeddedCanvas;
 import org.root.pad.TCanvas;
 import org.root.pad.TGCanvas;
 
@@ -504,7 +504,7 @@ public int wn_PnPoly( Point3D P, DetectorShape2D shape)
 	public void testcontained()
 	{
     	TGCanvas canvas = new TGCanvas();
-		EmbeddedCanvas canvas1 = new EmbeddedCanvas();
+		TEmbeddedCanvas canvas1 = new TEmbeddedCanvas();
 		
 		DetectorShapeTabView  view   = new DetectorShapeTabView();
 		DetectorShapeView2D dv1 = new DetectorShapeView2D("testiscont");

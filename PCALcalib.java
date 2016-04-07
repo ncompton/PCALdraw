@@ -56,7 +56,7 @@ import org.root.group.TDirectory;
 //import org.root.histogram.MyGraphErrors;
 //import org.root.histogram.MyH1D;
 //import org.root.histogram.MyH2D;
-import org.root.pad.EmbeddedCanvas;
+import org.root.pad.TEmbeddedCanvas;
 
 /**
  *
@@ -81,7 +81,7 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
 	PCALDraw pcal = new PCALDraw();
     DetectorShapeTabView  view   = new DetectorShapeTabView();
     public CanvasViewPanel        canvasView;
-	public EmbeddedCanvas         canvas,canvas1;
+	public TEmbeddedCanvas         canvas,canvas1;
 	
     
     int nProcessed = 3000000;
@@ -169,8 +169,8 @@ public class PCALcalib extends JFrame implements IDetectorListener, IDetectorPro
     }
     
     private void initCanvases(){
-    	canvas = new EmbeddedCanvas();
-		canvas1 = new EmbeddedCanvas();
+    	canvas = new TEmbeddedCanvas();
+		canvas1 = new TEmbeddedCanvas();
 		canvasView = new CanvasViewPanel();
 		canvasView.addCanvasLayer("Attenuation",canvas);
 		canvasView.addCanvasLayer("Average Energy",canvas1);

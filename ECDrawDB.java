@@ -3,6 +3,8 @@ package org.jlab.calib;
 import java.awt.BorderLayout;
 import java.awt.Polygon;
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
@@ -18,26 +20,33 @@ import math.geom2d.polygon.Polygon2D;
 import math.geom2d.polygon.Polygons2D;
 import math.geom2d.polygon.SimplePolygon2D;
 
+import org.jlab.clas.detector.DetectorDescriptor;
 import org.jlab.clas.detector.DetectorType;
+import org.jlab.clas12.basic.IDetectorProcessor;
 import org.jlab.clas12.calib.DetectorShape2D;
 import org.jlab.clas12.calib.DetectorShapeTabView;
 import org.jlab.clas12.calib.DetectorShapeView2D;
+import org.jlab.clas12.calib.IDetectorListener;
+import org.jlab.clasrec.main.DetectorEventProcessorDialog;
 import org.jlab.clasrec.utils.CLASGeometryLoader;
+import org.jlab.clasrec.utils.DataBaseLoader;
+import org.jlab.data.io.DataEvent;
 import org.jlab.geom.component.ScintillatorPaddle;
 import org.jlab.geom.detector.ec.ECDetector;
+import org.jlab.geom.detector.ec.ECFactory;
 import org.jlab.geom.detector.ec.ECLayer;
 import org.jlab.geom.prim.Point3D;
-import org.root.pad.EmbeddedCanvas;
+import org.root.attr.TStyle;
+import org.root.func.F1D;
+import org.root.histogram.GraphErrors;
+import org.root.pad.TEmbeddedCanvas;
 
-public class ECDrawDB {
+public class ECDrawDB{
 	
 	private double length;
 	private double angle;
 	private double anglewidth;
 	private double slightshift;
-	
-	private double[] xrotation = new double [6];
-	private double[] yrotation = new double [6];
 	
 	private static double[][][][] xPoint = new double [6][3][68][4];
 	private static double[][][][] yPoint = new double [6][3][68][4];
@@ -750,178 +759,96 @@ public class ECDrawDB {
 	}
 	
 	
+	public DetectorShape2D scaleshape(DetectorShape2D shape, double scalefactor)
+	{
+		double[] shapecenter = new double[3];
+		
+		//find center
+		shapecenter = getShapeCenter(shape);
+		
+		//translate center to zero
+		for(int i = 0; i < shape.getShapePath().size(); ++i)
+		{
+			shape.getShapePath().point(i).translateXYZ(-shapecenter[0], -shapecenter[1], -shapecenter[2]);
+		}
+		
+		//apply scale factor
+		for(int i = 0; i < shape.getShapePath().size(); ++i)
+		{
+			shape.getShapePath().point(i).set(shape.getShapePath().point(i).x()*scalefactor,shape.getShapePath().point(i).y()*scalefactor,shape.getShapePath().point(i).z()*scalefactor); 
+		}
+		
+		//translate center back to old center
+		for(int i = 0; i < shape.getShapePath().size(); ++i)
+		{
+			shape.getShapePath().point(i).translateXYZ(shapecenter[0], shapecenter[1], shapecenter[2]);
+		}
+		
+		
+		return shape;
+	}
+	
 	private void initVert()
 	{
-		ScintillatorPaddle paddle;
 		ECLayer  ecLayer;
 		int sector = 0;
-		int suplay = 2; //PCAL ==0  
-		int lastcomponent = 35;
-		Point3D tranpoint = new Point3D();
-		Point3D tranpointA = new Point3D();
-		Point3D tranpointB = new Point3D();
-		Point3D tranpointC = new Point3D();
-		Point3D tranpointD = new Point3D();
+		int suplay = 2; //PCAL ==0, ECinner ==1, ECouter==2 
 		Point3D point1 = new Point3D();
-		Point3D point2 = new Point3D();
-		Point3D point3 = new Point3D();
-        ECDetector detector  = (ECDetector) CLASGeometryLoader.createDetector(DetectorType.EC, 10, "default", "local");
+		DetectorShape2D shape = new DetectorShape2D();
+        //ECDetector detector  = (ECDetector) CLASGeometryLoader.createDetector(DetectorType.EC, 10, "default", "local");
+        ECDetector detector  = new ECFactory().createDetectorTilted(DataBaseLoader.getGeometryConstants(DetectorType.EC, 10, "default"));
         for(sector = 0; sector < 6; ++sector)
         {
-		        //                                          PCAL ==0        u,v,w
-		        ecLayer = detector.getSector(sector).getSuperlayer(suplay).getLayer(0);
-		
-		        //get point 1
-		        paddle = ecLayer.getComponent(0); //strip num
-		        point1.copy(paddle.getVolumePoint(0)); //one of 8
-		        //if(sector == 0) System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
-		            	
-		        //get point 2
-		        paddle = ecLayer.getComponent(lastcomponent);
-		        point2.copy(paddle.getVolumePoint(0));
-		        if(sector == 0) System.out.println("x: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(0).getComponent(0).getVolumePoint(0).x() + " y: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(0).getComponent(0).getVolumePoint(0).y() + " z: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(0).getComponent(0).getVolumePoint(0).z());
-		        if(sector == 0) System.out.println("x: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(1).getComponent(0).getVolumePoint(0).x() + " y: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(1).getComponent(0).getVolumePoint(0).y() + " z: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(1).getComponent(0).getVolumePoint(0).z());
-		        if(sector == 0) System.out.println("x: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(2).getComponent(0).getVolumePoint(0).x() + " y: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(2).getComponent(0).getVolumePoint(0).y() + " z: " + detector.getSector(sector).getSuperlayer(suplay).getLayer(2).getComponent(0).getVolumePoint(0).z());
-		        
-		        //get point 3
-		        paddle = ecLayer.getComponent((lastcomponent - 1)/2);
-		        point3.copy(paddle.getVolumePoint(4));
-		        //System.out.println("x: " + point3.x() + " y: " + point3.y() + " z: " + point3.z());
-		
-		        
-		        //calculate plane from 3 points
-		        //Point3D ab = new Point3D(point2);
-		        //Point3D ac = new Point3D(point3);
-		
-		        //ab.translateXYZ(-point1.x(),-point1.y(),-point1.z());
-		        //ac.translateXYZ(-point1.x(),-point1.y(),-point1.z());
-		        
-		        double a = (point2.y() - point1.y())*(point3.z() - point1.z()) - (point3.y() - point1.y())*(point2.z() - point1.z());
-		        double b = (point2.z() - point1.z())*(point3.x() - point1.x()) - (point3.z() - point1.z())*(point2.x() - point1.x());
-		        double c = (point2.x() - point1.x())*(point3.y() - point1.y()) - (point3.x() - point1.x())*(point2.y() - point1.y());
-		        double d = -(a * point1.x() + b * point1.y() + c * point1.z());
-		        
-		        //System.out.println("a: " + a + " b: " + b + " c: " + c + " d: " + d);
-		        
-		        //find x rotation
-            	if(-b/c > 0)
-            	{
-            		xrotation[sector] = -Math.atan(-b/c);
-            	}
-            	else
-            	{
-            		xrotation[sector] = Math.atan(Math.abs(-b/c));
-            	}
-            	
-            	if(Math.abs(xrotation[sector]) < 0.0000001) xrotation[sector] = 0.0;
-            	else if(Math.abs(xrotation[sector]) > Math.PI && xrotation[sector] < 0.0) xrotation[sector] += Math.PI;
-            	else if(Math.abs(xrotation[sector]) > Math.PI && xrotation[sector] > 0.0) xrotation[sector] -= Math.PI;
-            	//System.out.println("x rot: " + xrotation[sector]);
-            	
-            	//apply x rotation
-		        point1.rotateX(xrotation[sector]);
-		        point2.rotateX(xrotation[sector]);
-		        point3.rotateX(xrotation[sector]);
-		        
-		        //calculate 2nd plane from the rotated points
-		        //ab = new Point3D(point2);
-		        //ac = new Point3D(point3);
-		
-		        //ab.translateXYZ(-point1.x(),-point1.y(),-point1.z());
-		        //ac.translateXYZ(-point1.x(),-point1.y(),-point1.z());
-		        
-		        a = (point2.y() - point1.y())*(point3.z() - point1.z()) - (point3.y() - point1.y())*(point2.z() - point1.z());
-		        b = (point2.z() - point1.z())*(point3.x() - point1.x()) - (point3.z() - point1.z())*(point2.x() - point1.x());
-		        c = (point2.x() - point1.x())*(point3.y() - point1.y()) - (point3.x() - point1.x())*(point2.y() - point1.y());
-		        d = -(a * point1.x() + b * point1.y() + c * point1.z());
-		        
-		        //System.out.println("a: " + a + " b: " + b + " c: " + c + " d: " + d);
-		        
-		        //find y rotation
-		        if(-c/a > 0)
-            	{
-            		yrotation[sector] = Math.PI/2.0 - Math.atan(-c/a);
-            	}
-            	else
-            	{
-            		yrotation[sector] = Math.PI/2.0 - Math.atan(Math.abs(-c/a));
-            		yrotation[sector] *= -1.000;
-            	}
-		        
-		        if(Math.abs(yrotation[sector]) < 0.0000001) yrotation[sector] = 0.0;
-            	else if(Math.abs(yrotation[sector]) > Math.PI && yrotation[sector] < 0.0) yrotation[sector] += Math.PI;
-            	else if(Math.abs(yrotation[sector]) > Math.PI && yrotation[sector] > 0.0) yrotation[sector] -= Math.PI;
-		        //System.out.println("y rot: " + yrotation[sector]);
-		        
-		       
-			     //find translation coordinates
-			     tranpointA.copy(detector.getSector(sector).getSuperlayer(suplay).getLayer(0).getComponent(0).getVolumePoint(0));
-			     tranpointB.copy(detector.getSector(sector).getSuperlayer(suplay).getLayer(0).getComponent(0).getVolumePoint(4));
-			     tranpointC.copy(detector.getSector(sector).getSuperlayer(suplay).getLayer(0).getComponent(0).getVolumePoint(1));
-			     tranpointD.copy(detector.getSector(sector).getSuperlayer(suplay).getLayer(0).getComponent(0).getVolumePoint(5));
-			     point1.set((tranpointA.x()+tranpointB.x()+tranpointC.x()+tranpointD.x())/4.0,(tranpointA.y()+tranpointB.y()+tranpointC.y()+tranpointD.y())/4.0,(tranpointA.z()+tranpointB.z()+tranpointC.z()+tranpointD.z())/4.0);
-			   	 tranpoint.copy(point1);
-	             point1.rotateX(xrotation[sector]);
-	             point1.rotateY(yrotation[sector]);
-	             
-			     //tranpoint.set(detector.getSector(sector).getSuperlayer(0).getLayer(0).getComponent(0).getVolumePoint(0).x(),detector.getSector(sector).getSuperlayer(0).getLayer(0).getComponent(0).getVolumePoint(0).y(), 0.0);
-			     tranpoint.set(tranpoint.x() - point1.x(), tranpoint.y() - point1.y(), tranpoint.z() - point1.z());
-			     
-			     //System.out.println("x: " + tranpointA.x() + " y: " + tranpointA.y() + " z: " + tranpointA.z());
-			     //System.out.println("x: " + tranpointB.x() + " y: " + tranpointB.y() + " z: " + tranpointB.z());
-			     //System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
-			     //System.out.println("x: " + tranpoint.x() + " y: " + tranpoint.y() + " z: " + tranpoint.z());
-			     //System.out.println("   ");
-		   //apply both rotations to all geometry points
+        	//loop through u, v, w layers
 		    for(int l = 0; l <3; l++)
 		    {
-	        	//	                                       PCAL ==0           u,v,w
+		    	//double scaleu = 1.0;
+		    	//double scalev = 76526.91194571322/76778.14893160838;
+		    	//double scalew = 76526.91194571322/77132.03474988216;
+		    	//double scaleu = 1.0;
+		    	//double scalev = 0.985082567;
+		    	//double scalew = 0.975562687;
+		    	
+	        	//	                                             PCAL ==0         u,v,w
 	        	ecLayer = detector.getSector(sector).getSuperlayer(suplay).getLayer(l);
-	            for(ScintillatorPaddle paddle2 : ecLayer.getAllComponents())
+	        	
+	        	for(ScintillatorPaddle paddle2 : ecLayer.getAllComponents())
 	            {													//0-67
-	            	point1.copy(paddle2.getVolumePoint(0));
-	            	point1.rotateX(xrotation[sector]);
-	            	point1.rotateY(yrotation[sector]);
-	            	point1.translateXYZ(tranpoint.x(), tranpoint.y(),0.0);
-	            	//point1.rotateZ(Math.PI/2.0);
-	            	//if(paddle2.getComponentId() == 35 && l == 0)System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
-	            	//System.out.println("Component ID: " + paddle2.getComponentId());
-	            	xPoint[sector][l][paddle2.getComponentId()][0] = point1.x();
-	            	yPoint[sector][l][paddle2.getComponentId()][0] = point1.y();
-	            	
-	            	point1.copy(paddle2.getVolumePoint(4));
-	            	point1.rotateX(xrotation[sector]);
-	            	point1.rotateY(yrotation[sector]);
-	            	point1.translateXYZ(tranpoint.x(), tranpoint.y(),0.0);
-	            	//point1.rotateZ(Math.PI/2.0);
-	            	//if(paddle2.getComponentId() == 35 && l == 0)System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
-	            	//System.out.println("Component ID: " + paddle2.getComponentId());
-	            	xPoint[sector][l][paddle2.getComponentId()][1] = point1.x();
-	            	yPoint[sector][l][paddle2.getComponentId()][1] = point1.y();
-	            	
-	            	point1.copy(paddle2.getVolumePoint(5));
-	            	point1.rotateX(xrotation[sector]);
-	            	point1.rotateY(yrotation[sector]);
-	            	point1.translateXYZ(tranpoint.x(), tranpoint.y(),0.0);
-	            	//point1.rotateZ(Math.PI/2.0);
-	            	//if(paddle2.getComponentId() == 35 && l == 0) System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
-	            	//System.out.println("Component ID: " + paddle2.getComponentId());
-	            	xPoint[sector][l][paddle2.getComponentId()][2] = point1.x();
-	            	yPoint[sector][l][paddle2.getComponentId()][2] = point1.y();
-	            	
-	            	point1.copy(paddle2.getVolumePoint(1));
-	            	point1.rotateX(xrotation[sector]);
-	            	point1.rotateY(yrotation[sector]);
-	            	point1.translateXYZ(tranpoint.x(), tranpoint.y(),0.0);
-	            	//point1.rotateZ(Math.PI/2.0);
-	            	//if(paddle2.getComponentId() == 35 && l == 0) System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
-	            	//System.out.println("Component ID: " + paddle2.getComponentId());
-	            	xPoint[sector][l][paddle2.getComponentId()][3] = point1.x();
-	            	yPoint[sector][l][paddle2.getComponentId()][3] = point1.y();
-	            	
-	            	
+	        		shape.getShapePath().clear(); 
+	        		
+	        		//point1
+	        		point1.copy(paddle2.getVolumePoint(0));
+	        		shape.getShapePath().addPoint(point1.x(),  point1.y(),  point1.z()); 
+	        		
+	        		//point2
+	        		point1.copy(paddle2.getVolumePoint(4));
+	        		shape.getShapePath().addPoint(point1.x(),  point1.y(),  point1.z()); 
+	        		
+	        		//point3
+	        		point1.copy(paddle2.getVolumePoint(5));
+	        		shape.getShapePath().addPoint(point1.x(),  point1.y(),  point1.z()); 
+	        		
+	        		//point4
+	        		point1.copy(paddle2.getVolumePoint(1));
+	        		shape.getShapePath().addPoint(point1.x(),  point1.y(),  point1.z()); 
+	        		
+	        		//if(l == 0)shape = scaleshape(shape, scaleu);
+	        		//if(l == 1)shape = scaleshape(shape, scalev);
+	        		//if(l == 2)shape = scaleshape(shape, scalew);
+	        		
+	        		//center[l][paddle2.getComponentId()] = getShapeCenter(shape)[0];
+	        		//if(center[l][paddle2.getComponentId()] < minx) minx = center[l][paddle2.getComponentId()];
+	        		
+	        		for(int i = 0; i < shape.getShapePath().size(); ++i)
+	        		{
+	        			point1.copy(shape.getShapePath().point(i));
+		        		point1.translateXYZ(333.1042, 0.0, 0.0);
+		            	point1.rotateZ(sector * Math.PI/3.0);
+		            	
+		            	xPoint[sector][l][paddle2.getComponentId()][i] = point1.x();
+		            	yPoint[sector][l][paddle2.getComponentId()][i] = point1.y();
+	        		}
 	            }
-	            System.out.println("     ");
 	        }
         }
 	}
@@ -974,92 +901,60 @@ public class ECDrawDB {
 		}
 		
 		//if(nPoints > 2 && Polygons2D.computeArea(pol3) < 100.0)System.out.println("area: " + Polygons2D.computeArea(pol3));
+		/*
 		if(nPoints > 2 && Math.abs(Polygons2D.computeArea(pol3)) < 2.0)
 		{
 			nPoints = 0;
 			//System.out.println("area: " + Polygons2D.computeArea(pol3));
 		}
-		//if(!pol3.contains(pol3.centroid())) nPoints = 0;
-		
-		/////////////////////////////////////////////////////////////////
-		
-		/////////////////////////////////////////////////////////////
-		
-	
-		/*
-		Path2D path1 = new Path2D.Double();
-		path1.moveTo(xtemp1[0], ytemp1[0]);
-		for(int i = 1; i < vert1size; ++i) {
-		   path1.lineTo(xtemp1[i], ytemp1[i]);
-		}
-		path1.closePath();
-		Shape pol1 = (Shape)path1;
-		
-		Path2D path2 = new Path2D.Double();
-		path2.moveTo(xtemp2[0], ytemp2[0]);
-		for(int i = 1; i < vert2size; ++i) {
-		   path2.lineTo(xtemp2[i], ytemp2[i]);
-		}
-		path2.closePath();
-		Shape pol2 = (Shape)path2;
-		
-		Area a1 = new Area(pol1);
-		Area a2 = new Area(pol2);
-		
-		a1.intersect(a2);
-		
-		//a1.isPolygonal()
-		nPoints = 0;
-		double[] data = new double[6];
-		if(a1.isEmpty())
-			nPoints = 0;
-		else
-		{
-			//pol1 = (Shape) a1;
-			PathIterator pi = a1.getPathIterator(null);
-			while(!pi.isDone())
-			{
-				if(pi.currentSegment(data) != pi.SEG_CLOSE)
-				{
-					//int type = pi.currentSegment(data);
-					x[nPoints] = data[0];
-					y[nPoints] = data[1];
-					++nPoints;
-				}
-				pi.next();
-			}
-		}
-		
 		*/
-		/////////////////////////////////////////////////////////////////
-		/*
-		int nPoints2 = 0;
-		double[] x2 = new double[nPoints];
-		double[] y2 = new double[nPoints];
-		
-		for(int i = 0; i < nPoints; ++i)
-		{
-			x2[nPoints2] = x[i];
-			y2[nPoints2] = y[i];
-			
-			while(i != nPoints - 1 && Math.abs(x2[nPoints2] - x[i+1]) < 2.0 && Math.abs(y2[nPoints2] - y[i+1])< 2.0 && Math.sqrt(Math.pow(x2[nPoints2] - x[i+1],2) + Math.pow(y2[nPoints2] - y[i+1],2))< 2.0)
-			{
-				++i;
-			}
-			++nPoints2;
 
-		}
-		*/
-		
-		
+		/////////////////////////////////////////////////////////////
 		
 		return(new Object[]{nPoints, x, y});
 	}
 	
+	/*
+	public void detectorSelected(DetectorDescriptor desc){
+        int u, v, w, uvwnum;
+
+        TStyle.setStatBoxFont("Helvetica", 12);
+            
+        
+        //System.out.println("SELECTED = " + desc);
+        
+        uvwnum = (int)desc.getComponent();
+    	u = (int)(uvwnum/10000.0);
+    	uvwnum -= u*10000;
+    	v = (int)(uvwnum/100.0);
+    	uvwnum -= v*100;
+    	w = uvwnum;
+    	
+    	DetectorShape2D shapedraw = getPixelShape(desc.getSector(), u, v, w);
+    	double [] xtemp = new double [shapedraw.getShapePath().size()];
+		double [] ytemp = new double [shapedraw.getShapePath().size()];
+    	for(int i = 0; i < shapedraw.getShapePath().size(); ++i)
+		{
+			xtemp[i] = shapedraw.getShapePath().point(i).x();
+			ytemp[i] = shapedraw.getShapePath().point(i).y();
+			if(shapedraw.getShapePath().size() > 3) System.out.println("x: " + xtemp[i] + " y: " + ytemp[i]);
+		}
+    	
+    	GraphErrors g1  = new GraphErrors(xtemp,ytemp);
+	    g1.setMarkerSize(2);
+	    shapeCanvas.cd(0);
+	    shapeCanvas.draw(g1);
+   
+    }
+	
+	*/
+	
+	
 	public static void main(String[] args){ 
 		
 		ECDrawDB pcaltest = new ECDrawDB();
-		
+		TEmbeddedCanvas         shapeCanvas= new TEmbeddedCanvas();
+		DetectorShapeTabView  view= new DetectorShapeTabView();
 		
 		char stripLetter[] = {'u','v','w'};
 		char stripLetter2[] = {'w','u','u'};
@@ -1087,22 +982,41 @@ public class ECDrawDB {
 		//x = pcaltest.CalcDistance('u',x,0)[0];
 		//System.out.println("x: " + x);
 		
+	
 		
-		EmbeddedCanvas canvas = new EmbeddedCanvas();
 		
-		DetectorShapeTabView  view   = new DetectorShapeTabView();
 		
 		
 		//draw U strips
-		
 		/*
+		double areasum = 0.0;
 		DetectorShape2D shape = new DetectorShape2D();
 	 	DetectorShapeView2D Umap= new DetectorShapeView2D("PCAL U");
 	 	for(int sector = 0; sector < 6; sector++)
     	{
-	 		for(int uPaddle = 0; uPaddle < 68; uPaddle++)
+	 		for(int uPaddle = 0; uPaddle < 36; uPaddle++)
 	 		{
-	            shape = pcaltest.getStripShape(sector, "u", uPaddle);
+	            shape = pcaltest.getStripShape(sector, "w", uPaddle);
+	            
+
+		            double [] xtemp2 = new double [shape.getShapePath().size()];
+	        		double [] ytemp2 = new double [shape.getShapePath().size()];
+	        		
+	        		for(int i = 0; i < shape.getShapePath().size(); ++i)
+	        		{
+	        			xtemp2[i] = shape.getShapePath().point(i).x();
+	        			ytemp2[i] = shape.getShapePath().point(i).y();
+	        			//if(shape.getShapePath().size() > 3) 
+	        			//System.out.println("x: " + xtemp2[i] + " y: " + ytemp2[i]);
+	        		}
+	        		SimplePolygon2D pol1 = new SimplePolygon2D(xtemp2,ytemp2);
+	        		areasum += pol1.area();
+	        		
+	        		if(uPaddle == 35)
+	        			System.out.println("area: " + areasum);
+
+        		
+	            
 	            for(int i = 0; i < shape.getShapePath().size(); ++i)
         		{
 	            	
@@ -1183,6 +1097,7 @@ public class ECDrawDB {
 		
 		
 		//Draw pixels
+	    
 		PrintWriter writer = null;
 		try 
 		{
@@ -1195,6 +1110,7 @@ public class ECDrawDB {
 		}
 		int num1, num2, num3;
 		//double total;
+		
 		
 		DetectorShape2D shape = new DetectorShape2D();
     	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL Pixel");
@@ -1209,10 +1125,26 @@ public class ECDrawDB {
 		            	//System.out.println("u: " + uPaddle + " v: " + vPaddle + " w: " + wPaddle);
 		            	if(pcaltest.isValidPixel(sector, uPaddle, vPaddle, wPaddle))
 		            	{
+		            		//System.out.println("                       ");
 		            		//System.out.println("u: " + uPaddle + " v: " + vPaddle + " w: " + wPaddle);
 		            		shape = pcaltest.getPixelShape(sector, uPaddle, vPaddle, wPaddle);
 		            	//if(shape != null)
 		            	//{
+		            		
+		            		
+		            		double [] xtemp2 = new double [shape.getShapePath().size()];
+		            		double [] ytemp2 = new double [shape.getShapePath().size()];
+		            		
+		            		for(int i = 0; i < shape.getShapePath().size(); ++i)
+		            		{
+		            			xtemp2[i] = shape.getShapePath().point(i).x();
+		            			ytemp2[i] = shape.getShapePath().point(i).y();
+		            			//if(shape.getShapePath().size() > 3) 
+		            			//System.out.println("x: " + xtemp2[i] + " y: " + ytemp2[i]);
+		            		}
+		            		SimplePolygon2D pol1 = new SimplePolygon2D(xtemp2,ytemp2);
+		            		/////////////////////////////////////////////////////////////
+		            		
 		            		
 		            		num1 = uPaddle + 1;
 		            		num2 = vPaddle + 1;
@@ -1222,14 +1154,13 @@ public class ECDrawDB {
 		            		writer.println(num1  + "   " + num2 + "   " + num3 + "   " 
 									+ pcaltest.getUPixelDistance(uPaddle, vPaddle, wPaddle) + "   " 
 									+ pcaltest.getVPixelDistance(uPaddle, vPaddle, wPaddle) + "   "
-									+ pcaltest.getWPixelDistance(uPaddle, vPaddle, wPaddle)); 
-		            				//+ "   "	+ total);
+									+ pcaltest.getWPixelDistance(uPaddle, vPaddle, wPaddle) 
+		            				+ "   "	+ Polygons2D.computeArea(pol1));
 		            		
 		            		for(int i = 0; i < shape.getShapePath().size(); ++i)
 	        				{
 		            			x = shape.getShapePath().point(i).x();
 				            	y = shape.getShapePath().point(i).y();
-				            	if(uPaddle == 3 && vPaddle == 35 && wPaddle == 31) System.out.println("x: " + x + " y: " + y);
 	        					shape.getShapePath().point(i).set(x, y, 0.0);
 	        				}
 		            		UWmap.addShape(shape);
@@ -1244,23 +1175,21 @@ public class ECDrawDB {
 	    	
 	    	writer.close();
 	    	
+	    
 	    	
 	       // return UWmap;
-	    	
 	    	JFrame hi = new JFrame();
 			hi.setLayout(new BorderLayout());
 		    JSplitPane  splitPane = new JSplitPane();
 		    splitPane.setLeftComponent(view);
-		    splitPane.setRightComponent(canvas);
+		    splitPane.setRightComponent(shapeCanvas);
 		    hi.add(splitPane,BorderLayout.CENTER);
 		    hi.pack();
 		    hi.setVisible(true);
-	    	//canvas.add(view);
-	    	//canvas1.draw(view);
-	       // return UWmap;
     	 
 	    	System.out.println("Done!");
 	
 	}
-    
+
+
 }
