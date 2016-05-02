@@ -3,6 +3,7 @@ package org.jlab.calib;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.TreeMap;
 
 import org.root.attr.Attributes;
@@ -86,9 +87,9 @@ public class MyH4D implements EvioWritableTree {
 			                  int bz, double zmin, double zmax,
 			                  int ba, double amin, double amax) {
 		hName = name;
-		this.set(bx, xmin, xmax, by, ymin, ymax, 
+		set(bx, xmin, xmax, by, ymin, ymax, 
 				 bz, zmin, zmax, ba, amin, amax);
-		//offset = new MyMultiIndex(bx, by, bz, ba, bb, bc);
+		//offset = new MyMultiIndex(bx, by, bz, ba);
 		//hBuffer = new ArrayList<Double>(offset.getArraySize());
 		
 		this.attr.getProperties().setProperty("title", "");
@@ -152,11 +153,13 @@ public class MyH4D implements EvioWritableTree {
 		int buff = offset.getArraySize();
 		
 		hBuffer = new ArrayList<Double>(buff);
-		int divisor = 10000000;
+		//hBuffer = new ArrayList<Double>(0);
+		int divisor = 1000000;
 		int buffnum = (int)(buff / divisor);
 		for(int i =0; i < buffnum; ++i)
 		{
 			hBuffer.addAll(Collections.nCopies(divisor, 0.0));
+			//System.out.println("Array size: "+ i + " * " + divisor);
 		}
 		hBuffer.addAll(Collections.nCopies(buff - (buffnum * divisor), 0.0));
 		
@@ -794,7 +797,7 @@ public class MyH4D implements EvioWritableTree {
     }
 
     @Override
-    public void fromTreeMap(TreeMap<Integer, Object> map) {
+    public void fromTreeMap(Map<Integer, Object> map){
         if(map.get(1) instanceof int[]){
             if(  ((int[]) map.get(1))[0]==3){
                 int[]    nbins      = ((int[]) map.get(3));
@@ -851,10 +854,10 @@ public class MyH4D implements EvioWritableTree {
     }
 	
 	public static void main(String[] args){ 
-		MyH4D testh4 = new MyH4D("test1", 3, 0.0, 300.0,
-					                      68, 0.5, 68.5,
-					                      62, 0.5, 62.5,
-				                          62, 0.5, 62.5);
+		MyH4D testh4 = new MyH4D("test1", 50, 0.0, 300.0,
+					                      171, 0.5, 68.5,
+					                      171, 0.5, 62.5,
+					                      171, 0.5, 62.5);
 		
 		
 		testh4.fill(50, 1, 1, 1);
@@ -869,7 +872,7 @@ public class MyH4D implements EvioWritableTree {
 		TGCanvas testcanv = new TGCanvas();
 		MyH1D testh1 = new MyH1D();
 		
-		testh1 = testh4.projectionX("test",67,67,61,61,61,61).histClone("newtest");
+		testh1 = testh4.projectionX("test",0,5,0,5,0,3).histClone("newtest");
 		//testh1.fill(5.0);
 		testcanv.draw(testh1);
 		

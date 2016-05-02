@@ -1,11 +1,13 @@
 package org.jlab.calib;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.TreeMap;
 
 import org.root.attr.Attributes;
-import org.root.base.DataRegion;
 import org.root.base.EvioWritableTree;
-import org.root.base.IDataSet;
 import org.root.histogram.Axis;
 import org.root.histogram.MultiIndex;
 import org.root.pad.TGCanvas;
@@ -17,24 +19,26 @@ import org.root.pad.TGCanvas;
  * @author Erin Kirby
  * @version 061714
  */
-public class MyH3D implements EvioWritableTree,IDataSet {
+public class MyH3D implements EvioWritableTree{
 
 	private String hName = "basic3D";
 	private Axis xAxis = new Axis();
 	private Axis yAxis = new Axis();
 	private Axis zAxis = new Axis();
-	private double[] hBuffer;
+	private ArrayList<Double> hBuffer;
 	private MultiIndex offset;
         private Attributes attr = new Attributes(); 
         private Double     maximumBinValue = 0.0;
         
 	public MyH3D() {
 		offset = new MultiIndex(xAxis.getNBins(), yAxis.getNBins(), zAxis.getNBins());
-		hBuffer = new double[offset.getArraySize()];
-                this.attr.getProperties().setProperty("title", "");
-                this.attr.getProperties().setProperty("xtitle", "");
-                this.attr.getProperties().setProperty("ytitle", "");
-                this.attr.getProperties().setProperty("ztitle", "");
+		
+		hBuffer = new ArrayList<Double>(offset.getArraySize());
+		
+        this.attr.getProperties().setProperty("title", "");
+        this.attr.getProperties().setProperty("xtitle", "");
+        this.attr.getProperties().setProperty("ytitle", "");
+        this.attr.getProperties().setProperty("ztitle", "");
     }
 
     public void setName(String name){ this.hName = name;}
@@ -47,11 +51,13 @@ public class MyH3D implements EvioWritableTree,IDataSet {
 	public MyH3D(String name) {
 		hName = name;
 		offset = new MultiIndex(xAxis.getNBins(), yAxis.getNBins(), zAxis.getNBins());
-		hBuffer = new double[offset.getArraySize()];
-                this.attr.getProperties().setProperty("title", "");
-                this.attr.getProperties().setProperty("xtitle", "");
-                this.attr.getProperties().setProperty("ytitle", "");
-                this.attr.getProperties().setProperty("ztitle", "");
+		
+		hBuffer = new ArrayList<Double>(offset.getArraySize());
+		
+        this.attr.getProperties().setProperty("title", "");
+        this.attr.getProperties().setProperty("xtitle", "");
+        this.attr.getProperties().setProperty("ytitle", "");
+        this.attr.getProperties().setProperty("ztitle", "");
 	}
 
 	/**
@@ -78,11 +84,13 @@ public class MyH3D implements EvioWritableTree,IDataSet {
 		hName = name;
 		this.set(bx, xmin, xmax, by, ymin, ymax, bz, zmin, zmax);
 		offset = new MultiIndex(bx, by, bz);
-		hBuffer = new double[offset.getArraySize()];
-                this.attr.getProperties().setProperty("title", "");
-                this.attr.getProperties().setProperty("xtitle", "");
-                this.attr.getProperties().setProperty("ytitle", "");
-                this.attr.getProperties().setProperty("ztitle", "");
+		
+		hBuffer = new ArrayList<Double>(offset.getArraySize());
+		
+        this.attr.getProperties().setProperty("title", "");
+        this.attr.getProperties().setProperty("xtitle", "");
+        this.attr.getProperties().setProperty("ytitle", "");
+        this.attr.getProperties().setProperty("ztitle", "");
 	}
 
     public MyH3D(String name, String title, int bx, double xmin, double xmax, 
@@ -93,13 +101,15 @@ public class MyH3D implements EvioWritableTree,IDataSet {
                 this.setTitle(title);
 		this.set(bx, xmin, xmax, by, ymin, ymax, bz, zmin, zmax);
 		offset = new MultiIndex(bx, by, bz);
-		hBuffer = new double[offset.getArraySize()];
-                this.attr.getProperties().setProperty("title", "");
-                this.attr.getProperties().setProperty("xtitle", "");
-                this.attr.getProperties().setProperty("ytitle", "");
-                this.attr.getProperties().setProperty("ztitle", "");
+		
+		hBuffer = new ArrayList<Double>(offset.getArraySize());
+		
+        this.attr.getProperties().setProperty("title", "");
+        this.attr.getProperties().setProperty("xtitle", "");
+        this.attr.getProperties().setProperty("ytitle", "");
+        this.attr.getProperties().setProperty("ztitle", "");
                 
-                System.out.println("Array size: "+ offset.getArraySize());
+        //System.out.println("Array size: "+ offset.getArraySize());
 	}
 	/**
 	 * Sets the bins to the x and y axes and creates the buffer of the histogram
@@ -120,12 +130,22 @@ public class MyH3D implements EvioWritableTree,IDataSet {
 	public final void set(int bx, double xmin, double xmax, 
 			              int by, double ymin, double ymax,
 			              int bz, double zmin, double zmax) {
+		
 		xAxis.set(bx, xmin, xmax);
 		yAxis.set(by, ymin, ymax);
 		zAxis.set(bz, zmin, zmax);
+		
 		offset = new MultiIndex(bx, by, bz);
 		int buff = offset.getArraySize();
-		hBuffer = new double[buff];
+		
+		hBuffer = new ArrayList<Double>(buff);
+		int divisor = 10000000;
+		int buffnum = (int)(buff / divisor);
+		for(int i =0; i < buffnum; ++i)
+		{
+			hBuffer.addAll(Collections.nCopies(divisor, 0.0));
+		}
+		hBuffer.addAll(Collections.nCopies(buff - (buffnum * divisor), 0.0));
 	}
 
 	/**
@@ -162,8 +182,10 @@ public class MyH3D implements EvioWritableTree,IDataSet {
 
     public double getMaximum(){
     	double maximum = 0.0;
-     	for(int loop = 0; loop < hBuffer.length; loop++)
-     		if(hBuffer[loop]>maximum) maximum = hBuffer[loop];
+    	ListIterator<Double> litr = null;
+		litr=hBuffer.listIterator();
+     	while(litr.hasNext())
+     		if(litr.next()>maximum) maximum = litr.next();
      	return maximum;
     }
 
@@ -197,11 +219,14 @@ public class MyH3D implements EvioWritableTree,IDataSet {
 	 * @return The content at that bin
 	 */
 	public double getBinContent(int bx, int by, int bz) {
-		if (this.isValidBins(bx, by, bz)) {
+		if(this.isValidBins(bx, by, bz)) {
 			int buff = offset.getArrayIndex(bx, by, bz);
-            if(buff>=0 && buff< hBuffer.length){
-            	return hBuffer[buff];
-            } else {
+            if(buff>=0 && buff< hBuffer.size())
+            {
+            	return hBuffer.get(buff);
+            }
+            else 
+            {
             	System.out.println("[Index] error for binx = "+ bx +
                                     " biny = " + by +
                                     " binz = " + bz);
@@ -304,7 +329,7 @@ public class MyH3D implements EvioWritableTree,IDataSet {
 	public void setBinContent(int bx, int by, int bz, double w) {
 		if (this.isValidBins(bx, by, bz)) {
 			int buff = offset.getArrayIndex(bx, by, bz);
-			hBuffer[buff] = w;
+			hBuffer.set(buff, w);
 		}
 	}
 
@@ -338,9 +363,9 @@ public class MyH3D implements EvioWritableTree,IDataSet {
 	 *            the bin in array indexing format to increment
 	 */
 	private void addBinContent(int bin) {
-		hBuffer[bin] = hBuffer[bin] + 1.0;
-                if(hBuffer[bin]>this.maximumBinValue) 
-                    this.maximumBinValue = hBuffer[bin];
+		hBuffer.set(bin,hBuffer.get(bin) + 1.0);
+                if(hBuffer.get(bin)>this.maximumBinValue) 
+                    this.maximumBinValue = hBuffer.get(bin);
 	}
 
 	/**
@@ -352,9 +377,9 @@ public class MyH3D implements EvioWritableTree,IDataSet {
 	 *            the value to add to the bin content
 	 */
 	private void addBinContent(int bin, double w) {
-		hBuffer[bin] = hBuffer[bin] + w;
-                if(hBuffer[bin]>this.maximumBinValue) 
-                    this.maximumBinValue = hBuffer[bin];
+		hBuffer.set(bin, hBuffer.get(bin) + w);
+                if(hBuffer.get(bin)>this.maximumBinValue) 
+                    this.maximumBinValue = hBuffer.get(bin);
 	}
        /*
         public ArrayList<H1D>  getSlicesX(){
@@ -737,16 +762,18 @@ public class MyH3D implements EvioWritableTree,IDataSet {
 		return sliceY;
 	}
 */
+	/*
 	public double[] offset() {
 		return hBuffer;
 	}
+	*/
 	
 	/**
 	* Resets the content of the histogram, sets all bin contents to 0
 	*/
 	public void reset(){
-		for(int bin = 0; bin < this.hBuffer.length; bin++){
-			this.hBuffer[bin] = 0.0;
+		for(int bin = 0; bin < this.hBuffer.size(); bin++){
+			this.hBuffer.set(bin,0.0);
 		}
 	}
         
@@ -767,7 +794,7 @@ public class MyH3D implements EvioWritableTree,IDataSet {
     }
 
     @Override
-    public void fromTreeMap(TreeMap<Integer, Object> map) {
+    public void fromTreeMap(Map<Integer, Object> map){
         if(map.get(1) instanceof int[]){
             if(  ((int[]) map.get(1))[0]==3){
                 int[]    nbins      = ((int[]) map.get(3));
@@ -785,6 +812,7 @@ public class MyH3D implements EvioWritableTree,IDataSet {
         }
     }
 
+    /*
     public DataRegion getDataRegion() {
         DataRegion  region = new DataRegion();
         region.MINIMUM_X = this.xAxis.getBinCenter(0)-this.xAxis.getBinWidth(0)/2.0;
@@ -806,6 +834,7 @@ public class MyH3D implements EvioWritableTree,IDataSet {
         }
         return region;
     }
+    */
 
     public Integer getDataSize() {
         return this.xAxis.getNBins()*this.yAxis.getNBins()*this.zAxis.getNBins();
@@ -843,11 +872,6 @@ public class MyH3D implements EvioWritableTree,IDataSet {
         return 0;
     }
 
-	@Override
-	public Double getData(int arg0, int arg1) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	
 	public static void main(String[] args){ 
 		MyH3D testh3 = new MyH3D("test1", 5, 0.0, 5.0, 
@@ -869,5 +893,6 @@ public class MyH3D implements EvioWritableTree,IDataSet {
 		testcanv.draw(testh1);
 		
 	}
+
 	
 }

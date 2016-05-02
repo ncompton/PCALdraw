@@ -13,8 +13,11 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
@@ -55,19 +58,14 @@ import org.root.pad.TEmbeddedCanvas;
  * @author gavalian
  * @edited by N. Compton & Taya C.
  */
-public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorProcessor, ActionListener {
+public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorProcessor, ActionListener {
 
-	//DetectorCollection<MyH1D>  tdcH = new DetectorCollection<MyH1D>();
-    //DetectorCollection<MyH1D>  adcH = new DetectorCollection<MyH1D>();
-    
     //public EventDecoder     decoder = new EventDecoder();
 	//FADCConfigLoader          fadc  = new FADCConfigLoader();
     
-    //public String laba[] = {"monitor/pcal/adc","monitor/ecinner/adc","monitor/ecouter/adc"}; 
-	//public String labt[] = {"monitor/pcal/tdc","monitor/ecinner/tdc","monitor/ecouter/tdc"};
-    
 	PCALDraw pcal = new PCALDraw();
     DetectorShapeTabView  view   = new DetectorShapeTabView();
+    DetectorShapeView2D  dv2,dv3,dv4,dv5,dv6,dv7,dv8,dv9;
     public CanvasViewPanel        canvasView;
 	public TEmbeddedCanvas         canvas,canvas1,canshape;
 	
@@ -93,10 +91,25 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
     TDirectory mondirectory = new TDirectory("calibration");
     
     int hit[][][] = new int[68][62][62]; //bad pixel, good pixel, maybe good = 0, 1, 2
-	double udpixel[][][] = new double[68][62][62]; //
-	double vdpixel[][][] = new double[68][62][62]; //
-	double wdpixel[][][] = new double[68][62][62]; //
-	int pixelnumber[][][] = new int[68][62][62];
+    
+	double udpixel[][][] = new double[68][62][62]; //u-PMT distance with that pixel
+	double vdpixel[][][] = new double[68][62][62]; //v-PMT distance with that pixel
+	double wdpixel[][][] = new double[68][62][62]; //w-PMT distance with that pixel
+	
+	double uwidth[][][] = new double[68][62][62]; //u Gaussian width pixel
+	double vwidth[][][] = new double[68][62][62]; //v Gaussian width pixel
+	double wwidth[][][] = new double[68][62][62]; //w Gaussian width pixel
+	
+	double ucent[][][] = new double[68][62][62]; //u Gaussian centroid pixel
+	double vcent[][][] = new double[68][62][62]; //v Gaussian centroid pixel
+	double wcent[][][] = new double[68][62][62]; //w Gaussian centroid pixel
+	
+	int pixelnumber[][][] = new int[68][62][62]; //indexing of the pixel number
+	MyH1D Hpixarea = new MyH1D("pixarea",200,0.0,100.0);
+	MyH1D Hpixcounts = new MyH1D("pixcounts",1000,0.0,1000.0);
+	//int loop3Dhist[][][][] = new int[3000][50][50][50]; //indexing of 4D histogram
+	//ArrayList<MyH3D> pixeladclist;
+	//MyH4D H4ADC = new MyH4D("ADCvalues",50,0.0,150.0,50,0.0,150.0,50,0.0,150.0,3000,0.5,6500.5);
 	
 	double ugain[] = new double[68]; //
 	double vgain[] = new double[62]; //
@@ -136,7 +149,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
     }
 
 	
-    public PCALcalibv1(){
+    public PCALcalibv2(){
         super();
         //fadc.load("/test/fc/fadc",10,"default");
         this.initDetector();
@@ -173,8 +186,12 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
     private void initDetector(){
 
     	int sector = 0;
+    	int count = 0;
+    	String name;
+    	//pixeladclist = new ArrayList<MyH3D>(68*62*62);
+    	//pixeladclist = new ArrayList<MyH3D>(7000);
     	//draw pixels
-    	DetectorShapeView2D  dv2 = new DetectorShapeView2D("PCAL Pixels");
+    	dv2 = new DetectorShapeView2D("PCAL Pixels");
     	for(int upaddle = 0; upaddle < 68; upaddle++){
         	for(int vpaddle = 0; vpaddle < 62; vpaddle++){
         		for(int wpaddle = 0; wpaddle < 62; wpaddle++){
@@ -183,10 +200,20 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
         				DetectorShape2D shape = pcal.getPixelShape(CurrentSector, upaddle, vpaddle, wpaddle);
         				for(int i = 0; i < shape.getShapePath().size(); ++i)
         				{
-        					shape.getShapePath().point(i).set(shape.getShapePath().point(i).x() * 1000.0, shape.getShapePath().point(i).y() * 1000.0, 0.0);
+        					shape.getShapePath().point(i).set(shape.getShapePath().point(i).x(), shape.getShapePath().point(i).y(), 0.0);
         				}
         				dv2.addShape(shape);
+        				Hpixarea.fill(pcal.shapeArea(shape));
         				hit[upaddle][vpaddle][wpaddle] = 1;
+        				
+        				/*
+        				//System.out.println(Runtime.getRuntime().freeMemory());
+        				//System.out.println(pixeladclist.size());
+        				name = String.format("ADC_%02d_%02d_%02d", upaddle, vpaddle, wpaddle);
+        				pixeladclist.add(new MyH3D(name,50,0.0,150.0,50,0.0,150.0,50,0.0,150.0));
+        				*/
+        				pixelnumber[upaddle][vpaddle][wpaddle] = count;
+        				++count;
         				
         				udpixel[upaddle][vpaddle][wpaddle] = pcal.getUPixelDistance(upaddle, vpaddle, wpaddle);
         				vdpixel[upaddle][vpaddle][wpaddle] = pcal.getVPixelDistance(upaddle, vpaddle, wpaddle);
@@ -195,6 +222,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
         			else
         			{
         				hit[upaddle][vpaddle][wpaddle] = 0;
+        				pixelnumber[upaddle][vpaddle][wpaddle] = -10;
         				udpixel[upaddle][vpaddle][wpaddle] = -10.0;
         				vdpixel[upaddle][vpaddle][wpaddle] = -10.0;
         				wdpixel[upaddle][vpaddle][wpaddle] = -10.0;
@@ -204,21 +232,23 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
         }
     	this.view.addDetectorLayer(dv2);
     	view.addDetectorListener(this);
+    	//pixeladclist.trimToSize();
+    	//System.out.println(pixeladclist.size());
     	
     	//draw UW pane
-    	DetectorShapeView2D  dv3 = new DetectorShapeView2D("PCAL UW");
+    	dv3 = new DetectorShapeView2D("PCAL UW");
     	dv3 = pcal.drawUW(CurrentSector);
     	this.view.addDetectorLayer(dv3);
     	view.addDetectorListener(this);
     	
     	//draw UV pane
-    	DetectorShapeView2D  dv4 = new DetectorShapeView2D("PCAL VU");
+    	dv4 = new DetectorShapeView2D("PCAL VU");
     	dv4 = pcal.drawVU(CurrentSector);
     	this.view.addDetectorLayer(dv4);
     	view.addDetectorListener(this);
     	
     	//draw UW pane
-	    DetectorShapeView2D  dv5 = new DetectorShapeView2D("PCAL WU");
+	    dv5 = new DetectorShapeView2D("PCAL WU");
 	    dv5 = pcal.drawWU(CurrentSector);
 	    this.view.addDetectorLayer(dv5);
 	    view.addDetectorListener(this);
@@ -226,20 +256,20 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
     	
     	
     	//draw U strips
-    	DetectorShapeView2D  dv7 = new DetectorShapeView2D("PCAL U Strips");
+    	dv7 = new DetectorShapeView2D("PCAL U Strips");
     	dv7 = pcal.drawUStrips(CurrentSector);
     	this.view.addDetectorLayer(dv7);
     	view.addDetectorListener(this);
 
     	
     	//draw V strips
-    	DetectorShapeView2D  dv8 = new DetectorShapeView2D("PCAL V Strips");
+    	dv8 = new DetectorShapeView2D("PCAL V Strips");
     	dv8 = pcal.drawVStrips(CurrentSector);
     	this.view.addDetectorLayer(dv8);
     	view.addDetectorListener(this);
  
     	//draw W strips
-    	DetectorShapeView2D  dv9 = new DetectorShapeView2D("PCAL W Strips");
+    	dv9 = new DetectorShapeView2D("PCAL W Strips");
     	dv9 = pcal.drawWStrips(CurrentSector);
     	this.view.addDetectorLayer(dv9);
     	view.addDetectorListener(this);
@@ -256,6 +286,8 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
         String name, name2;
         String namedir;
         MyH1D h1 = null;
+        MyH1D h2 = null;
+        MyH1D h3 = null;
         MyH1D hsum1 = null;
         MyH1D hsum2 = null;
         MyH1D hsum3 = null;
@@ -271,8 +303,9 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
         double[] xverte = new double[20];
         double[] yvert = new double[20];
         double[] yverte = new double[20];
-        int size;
+        int size, counts;
         MyGraphErrors gshape;
+        double area, ratio;
         
         TStyle.setStatBoxFont("Helvetica", 12);
             
@@ -396,38 +429,55 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
 	        
 	        
 	       //////////// Shape Information //////////////////////////
-	        obj = pcal.getPixelVerticies(desc.getSector(), u, v, w);
-			size = (int)obj[0];
-			System.arraycopy( (double[])obj[1], 0, xvert, 0, size);
-			System.arraycopy( (double[])obj[2], 0, yvert, 0, size);
+	        DetectorShape2D pixshape = dv2.getSelectedShape();
+	        size = pixshape.getShapePath().size();
+	        for(int i=0; i < size;++i)
+	        {
+	        	xvert[i] = pixshape.getShapePath().point(i).x();
+	        	yvert[i] = pixshape.getShapePath().point(i).y();
+	        	xverte[i] = 0.0;
+	        	yverte[i] = 0.0;
+	        }
 	        
 	        canshape.divide(2,2);
 	        canshape.cd(0);
 	        gshape = graphn("shapeoutline", size, xvert, yvert, xverte, yverte);
 	        canshape.draw(gshape);
 	        
-	        /*
+	        
 	        canshape.cd(1);
-	        namedir = String.format("pixelsignal%02d", iteration-1);
-	        name = String.format("Uen_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-	        hsum1  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+	        h1  = (MyH1D)this.Hpixarea;
+	        canshape.getPad().setAxisRange(0.0, 50.0, 0.0, 1.1 * h1.getBinContent(h1.getMaximumBin()));
+	        canshape.draw(h1);
+	        hsum1  = new MyH1D("thisarea", 200, 0.0, 100.0);
+	        area = pcal.shapeArea(pixshape);
+	        //System.out.println("area: " + area);
+	        hsum1.fill(area,h1.getBinContent((int)(area/(100.0/200.0))));
 	        hsum1.setLineColor(2);
 	        canshape.draw(hsum1,"same");
 	        
+	        
 	        canshape.cd(2);
-	        namedir = String.format("pixelsignal%02d", iteration-1);
-	        name = String.format("Ven_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-	        hsum2  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
-	        hsum2.setLineColor(3);
+	        h2  = (MyH1D)this.Hpixcounts;
+	        canshape.getPad().setAxisRange(0.0, 500.0, 0.0, 1.1 * h2.getBinContent(h2.getMaximumBin()));
+	        canshape.draw(h2);
+	        namedir = String.format("crossStripHisto%02d", iteration - 1);
+		    name = String.format("adu_sig");
+			name2 = String.format("adu_%02d_%02d_%02d", u + 1, v + 1, w + 1);
+	        hsum2  = new MyH1D("thiscount", 1000, 0.0, 1000.0);
+	        counts = ((MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, w, w)).getEntries();
+	        hsum2.fill(counts,h2.getBinContent(counts));
+	        hsum2.setLineColor(2);
 	        canshape.draw(hsum2,"same");
 	        
+	        
 	        canshape.cd(3);
-	        namedir = String.format("pixelsignal%02d", iteration-1);
-	        name = String.format("Wen_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-	        hsum3  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
-	        hsum3.setLineColor(4);
-	        canshape.draw(hsum3,"same");
-	        */
+	        hsum3  = new MyH1D("thisratio", 200, 0.0, 100.0);
+	        hsum3.fill((double)counts/area);
+	        hsum3.setLineColor(2);
+	        canshape.getPad().setAxisRange(0.0, 50.0, 0.0, 2.0);
+	        canshape.draw(hsum3);
+	        
 			
         }
         if(desc.getLayer() == 3) //UW
@@ -719,6 +769,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
         */
     }
 
+    
     @Override
     public void processEvent(DataEvent de) 
     {
@@ -945,25 +996,56 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
         			HnumhitsVW = (MyH2D) getDir().getDirectory(namedir).getObject("numHitsVW");
         			HnumhitsVW.fill(rs[1],rs[2]);
 
-        			
+        			//adc on u strip
         			namedir = String.format("crossStripHisto%02d", iteration);
             		name = String.format("adu_sig");
             		pixelfilling4 = (MyH4D)getDir().getDirectory(namedir).getObject(name);
-            		pixelfilling4.fill(ad[0], rs[0], rs[1], rs[2]);
+            		if(iteration != 0)
+            		{
+	            		if(Math.abs(ad[1] - (vA[rs[1]-1]*Math.exp(vB[rs[1]-1] * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + vC[rs[1]-1])) < 20.0
+	            		&& Math.abs(ad[2] - (wA[rs[2]-1]*Math.exp(wB[rs[2]-1] * wdpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + wC[rs[2]-1])) < 20.0)
+	            			pixelfilling4.fill(ad[0], rs[0], rs[1], rs[2]);
+            		}
+            		else
+            		{
+            			pixelfilling4.fill(ad[0], rs[0], rs[1], rs[2]);
+            		}
             			
+            		//adc on v strip
             		namedir = String.format("crossStripHisto%02d", iteration);
             		name = String.format("adv_sig");
             		pixelfilling4 = (MyH4D)getDir().getDirectory(namedir).getObject(name);
-            		pixelfilling4.fill(ad[1], rs[0], rs[1], rs[2]);
-            			
+            		if(iteration != 0)
+            		{
+	            		if(Math.abs(ad[0] - (uA[rs[0]-1]*Math.exp(uB[rs[0]-1] * udpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + uC[rs[0]-1])) < 20.0
+	            		&& Math.abs(ad[2] - (wA[rs[2]-1]*Math.exp(wB[rs[2]-1] * wdpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + wC[rs[2]-1])) < 20.0)
+	            			pixelfilling4.fill(ad[1], rs[0], rs[1], rs[2]);
+            		}
+            		else
+            		{
+            			pixelfilling4.fill(ad[1], rs[0], rs[1], rs[2]);
+            		}
+            		
+            		
+            		//adc on w strip
             		namedir = String.format("crossStripHisto%02d", iteration);
             		name = String.format("adw_sig");
             		pixelfilling4 = (MyH4D)getDir().getDirectory(namedir).getObject(name);
-            		pixelfilling4.fill(ad[2], rs[0], rs[1], rs[2]);
+            		if(iteration != 0)
+            		{
+	            		if(Math.abs(ad[1] - (vA[rs[1]-1]*Math.exp(vB[rs[1]-1] * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + vC[rs[1]-1])) < 20.0
+	            		&& Math.abs(ad[0] - (uA[rs[0]-1]*Math.exp(uB[rs[0]-1] * udpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + uC[rs[0]-1])) < 20.0)
+	            			pixelfilling4.fill(ad[2], rs[0], rs[1], rs[2]);
+            		}
+            		else
+            		{
+            			pixelfilling4.fill(ad[2], rs[0], rs[1], rs[2]);
+            		}
+            		
             			
             		//check if pixel is valid with hitmatrix
             		//fill pixel histograms initialized by Nickinit()
-            		if(hit[rs[0] - 1][rs[1] - 1][rs[2] - 1] == 1)
+            		if(hit[rs[0] - 1][rs[1] - 1][rs[2] - 1] == 1 && iteration == 0)
             		{
             			double ucor = ((ad[0] - uC[rs[0]-1])/Math.exp(uB[rs[0]-1] * udpixel[rs[0]-1][rs[1]-1][rs[2]-1])) + uC[rs[0]-1];
             			double vcor = ((ad[1] - vC[rs[1]-1])/Math.exp(vB[rs[1]-1] * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1])) + vC[rs[1]-1];
@@ -988,6 +1070,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
             			name = String.format("toten_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
             			pixelfilling = (MyH1D)getDir().getDirectory(namedir).getObject(name);
             			pixelfilling.fill((ucor + vcor + wcor)/3.0);
+
         			}
         		}
         	}
@@ -995,12 +1078,14 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
         
     }
 
+    
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand().compareTo("Process")==0){
             DetectorEventProcessorDialog dialog = new DetectorEventProcessorDialog(this);
         }
     }
   
+    
     public void process(){
     	   ProgressPrintout printout = new ProgressPrintout("Calibration");
     	   printout.setInterval(1.0);
@@ -1023,6 +1108,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
     	    }
     	   //this.analyze();
     	}
+    
     
     public void Nickanalyze() 
 	{
@@ -1062,6 +1148,8 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
 						//centroids[counter] = myfunc.getParameter(1);
 						if(tempsignal.getMean() > 1 && tempsignal.getEntries() > 10)
 						{
+							Hpixcounts.fill(tempsignal.getEntries());
+							
 							centroids[counter] = tempsignal.getMean();
 							ey[counter] = tempsignal.getRMS()/tempsignal.getEntries(); 
 							
@@ -1191,7 +1279,8 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
 	}
 	
     	 //MyGraphErrors constructor
-  	public MyGraphErrors graphn(String name, int numberpoints, double x[], double y[], double xe[], double ye[])
+  	
+    public MyGraphErrors graphn(String name, int numberpoints, double x[], double y[], double xe[], double ye[])
     {
           double a[] = new double[numberpoints];
           double b[] = new double[numberpoints];
@@ -1213,6 +1302,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
           return mygraph;
     }
   	
+    
     public F1D fitexp(double x[], int counter, int strip, String functionName, int uvw)
     {
     	  	double minx, maxx;
@@ -1413,6 +1503,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
 		getDir().addDirectory(pixelsignal);
 	}
     
+	
 	public void analyze() 
 	{
 		//create directories
@@ -1621,6 +1712,7 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
 		
 	}
 	
+	
 	public void getAttenuationCoefficients()
     {
 			
@@ -1757,15 +1849,15 @@ public class PCALcalibv1 extends JFrame implements IDetectorListener, IDetectorP
 		}
 		
     }
-	
 
-    public static void main(String[] args){    	
+    
+	public static void main(String[] args){    	
     	//PCALcalib detview = new PCALcalib("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-100k.evio");
     	//PCALcalib detview = new PCALcalib("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-500k.evio");
     	//PCALcalib detview = new PCALcalib("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-3M-s2.evio");
     	
     	//Draws detector views
-    	PCALcalibv1 detview = new PCALcalibv1();
+    	PCALcalibv2 detview = new PCALcalibv2();
     	
     	for(iteration = 0; iteration < detview.numiterations; ++iteration)
     	{

@@ -2641,6 +2641,29 @@ public class PCALDraw {
     }
     
     
+    public double shapeArea(DetectorShape2D inshape) 
+	{ 
+		int numPoints = inshape.getShapePath().size();
+		double[] xpoint = new double[numPoints];
+		double[] ypoint = new double[numPoints];
+		int i, j;
+		double area = 0;         // Accumulates area in the loop
+		j = numPoints-1;  // The last vertex is the 'previous' one to the first
+		
+		for(i=0; i<numPoints; i++)
+		{
+			xpoint[i] = inshape.getShapePath().point(i).x();
+			ypoint[i] = inshape.getShapePath().point(i).y();
+		}
+
+		for(i=0; i<numPoints; i++)
+		{
+			area = area + (xpoint[j]+xpoint[i]) * (ypoint[j]-ypoint[i]); 
+		    j = i;  //j is previous vertex to i
+		}
+		return area/2.0;
+	}
+    
 	public float uvw_dalitz(int ic, int ip, int il) {
 		float uvw=0;
 		switch (ic) {

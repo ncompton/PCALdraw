@@ -3,6 +3,7 @@ package org.jlab.calib;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.TreeMap;
 
 import org.root.attr.Attributes;
@@ -929,7 +930,7 @@ public class MyH6D implements EvioWritableTree {
     }
 
     @Override
-    public void fromTreeMap(TreeMap<Integer, Object> map) {
+    public void fromTreeMap(Map<Integer, Object> map){
         if(map.get(1) instanceof int[]){
             if(  ((int[]) map.get(1))[0]==3){
                 int[]    nbins      = ((int[]) map.get(3));
