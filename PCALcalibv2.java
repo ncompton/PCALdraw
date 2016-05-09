@@ -106,10 +106,10 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 	
 	int pixelnumber[][][] = new int[68][62][62]; //indexing of the pixel number
 	MyH1D Hpixarea = new MyH1D("pixarea",200,0.0,100.0);
-	MyH1D Hpixcounts = new MyH1D("pixcounts",1000,0.0,1000.0);
+	//MyH1D Hpixcounts = new MyH1D("pixcounts",1000,0.0,1000.0);
 	//int loop3Dhist[][][][] = new int[3000][50][50][50]; //indexing of 4D histogram
 	//ArrayList<MyH3D> pixeladclist;
-	//MyH4D H4ADC = new MyH4D("ADCvalues",50,0.0,150.0,50,0.0,150.0,50,0.0,150.0,3000,0.5,6500.5);
+	//MyH4S H4ADC = new MyH4S("ADCvalues",50,0.0,150.0,50,0.0,150.0,50,0.0,150.0,7000,0.5,7000.5);
 	
 	double ugain[] = new double[68]; //
 	double vgain[] = new double[62]; //
@@ -206,9 +206,10 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
         				Hpixarea.fill(pcal.shapeArea(shape));
         				hit[upaddle][vpaddle][wpaddle] = 1;
         				
-        				/*
+        				
         				//System.out.println(Runtime.getRuntime().freeMemory());
-        				//System.out.println(pixeladclist.size());
+        				/*
+        				System.out.println(pixeladclist.size());
         				name = String.format("ADC_%02d_%02d_%02d", upaddle, vpaddle, wpaddle);
         				pixeladclist.add(new MyH3D(name,50,0.0,150.0,50,0.0,150.0,50,0.0,150.0));
         				*/
@@ -456,7 +457,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 	        hsum1.setLineColor(2);
 	        canshape.draw(hsum1,"same");
 	        
-	        
+	  		/*
 	        canshape.cd(2);
 	        h2  = (MyH1D)this.Hpixcounts;
 	        canshape.getPad().setAxisRange(0.0, 500.0, 0.0, 1.1 * h2.getBinContent(h2.getMaximumBin()));
@@ -477,6 +478,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 	        hsum3.setLineColor(2);
 	        canshape.getPad().setAxisRange(0.0, 50.0, 0.0, 2.0);
 	        canshape.draw(hsum3);
+	        */
 	        
 			
         }
@@ -1148,7 +1150,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 						//centroids[counter] = myfunc.getParameter(1);
 						if(tempsignal.getMean() > 1 && tempsignal.getEntries() > 10)
 						{
-							Hpixcounts.fill(tempsignal.getEntries());
+							//Hpixcounts.fill(tempsignal.getEntries());
 							
 							centroids[counter] = tempsignal.getMean();
 							ey[counter] = tempsignal.getRMS()/tempsignal.getEntries(); 

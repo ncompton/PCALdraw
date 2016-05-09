@@ -5,6 +5,11 @@ import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
 
+import math.geom2d.Point2D;
+import math.geom2d.polygon.Polygon2D;
+import math.geom2d.polygon.Polygons2D;
+import math.geom2d.polygon.SimplePolygon2D;
+
 import org.jlab.clas.detector.DetectorType;
 import org.jlab.clas12.calib.DetectorShape2D;
 import org.jlab.clas12.calib.DetectorShapeTabView;
@@ -592,8 +597,38 @@ public int wn_PnPoly( Point3D P, DetectorShape2D shape)
 	
 	public static void main(String[] args){   
 		
-		TestBug test = new TestBug();
+		//TestBug test = new TestBug();
 		//test.testcontained();
+		
+		SimplePolygon2D poly1 = new SimplePolygon2D();
+		SimplePolygon2D poly2 = new SimplePolygon2D();
+		Polygon2D poly3 = null;
+		//point1
+		poly1.addVertex(new Point2D(0.0,0.0)); 
+		//point2
+		poly1.addVertex(new Point2D(0.0,1.0));
+		//point3
+		poly1.addVertex(new Point2D(1.0,1.0));  
+		//point4
+		poly1.addVertex(new Point2D(1.0,0.0));
+		
+		System.out.println(poly1.area());
+		//point1
+		poly2.addVertex(new Point2D(1.0,0.0));
+		//point2
+		poly2.addVertex(new Point2D(1.0,1.0));
+		//point3
+		poly2.addVertex(new Point2D(2.0,1.0));
+		//point4
+		poly2.addVertex(new Point2D(2.0,0.0));
+		System.out.println(poly2.area());
+		
+		poly3 = Polygons2D.union(poly1,poly2);
+		System.out.println(poly3.area());
+		for(int i = 0; i < poly3.vertexNumber(); ++ i)
+		{
+			System.out.println(poly3.vertex(i).getX() + "  " + poly3.vertex(i).getY());
+		}
 	}
 
 }
