@@ -463,7 +463,6 @@ public class CalDrawDB{
 		return(new Object[]{nPoints, xnew, ynew});
 		*/
 	}
-	
 
 	public Object[] getStripVerticies(int sector, String strip1, int paddle1){
 		int numpoints = 4;
@@ -487,6 +486,7 @@ public class CalDrawDB{
 	
 	//estimates the shape center by calculating average x, y, z
 	//from all verticies in the shape
+
 	public double[] getShapeCenter(DetectorShape2D shape){
 		double[] center = new double[3];
 		int numpoints = shape.getShapePath().size();
@@ -506,6 +506,7 @@ public class CalDrawDB{
 	
 	//assuming PMT is right at edge of PCAL
 	//there is actually tens of centimeters of fibers between.
+
 	public double[] getPMTLocation(String strip1, int paddle1){
 		double[] center = new double[3];
 		
@@ -651,6 +652,7 @@ public class CalDrawDB{
 	}
 	
 	//get attenuation distance
+
 	public double getWPixelDistance(int uPaddle, int vPaddle, int wPaddle){
 		double distance = 0;
 		double[] shapecenter = new double[3];
@@ -665,6 +667,7 @@ public class CalDrawDB{
 		
 		return distance;
 	}
+	
 	
 
 	
@@ -737,6 +740,7 @@ public class CalDrawDB{
 	
     //xdistance needs to be 1-77 or 1-84 not 0
     //meant for use with the output of CalcDistinStrips
+
     public double[] CalcDistance(char stripletter, double xdistance, double xdistanceE)
     {
         
@@ -778,8 +782,7 @@ public class CalDrawDB{
 		
 	}
 	
-	
-	public DetectorShape2D scaleshape(DetectorShape2D shape, double scalefactor)
+	public DetectorShape2D scaleShape(DetectorShape2D shape, double scalefactor)
 	{
 		double[] shapecenter = new double[3];
 		
@@ -808,6 +811,36 @@ public class CalDrawDB{
 		return shape;
 	}
 	
+	public DetectorShape2D trimShape(DetectorShape2D shapeA, DetectorShape2D shapeB)
+	{
+		DetectorShape2D shapeC = new DetectorShape2D();
+		
+		Object[] obj = getVerticies(shapeA,shapeB);
+		
+		int numpoints = (int)obj[0];
+
+		if(numpoints > 2)
+		{
+			double[] x = new double[numpoints];
+			double[] y = new double[numpoints];
+			System.arraycopy( (double[])obj[1], 0, x, 0, numpoints);
+			System.arraycopy( (double[])obj[2], 0, y, 0, numpoints);
+		
+			for(int i = 0; i < numpoints; ++i)
+			{
+				shapeC.getShapePath().addPoint(x[i], y[i], 0.0);
+			}
+			
+			return(shapeC);
+		}
+		else
+		{
+			System.out.println("WHY!!!!");
+			return(null);
+		}
+		
+	}
+	
 	
 	private void initVert()
 	{
@@ -823,6 +856,7 @@ public class CalDrawDB{
 		double xtemp, ytemp;
 		Point3D point1 = new Point3D();
 		Polygon2D poly1 = new SimplePolygon2D();
+		Polygon2D outer = new SimplePolygon2D();
 		Point2D minxpoint = new Point2D(999.0,999.0);
 		Point2D minypoint = new Point2D(999.0,999.0);
 		Point2D maxypoint = new Point2D(999.0,-999.0);
@@ -891,9 +925,11 @@ public class CalDrawDB{
 	        			if(poly1.vertex(i).y() > maxypoint.y()) maxypoint = Point2D.create(poly1.vertex(i));
 	        			//System.out.println("Point #: " + i + " x: " + poly1.vertex(i).x() + " y: " + poly1.vertex(i).y());
 	        		}
+	        		shape2.getShapePath().clear();
 	        		shape2.getShapePath().addPoint(minxpoint.x(),minxpoint.y(), 0.0); 
 	        		shape2.getShapePath().addPoint(minypoint.x(),minypoint.y(), 0.0); 
 	        		shape2.getShapePath().addPoint(maxypoint.x(),maxypoint.y(), 0.0);
+	        		
 	        		
 	        		//get triangle edge lengths 
 	        		A = minxpoint.distance(minypoint);
@@ -918,23 +954,28 @@ public class CalDrawDB{
 	        	//get strips widths and shifts for each layer
 	        	if(l == 0)
 	        	{
-	        		uwidth = udist/(double)numstrips[l];
+	        		if(unit == 0) uwidth = udist/(double)(numstrips[l] + 16);
+	        		else uwidth = udist/(double)numstrips[l];
 	        		//shift starting from last strip
 	        		xshift = -uwidth; //per strip
 	        		yshift = 0.0;
 	        	}
 	        	if(l == 1)
 	        	{
-	        		vwidth = vdist/(double)numstrips[l];
+	        		if(unit == 0) vwidth = vdist/(double)(numstrips[l] + 15);
+	        		else vwidth = vdist/(double)numstrips[l];
 	        		xshift = vwidth * Math.cos(a);
 	        		yshift = -vwidth * Math.sin(a);
 	        	}
 	        	if(l == 2)
 	        	{
-	        		wwidth = wdist/(double)numstrips[l];
+	        		if(unit == 0) wwidth = wdist/(double)(numstrips[l] + 15);
+	        		else wwidth = wdist/(double)numstrips[l];
 	        		xshift = wwidth * Math.cos(a);
 	        		yshift = wwidth * Math.sin(a);
 	        	}
+	        	
+	        	//System.out.println("numstrips: " + numstrips[l]);
 	        	
 	        	//System.out.println("udist: " + udist);
 	        	//System.out.println("vdist: " + vdist);
@@ -980,6 +1021,16 @@ public class CalDrawDB{
 		        		shape.getShapePath().addPoint(maxypoint.x() + nextpad*xshift,  maxypoint.y(),  0.0); 
 		        		//point4
 		        		shape.getShapePath().addPoint(minypoint.x() + nextpad*xshift,  minypoint.y(),  0.0); 
+	        		
+		        		/*
+		        		//testing
+		        		if(sector == 0)
+		        		{
+		        			xtemp = minypoint.x() + currentpad*xshift;
+		        			ytemp = minypoint.y() + currentpad*yshift;
+		        			System.out.println("x: " + xtemp + " y: " + ytemp);
+		        		}
+		        		*/
 	        		}
 	        		//v
 	        		if(l == 1)
@@ -1046,11 +1097,16 @@ public class CalDrawDB{
 		        			System.out.println("x: " + xtemp + " y: " + ytemp);
 		        		}
 		        		*/
+		        		
 	        		}
 	        		
-	        		for(int j = 0; j < shape.getShapePath().size(); ++j)
+	        		DetectorShape2D shape3 = new DetectorShape2D();
+	        		shape3 = this.trimShape(shape, shape2);
+	        		if(shape3.getShapePath().size() < 4) shape3.getShapePath().addPoint(shape3.getShapePath().point(2));
+
+	        		for(int j = 0; j < shape3.getShapePath().size(); ++j)
 	        		{
-	        			point1.copy(shape.getShapePath().point(j));
+	        			point1.copy(shape3.getShapePath().point(j));
 	        			
 	        			//push unit to the right to make room for beam line
 		        		point1.translateXYZ(333.1042, 0.0, 0.0);
@@ -1151,7 +1207,7 @@ public class CalDrawDB{
 
 	public static void main(String[] args){ 
 		
-		CalDrawDB pcaltest = new CalDrawDB("ECin");
+		CalDrawDB pcaltest = new CalDrawDB("PCAL");
 		TEmbeddedCanvas         shapeCanvas= new TEmbeddedCanvas();
 		DetectorShapeTabView  view= new DetectorShapeTabView();
 		
@@ -1187,15 +1243,15 @@ public class CalDrawDB{
 		
 		
 		//draw U strips
-		/*
+
 		double areasum = 0.0;
 		DetectorShape2D shape = new DetectorShape2D();
 	 	DetectorShapeView2D Umap= new DetectorShapeView2D("PCAL U");
-	 	for(int sector = 0; sector < 6; sector++)
+	 	for(int sector = 0; sector < 1; sector++)
     	{
-	 		for(int uPaddle = 0; uPaddle < 36; uPaddle++)
+	 		for(int uPaddle = 0; uPaddle < 62; uPaddle++)
 	 		{
-	            shape = pcaltest.getStripShape(sector, "w", uPaddle);
+	            shape = pcaltest.getStripShape(sector, "v", uPaddle);
 	            
 
 		            double [] xtemp2 = new double [shape.getShapePath().size()];
@@ -1236,7 +1292,7 @@ public class CalDrawDB{
 	 		}
     	}
 	    view.addDetectorLayer(Umap);
-		*/
+		
 		
 		/*
 		Object[] obj = pcaltest.getOverlapVerticies(2, "u", 67, "w", 42);
@@ -1296,7 +1352,7 @@ public class CalDrawDB{
 		
 		
 		//Draw pixels
-	    
+	    /*
 		PrintWriter writer = null;
 		try 
 		{
@@ -1315,11 +1371,11 @@ public class CalDrawDB{
     	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL Pixel");
     	 	for(int sector = 0; sector < 1; sector++)
 	    	{
-	    	for(int uPaddle = 0; uPaddle < 36; uPaddle++)
+	    	for(int uPaddle = 0; uPaddle < 68; uPaddle++)
 	    	{
-	    		for(int vPaddle = 0; vPaddle < 36; vPaddle++)
+	    		for(int vPaddle = 0; vPaddle < 62; vPaddle++)
 	            {
-		            for(int wPaddle = 0; wPaddle < 36; wPaddle++)
+		            for(int wPaddle = 0; wPaddle < 62; wPaddle++)
 		            {
 		            	//System.out.println("u: " + uPaddle + " v: " + vPaddle + " w: " + wPaddle);
 		            	if(pcaltest.isValidPixel(sector, uPaddle, vPaddle, wPaddle))
@@ -1374,7 +1430,7 @@ public class CalDrawDB{
 	    	view.addDetectorLayer(UWmap);
 	    	
 	    	writer.close();
-	    	
+	    	*/
 	    
 	    	
 	       // return UWmap;
