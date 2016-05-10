@@ -1173,7 +1173,7 @@ public class CalDrawDB{
 			}
 			else
 			{
-				if(Math.abs(pol3.vertex(i).getX() - x[count-1]) > 0.0001 || Math.abs(pol3.vertex(i).getY() - y[count-1]) > 0.0001)
+				if(Math.abs(pol3.vertex(i).getX() - x[count-1]) > 0.00001 || Math.abs(pol3.vertex(i).getY() - y[count-1]) > 0.00001)
 				{
 					x[count] = pol3.vertex(i).getX();
 					y[count] = pol3.vertex(i).getY();
@@ -1243,7 +1243,7 @@ public class CalDrawDB{
 		
 		
 		//draw U strips
-
+		/*
 		double areasum = 0.0;
 		DetectorShape2D shape = new DetectorShape2D();
 	 	DetectorShapeView2D Umap= new DetectorShapeView2D("PCAL U");
@@ -1251,7 +1251,7 @@ public class CalDrawDB{
     	{
 	 		for(int uPaddle = 0; uPaddle < 62; uPaddle++)
 	 		{
-	            shape = pcaltest.getStripShape(sector, "v", uPaddle);
+	            shape = pcaltest.getStripShape(sector, "w", uPaddle);
 	            
 
 		            double [] xtemp2 = new double [shape.getShapePath().size()];
@@ -1292,7 +1292,7 @@ public class CalDrawDB{
 	 		}
     	}
 	    view.addDetectorLayer(Umap);
-		
+		*/
 		
 		/*
 		Object[] obj = pcaltest.getOverlapVerticies(2, "u", 67, "w", 42);
@@ -1352,7 +1352,7 @@ public class CalDrawDB{
 		
 		
 		//Draw pixels
-	    /*
+	    
 		PrintWriter writer = null;
 		try 
 		{
@@ -1419,6 +1419,7 @@ public class CalDrawDB{
 				            	y = shape.getShapePath().point(i).y();
 	        					shape.getShapePath().point(i).set(x, y, 0.0);
 	        				}
+		            		shape.setColor(130,(int)(255*vPaddle/62.),(int)(255*wPaddle/62.));
 		            		UWmap.addShape(shape);
 		            	}
 		            	//}
@@ -1430,7 +1431,7 @@ public class CalDrawDB{
 	    	view.addDetectorLayer(UWmap);
 	    	
 	    	writer.close();
-	    	*/
+	    	
 	    
 	    	
 	       // return UWmap;
