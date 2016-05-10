@@ -1163,6 +1163,7 @@ public class CalDrawDB{
 		
 		//nPoints = pol3.vertexNumber();
 		int count = 0;
+		Boolean duplicate = false;
 		for(int i = 0; i < pol3.vertexNumber(); ++i)
 		{			
 			if(i == 0)
@@ -1173,12 +1174,20 @@ public class CalDrawDB{
 			}
 			else
 			{
-				if(Math.abs(pol3.vertex(i).getX() - x[count-1]) > 0.00001 || Math.abs(pol3.vertex(i).getY() - y[count-1]) > 0.00001)
+				for(int j = 0; j < i; ++j)
+				{
+					if(Math.abs(pol3.vertex(i).getX() - x[j]) < 0.000001 && Math.abs(pol3.vertex(i).getY() - y[j]) < 0.0001)
+					{
+						duplicate = true;
+					}
+				}
+				if(!duplicate)
 				{
 					x[count] = pol3.vertex(i).getX();
 					y[count] = pol3.vertex(i).getY();
 					++count;
 				}
+				duplicate = false;
 			}
 			
 			//System.out.println("x: " + pol3.vertex(i).getX() + " y: " + pol3.vertex(i).getY());
@@ -1207,7 +1216,7 @@ public class CalDrawDB{
 
 	public static void main(String[] args){ 
 		
-		CalDrawDB pcaltest = new CalDrawDB("PCAL");
+		CalDrawDB pcaltest = new CalDrawDB("ECin");
 		TEmbeddedCanvas         shapeCanvas= new TEmbeddedCanvas();
 		DetectorShapeTabView  view= new DetectorShapeTabView();
 		
@@ -1371,11 +1380,11 @@ public class CalDrawDB{
     	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL Pixel");
     	 	for(int sector = 0; sector < 1; sector++)
 	    	{
-	    	for(int uPaddle = 0; uPaddle < 68; uPaddle++)
+	    	for(int uPaddle = 0; uPaddle < 36; uPaddle++)
 	    	{
-	    		for(int vPaddle = 0; vPaddle < 62; vPaddle++)
+	    		for(int vPaddle = 0; vPaddle < 36; vPaddle++)
 	            {
-		            for(int wPaddle = 0; wPaddle < 62; wPaddle++)
+		            for(int wPaddle = 0; wPaddle < 36; wPaddle++)
 		            {
 		            	//System.out.println("u: " + uPaddle + " v: " + vPaddle + " w: " + wPaddle);
 		            	if(pcaltest.isValidPixel(sector, uPaddle, vPaddle, wPaddle))
@@ -1389,6 +1398,7 @@ public class CalDrawDB{
 		            		
 		            		double [] xtemp2 = new double [shape.getShapePath().size()];
 		            		double [] ytemp2 = new double [shape.getShapePath().size()];
+		            		
 		            		
 		            		for(int i = 0; i < shape.getShapePath().size(); ++i)
 		            		{
@@ -1405,6 +1415,10 @@ public class CalDrawDB{
 		            		num2 = vPaddle + 1;
 		            		num3 = wPaddle + 1;
 		            		//total = pcaltest.getUPixelDistance(uPaddle, vPaddle, wPaddle) + pcaltest.getVPixelDistance(uPaddle, vPaddle, wPaddle) + pcaltest.getWPixelDistance(uPaddle, vPaddle, wPaddle);
+		            		if(pcaltest.unit != 0 && shape.getShapePath().size() == 4)
+		            			System.out.println("4 vertex: " + num1  + "   " + num2 + "   " + num3);
+		            		if(pcaltest.unit != 0 && shape.getShapePath().size() == 5)
+		            			System.out.println("5 vertex: " + num1  + "   " + num2 + "   " + num3);
 		            		
 		            		//System.out.println(num1  + "   " + num2 + "   " + num3);
 		            		writer.println(num1  + "   " + num2 + "   " + num3 + "   "
