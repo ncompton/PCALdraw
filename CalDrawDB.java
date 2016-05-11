@@ -1132,6 +1132,9 @@ public class CalDrawDB{
 		double[] x = new double[vert1size * vert2size];
 		double[] y = new double[vert1size * vert2size];
 		
+		double[] x2 = new double[vert1size * vert2size];
+		double[] y2 = new double[vert1size * vert2size];
+		
 		double[] xtemp1 = new double[vert1size];
 		double[] ytemp1 = new double[vert1size];
 		
@@ -1152,7 +1155,7 @@ public class CalDrawDB{
 		}
 		
 		
-		/////////////////////////////////////////////////////////////
+		////////////////// Find Intersection //////////////////////////
 		
 		SimplePolygon2D pol1 = new SimplePolygon2D(xtemp1,ytemp1);
 		SimplePolygon2D pol2 = new SimplePolygon2D(xtemp2,ytemp2);
@@ -1161,6 +1164,7 @@ public class CalDrawDB{
 		Polygon2D pol3 = Polygons2D.intersection(pol1,pol2);
 		
 		
+		///////////// Remove Duplicate Points /////////////////////////
 		//nPoints = pol3.vertexNumber();
 		int count = 0;
 		Boolean duplicate = false;
@@ -1192,31 +1196,86 @@ public class CalDrawDB{
 			
 			//System.out.println("x: " + pol3.vertex(i).getX() + " y: " + pol3.vertex(i).getY());
 		}
+		
+		///////////////// Record number of points /////////////////////
+				
 		if(count > 2)
 			nPoints = count;
 		else
 			nPoints = 0;
+
+		//////////// Remove Redundant Co-linear Points ////////////////
 		
-		//System.out.println("nPoints: " + nPoints);
-		
-		//if(nPoints > 2 && Polygons2D.computeArea(pol3) < 100.0)System.out.println("area: " + Polygons2D.computeArea(pol3));
-		/*
-		if(nPoints > 2 && Math.abs(Polygons2D.computeArea(pol3)) < 2.0)
+		int count2 = 0;
+		double slopebefore, slopeafter;
+		Boolean colinear = false;
+		if(nPoints > 2)
 		{
-			nPoints = 0;
-			//System.out.println("area: " + Polygons2D.computeArea(pol3));
+			for(int i = 0; i < nPoints; ++i)
+			{			
+				if(i == 0)
+				{
+					//test slope between 
+					     	 
+					//last and zeroth point
+					if(Math.abs(x[i] - x[nPoints - 1]) < 0.000001) slopebefore = 999.0;
+					else slopebefore = (y[nPoints - 1] - y[i])/(x[nPoints - 1] - x[i]);
+					
+					//current and next
+					if(Math.abs(x[i] - x[i + 1]) < 0.000001) slopeafter = 999.0;
+					else slopeafter = (y[i + 1] - y[i])/(x[i + 1] - x[i]);
+				}
+				else if(i == nPoints -1)
+				{
+					//test slope between 
+				     
+					//previous and current
+					if(Math.abs(x[i] - x[i - 1]) < 0.000001) slopebefore = 999.0;
+					else slopebefore = (y[i - 1] - y[i])/(x[i - 1] - x[i]);
+					
+					//current and zeroth
+					if(Math.abs(x[i] - x[0]) < 0.000001) slopeafter = 999.0;
+					else slopeafter = (y[0] - y[i])/(x[0] - x[i]);
+				}
+				else 
+				{
+					//test slope between 
+					
+				    //previous and current
+					if(Math.abs(x[i] - x[i - 1]) < 0.000001) slopebefore = 999.0;
+					else slopebefore = (y[i - 1] - y[i])/(x[i - 1] - x[i]);
+					
+					//current and next
+					if(Math.abs(x[i] - x[i + 1]) < 0.000001) slopeafter = 999.0;
+					else slopeafter = (y[i + 1] - y[i])/(x[i + 1] - x[i]);
+				}
+				
+				if(Math.abs(slopeafter - slopebefore) > 0.0001)
+				{
+					x2[count2] = x[i];
+					y2[count2] = y[i];
+					++count2;
+				}
+					
+				//System.out.println("x: " + pol3.vertex(i).getX() + " y: " + pol3.vertex(i).getY());
+			}
 		}
-		*/
+		///////////////// Record number of points /////////////////////
+		
+		if(count2 > 2)
+			nPoints = count2;
+		else
+			nPoints = 0;
 
 		/////////////////////////////////////////////////////////////
 		
-		return(new Object[]{nPoints, x, y});
+		return(new Object[]{nPoints, x2, y2});
 	}
 	
 
 	public static void main(String[] args){ 
 		
-		CalDrawDB pcaltest = new CalDrawDB("ECin");
+		CalDrawDB pcaltest = new CalDrawDB("PCAL");
 		TEmbeddedCanvas         shapeCanvas= new TEmbeddedCanvas();
 		DetectorShapeTabView  view= new DetectorShapeTabView();
 		
@@ -1380,11 +1439,11 @@ public class CalDrawDB{
     	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL Pixel");
     	 	for(int sector = 0; sector < 1; sector++)
 	    	{
-	    	for(int uPaddle = 0; uPaddle < 36; uPaddle++)
+	    	for(int uPaddle = 0; uPaddle < 68; uPaddle++)
 	    	{
-	    		for(int vPaddle = 0; vPaddle < 36; vPaddle++)
+	    		for(int vPaddle = 0; vPaddle < 62; vPaddle++)
 	            {
-		            for(int wPaddle = 0; wPaddle < 36; wPaddle++)
+		            for(int wPaddle = 0; wPaddle < 62; wPaddle++)
 		            {
 		            	//System.out.println("u: " + uPaddle + " v: " + vPaddle + " w: " + wPaddle);
 		            	if(pcaltest.isValidPixel(sector, uPaddle, vPaddle, wPaddle))
@@ -1415,11 +1474,12 @@ public class CalDrawDB{
 		            		num2 = vPaddle + 1;
 		            		num3 = wPaddle + 1;
 		            		//total = pcaltest.getUPixelDistance(uPaddle, vPaddle, wPaddle) + pcaltest.getVPixelDistance(uPaddle, vPaddle, wPaddle) + pcaltest.getWPixelDistance(uPaddle, vPaddle, wPaddle);
+		            		/*
 		            		if(pcaltest.unit != 0 && shape.getShapePath().size() == 4)
 		            			System.out.println("4 vertex: " + num1  + "   " + num2 + "   " + num3);
 		            		if(pcaltest.unit != 0 && shape.getShapePath().size() == 5)
 		            			System.out.println("5 vertex: " + num1  + "   " + num2 + "   " + num3);
-		            		
+		            		*/
 		            		//System.out.println(num1  + "   " + num2 + "   " + num3);
 		            		writer.println(num1  + "   " + num2 + "   " + num3 + "   "
 									+ pcaltest.getUPixelDistance(uPaddle, vPaddle, wPaddle) + "   " 
