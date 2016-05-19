@@ -90,7 +90,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
     
     TDirectory mondirectory = new TDirectory("calibration");
     
-    int hit[][][] = new int[68][62][62]; //bad pixel, good pixel, maybe good = 0, 1, 2
+    short hit[][][] = new short[68][62][62]; //bad pixel, good pixel, maybe good = 0, 1, 2
     
 	double udpixel[][][] = new double[68][62][62]; //u-PMT distance with that pixel
 	double vdpixel[][][] = new double[68][62][62]; //v-PMT distance with that pixel
@@ -104,11 +104,11 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 	double vcent[][][] = new double[68][62][62]; //v Gaussian centroid pixel
 	double wcent[][][] = new double[68][62][62]; //w Gaussian centroid pixel
 	
-	int pixelnumber[][][] = new int[68][62][62]; //indexing of the pixel number
+	short pixelnumber[][][] = new short[68][62][62]; //indexing of the pixel number
 	MyH1D Hpixarea = new MyH1D("pixarea",200,0.0,100.0);
 	//MyH1D Hpixcounts = new MyH1D("pixcounts",1000,0.0,1000.0);
 	//int loop3Dhist[][][][] = new int[3000][50][50][50]; //indexing of 4D histogram
-	//ArrayList<MyH3D> pixeladclist;
+	//ArrayList<MyH3S> pixeladclist;
 	//MyH4S H4ADC = new MyH4S("ADCvalues",50,0.0,150.0,50,0.0,150.0,50,0.0,150.0,7000,0.5,7000.5);
 	
 	double ugain[] = new double[68]; //
@@ -189,7 +189,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
     	int count = 0;
     	String name;
     	//pixeladclist = new ArrayList<MyH3D>(68*62*62);
-    	//pixeladclist = new ArrayList<MyH3D>(7000);
+    	//pixeladclist = new ArrayList<MyH3S>(7000);
     	//draw pixels
     	dv2 = new DetectorShapeView2D("PCAL Pixels");
     	for(int upaddle = 0; upaddle < 68; upaddle++){
@@ -208,12 +208,12 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
         				
         				
         				//System.out.println(Runtime.getRuntime().freeMemory());
-        				/*
-        				System.out.println(pixeladclist.size());
-        				name = String.format("ADC_%02d_%02d_%02d", upaddle, vpaddle, wpaddle);
-        				pixeladclist.add(new MyH3D(name,50,0.0,150.0,50,0.0,150.0,50,0.0,150.0));
-        				*/
-        				pixelnumber[upaddle][vpaddle][wpaddle] = count;
+        				
+        				//System.out.println(pixeladclist.size());
+        				//name = String.format("ADC_%02d_%02d_%02d", upaddle, vpaddle, wpaddle);
+        				//pixeladclist.add(new MyH3S(name,50,0.0,150.0,50,0.0,150.0,50,0.0,150.0));
+        				
+        				pixelnumber[upaddle][vpaddle][wpaddle] = (short)count;
         				++count;
         				
         				udpixel[upaddle][vpaddle][wpaddle] = pcal.getUPixelDistance(upaddle, vpaddle, wpaddle);
@@ -347,7 +347,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 		    namedir = String.format("crossStripHisto%02d", iteration - 1);
 		    name = String.format("adu_sig");
 			name2 = String.format("adu_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-	        h1  = (MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, w, w);
+	        h1  = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, w, w);
 	        canvas.cd(1);
 	        canvas.draw(h1);
 	        
@@ -372,7 +372,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 		    namedir = String.format("crossStripHisto%02d", iteration - 1);
 		    name = String.format("adv_sig");
 			name2 = String.format("adv_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-			h1 = (MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, w, w);
+			h1 = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, w, w);
 	        canvas.cd(3);
 	        canvas.draw(h1);
 	        
@@ -395,7 +395,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 		    namedir = String.format("crossStripHisto%02d", iteration - 1);
 		    name = String.format("adw_sig");
 			name2 = String.format("adw_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-			h1 = (MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, w, w);
+			h1 = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, w, w);
 	        canvas.cd(5);
 	        canvas.draw(h1);
 	        
@@ -404,27 +404,27 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 	        canvas1.cd(0);
 	        namedir = String.format("pixelsignal%02d", iteration-1);
 	        name = String.format("toten_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-	        h1  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+	        h1  = (MyH1D)((MyH1S)getDir().getDirectory(namedir).getObject(name)).histCloneToH1D(name);
 	        canvas1.draw(h1);
 	        
 	        canvas1.cd(1);
 	        namedir = String.format("pixelsignal%02d", iteration-1);
 	        name = String.format("Uen_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-	        hsum1  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+	        hsum1  = (MyH1D)((MyH1S)getDir().getDirectory(namedir).getObject(name)).histCloneToH1D(name);
 	        hsum1.setLineColor(2);
 	        canvas1.draw(hsum1,"same");
 	        
 	        canvas1.cd(2);
 	        namedir = String.format("pixelsignal%02d", iteration-1);
 	        name = String.format("Ven_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-	        hsum2  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+	        hsum2  = (MyH1D)((MyH1S)getDir().getDirectory(namedir).getObject(name)).histCloneToH1D(name);
 	        hsum2.setLineColor(3);
 	        canvas1.draw(hsum2,"same");
 	        
 	        canvas1.cd(3);
 	        namedir = String.format("pixelsignal%02d", iteration-1);
 	        name = String.format("Wen_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-	        hsum3  = (MyH1D)getDir().getDirectory(namedir).getObject(name);
+	        hsum3  = (MyH1D)((MyH1S)getDir().getDirectory(namedir).getObject(name)).histCloneToH1D(name);
 	        hsum3.setLineColor(4);
 	        canvas1.draw(hsum3,"same");
 	        
@@ -466,7 +466,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 		    name = String.format("adu_sig");
 			name2 = String.format("adu_%02d_%02d_%02d", u + 1, v + 1, w + 1);
 	        hsum2  = new MyH1D("thiscount", 1000, 0.0, 1000.0);
-	        counts = ((MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, w, w)).getEntries();
+	        counts = ((MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, w, w)).getEntries();
 	        hsum2.fill(counts,h2.getBinContent(counts));
 	        hsum2.setLineColor(2);
 	        canshape.draw(hsum2,"same");
@@ -507,7 +507,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 			namedir = String.format("crossStripHisto%02d", iteration - 1);
 			name = String.format("adu_sig");
 			name2 = String.format("ProjHistU%02d_W%02d", u + 1, w + 1);
-		    h1  = (MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, 0, 61, w, w);
+		    h1  = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, 0, 61, w, w);
 		    namedir = String.format("GaussFit%02d", iteration-1);
 			name = String.format("gaussU%02d_%02d", u + 1, w + 1);
 			gaus  = (F1D)getDir().getDirectory(namedir).getObject(name);
@@ -521,7 +521,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 	        namedir = String.format("crossStripHisto%02d", iteration - 1);
 			name = String.format("adw_sig");
 			name2 = String.format("ProjHistW%02d_U%02d", w + 1, u + 1);
-		    h1  = (MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, 0, 61, w, w);
+		    h1  = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, 0, 61, w, w);
 		    namedir = String.format("GaussFit%02d", iteration-1);
 			name = String.format("gaussW%02d_%02d", w + 1, u + 1);
 			gaus  = (F1D)getDir().getDirectory(namedir).getObject(name);
@@ -599,7 +599,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 	    	namedir = String.format("crossStripHisto%02d", iteration - 1);
 			name = String.format("adv_sig");
 			name2 = String.format("ProjHistV%02d_U%02d", v + 1, u + 1);
-		    h1  = (MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, 0, 61);
+		    h1  = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, 0, 61);
 		    namedir = String.format("GaussFit%02d", iteration-1);
 			name = String.format("gaussV%02d_%02d", v + 1, u + 1);
 			gaus  = (F1D)getDir().getDirectory(namedir).getObject(name);
@@ -683,7 +683,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 	        namedir = String.format("crossStripHisto%02d", iteration - 1);
 			name = String.format("adw_sig");
 			name2 = String.format("ProjHistW%02d_U%02d", w + 1, u + 1);
-		    h1  = (MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, 0, 61, w, w);
+		    h1  = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, 0, 61, w, w);
 		    namedir = String.format("GaussFit%02d", iteration-1);
 			name = String.format("gaussW%02d_%02d", w + 1, u + 1);
 			gaus  = (F1D)getDir().getDirectory(namedir).getObject(name);
@@ -814,7 +814,8 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 		String name;
 		String namedir;
 		MyH1D pixelfilling;
-		MyH4D pixelfilling4;
+		MyH1S pixelfillingS;
+		MyH4S pixelfilling4;
 		
 		for (int is=0 ; is<6 ; is++) //initialization
 		{
@@ -1001,48 +1002,48 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
         			//adc on u strip
         			namedir = String.format("crossStripHisto%02d", iteration);
             		name = String.format("adu_sig");
-            		pixelfilling4 = (MyH4D)getDir().getDirectory(namedir).getObject(name);
-            		if(iteration != 0)
-            		{
+            		pixelfilling4 = (MyH4S)getDir().getDirectory(namedir).getObject(name);
+            		//if(iteration != 0)
+            		//{
 	            		if(Math.abs(ad[1] - (vA[rs[1]-1]*Math.exp(vB[rs[1]-1] * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + vC[rs[1]-1])) < 20.0
 	            		&& Math.abs(ad[2] - (wA[rs[2]-1]*Math.exp(wB[rs[2]-1] * wdpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + wC[rs[2]-1])) < 20.0)
 	            			pixelfilling4.fill(ad[0], rs[0], rs[1], rs[2]);
-            		}
-            		else
-            		{
-            			pixelfilling4.fill(ad[0], rs[0], rs[1], rs[2]);
-            		}
+            		//}
+            		//else
+            		//{
+            		//	pixelfilling4.fill(ad[0], rs[0], rs[1], rs[2]);
+            		//}
             			
             		//adc on v strip
             		namedir = String.format("crossStripHisto%02d", iteration);
             		name = String.format("adv_sig");
-            		pixelfilling4 = (MyH4D)getDir().getDirectory(namedir).getObject(name);
-            		if(iteration != 0)
-            		{
+            		pixelfilling4 = (MyH4S)getDir().getDirectory(namedir).getObject(name);
+            		//if(iteration != 0)
+            		//{
 	            		if(Math.abs(ad[0] - (uA[rs[0]-1]*Math.exp(uB[rs[0]-1] * udpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + uC[rs[0]-1])) < 20.0
 	            		&& Math.abs(ad[2] - (wA[rs[2]-1]*Math.exp(wB[rs[2]-1] * wdpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + wC[rs[2]-1])) < 20.0)
 	            			pixelfilling4.fill(ad[1], rs[0], rs[1], rs[2]);
-            		}
-            		else
-            		{
-            			pixelfilling4.fill(ad[1], rs[0], rs[1], rs[2]);
-            		}
+            		//}
+            		//else
+            		//{
+            		//	pixelfilling4.fill(ad[1], rs[0], rs[1], rs[2]);
+            		//}
             		
             		
             		//adc on w strip
             		namedir = String.format("crossStripHisto%02d", iteration);
             		name = String.format("adw_sig");
-            		pixelfilling4 = (MyH4D)getDir().getDirectory(namedir).getObject(name);
-            		if(iteration != 0)
-            		{
+            		pixelfilling4 = (MyH4S)getDir().getDirectory(namedir).getObject(name);
+            		//if(iteration != 0)
+            		//{
 	            		if(Math.abs(ad[1] - (vA[rs[1]-1]*Math.exp(vB[rs[1]-1] * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + vC[rs[1]-1])) < 20.0
 	            		&& Math.abs(ad[0] - (uA[rs[0]-1]*Math.exp(uB[rs[0]-1] * udpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + uC[rs[0]-1])) < 20.0)
 	            			pixelfilling4.fill(ad[2], rs[0], rs[1], rs[2]);
-            		}
-            		else
-            		{
-            			pixelfilling4.fill(ad[2], rs[0], rs[1], rs[2]);
-            		}
+            		//}
+            		//else
+            		//{
+            		//	pixelfilling4.fill(ad[2], rs[0], rs[1], rs[2]);
+            		//}
             		
             			
             		//check if pixel is valid with hitmatrix
@@ -1055,23 +1056,23 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
             			
             			namedir = String.format("pixelsignal%02d", iteration);
             			name = String.format("Uen_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
-            			pixelfilling = (MyH1D)getDir().getDirectory(namedir).getObject(name);
-            			pixelfilling.fill(ucor);
+            			pixelfillingS = (MyH1S)getDir().getDirectory(namedir).getObject(name);
+            			pixelfillingS.fill(ucor);
             			
             			namedir = String.format("pixelsignal%02d", iteration);
             			name = String.format("Ven_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
-            			pixelfilling = (MyH1D)getDir().getDirectory(namedir).getObject(name);
-            			pixelfilling.fill(vcor);
+            			pixelfillingS = (MyH1S)getDir().getDirectory(namedir).getObject(name);
+            			pixelfillingS.fill(vcor);
             			
             			namedir = String.format("pixelsignal%02d", iteration);
             			name = String.format("Wen_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
-            			pixelfilling = (MyH1D)getDir().getDirectory(namedir).getObject(name);
-            			pixelfilling.fill(wcor);
+            			pixelfillingS = (MyH1S)getDir().getDirectory(namedir).getObject(name);
+            			pixelfillingS.fill(wcor);
             			
             			namedir = String.format("pixelsignal%02d", iteration);
             			name = String.format("toten_%02d_%02d_%02d", rs[0], rs[1], rs[2]);
-            			pixelfilling = (MyH1D)getDir().getDirectory(namedir).getObject(name);
-            			pixelfilling.fill((ucor + vcor + wcor)/3.0);
+            			pixelfillingS = (MyH1S)getDir().getDirectory(namedir).getObject(name);
+            			pixelfillingS.fill((ucor + vcor + wcor)/3.0);
 
         			}
         		}
@@ -1145,7 +1146,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 						namedir = String.format("crossStripHisto%02d", iteration);
 						name = String.format("adu_sig");
 						name2 = String.format("adu_%02d_%02d_%02d", ustrip + 1, vstrip + 1, wstrip + 1);
-						tempsignal  = (MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, ustrip, ustrip, vstrip, vstrip, wstrip, wstrip);
+						tempsignal  = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, ustrip, ustrip, vstrip, vstrip, wstrip, wstrip);
 
 						//centroids[counter] = myfunc.getParameter(1);
 						if(tempsignal.getMean() > 1 && tempsignal.getEntries() > 10)
@@ -1202,7 +1203,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 						namedir = String.format("crossStripHisto%02d", iteration);
 						name = String.format("adv_sig");
 						name2 = String.format("adv_%02d_%02d_%02d", ustrip + 1, vstrip + 1, wstrip + 1);
-						tempsignal  = (MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, ustrip, ustrip, vstrip, vstrip, wstrip, wstrip);
+						tempsignal  = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, ustrip, ustrip, vstrip, vstrip, wstrip, wstrip);
 
 						//centroids[counter] = myfunc.getParameter(1);
 						if(tempsignal.getMean() > 1)
@@ -1246,7 +1247,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 						namedir = String.format("crossStripHisto%02d", iteration);
 						name = String.format("adw_sig");
 						name2 = String.format("adw_%02d_%02d_%02d", ustrip + 1, vstrip + 1, wstrip + 1);
-						tempsignal  = (MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, ustrip, ustrip, vstrip, vstrip, wstrip, wstrip);
+						tempsignal  = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, ustrip, ustrip, vstrip, vstrip, wstrip, wstrip);
 
 						//centroids[counter] = myfunc.getParameter(1);
 						if(tempsignal.getMean() > 1)
@@ -1448,13 +1449,13 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 		
 	
 		histname = String.format("adu_sig");
-		geometry.add(new MyH4D(histname,100,0.0,300.0,68,0.5,68.5,62,0.5,62.5,62,0.5,62.5));
+		geometry.add(new MyH4S(histname,100,0.0,300.0,68,0.5,68.5,62,0.5,62.5,62,0.5,62.5));
 		
 		histname = String.format("adv_sig");
-		geometry.add(new MyH4D(histname,100,0.0,300.0,68,0.5,68.5,62,0.5,62.5,62,0.5,62.5));
+		geometry.add(new MyH4S(histname,100,0.0,300.0,68,0.5,68.5,62,0.5,62.5,62,0.5,62.5));
 
 		histname = String.format("adw_sig");
-		geometry.add(new MyH4D(histname,100,0.0,300.0,68,0.5,68.5,62,0.5,62.5,62,0.5,62.5));
+		geometry.add(new MyH4S(histname,100,0.0,300.0,68,0.5,68.5,62,0.5,62.5,62,0.5,62.5));
 		
 		//this directory is for attenuation 2D plots
 		getDir().addDirectory(geometry);
@@ -1466,7 +1467,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 		int ustrip, vstrip, wstrip;
 		//int counter = 0;
 		String name;
-		MyH1D sig;
+		MyH1S sig;
 		
 		namedir = String.format("pixelsignal%02d", iteration);
 		TDirectory pixelsignal = new TDirectory(namedir);
@@ -1480,19 +1481,19 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 					if(hit[ustrip][vstrip][wstrip] == 1)
 					{						
 						name = String.format("Uen_%02d_%02d_%02d", ustrip + 1, vstrip + 1, wstrip + 1);
-						sig = new MyH1D(name,100,0.0,300.0);
+						sig = new MyH1S(name,100,0.0,300.0);
 						pixelsignal.add(sig);
 						
 						name = String.format("Ven_%02d_%02d_%02d", ustrip + 1, vstrip + 1, wstrip + 1);
-						sig = new MyH1D(name,100,0.0,300.0);
+						sig = new MyH1S(name,100,0.0,300.0);
 						pixelsignal.add(sig);
 						
 						name = String.format("Wen_%02d_%02d_%02d", ustrip + 1, vstrip + 1, wstrip + 1);
-						sig = new MyH1D(name,100,0.0,300.0);
+						sig = new MyH1S(name,100,0.0,300.0);
 						pixelsignal.add(sig);
 						
 						name = String.format("toten_%02d_%02d_%02d", ustrip + 1, vstrip + 1, wstrip + 1);
-						sig = new MyH1D(name,100,0.0,300.0);
+						sig = new MyH1S(name,100,0.0,300.0);
 						pixelsignal.add(sig);
 						
 						
@@ -1596,19 +1597,19 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 					{
 						histName = String.format("adu_sig");
 						projName = String.format("adu_%02d_%02d", strip, crossStrip);
-						ProjHadc = (MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(histName)).projectionX(projName, strip, strip, 0, 61, crossStrip, crossStrip);
+						ProjHadc = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(histName)).projectionX(projName, strip, strip, 0, 61, crossStrip, crossStrip);
 					}
 					else if(stripLetter[il] == 'v')
 					{
 						histName = String.format("adv_sig");
 						projName = String.format("adv_%02d_%02d", strip, crossStrip);
-						ProjHadc = (MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(histName)).projectionX(projName, crossStrip, crossStrip, strip, strip, 0, 61);
+						ProjHadc = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(histName)).projectionX(projName, crossStrip, crossStrip, strip, strip, 0, 61);
 					}
 					else if(stripLetter[il] == 'w')
 					{
 						histName = String.format("adw_sig");
 						projName = String.format("adw_%02d_%02d", strip, crossStrip);
-						ProjHadc = (MyH1D)((MyH4D)getDir().getDirectory(namedir).getObject(histName)).projectionX(projName, crossStrip, crossStrip, 0, 61, strip, strip);
+						ProjHadc = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(histName)).projectionX(projName, crossStrip, crossStrip, 0, 61, strip, strip);
 					}
 					else
 					{

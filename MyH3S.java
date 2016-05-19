@@ -1,12 +1,15 @@
 package org.jlab.calib;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.root.attr.Attributes;
 import org.root.base.EvioWritableTree;
 import org.root.histogram.Axis;
-//import org.root.histogram.MultiIndex;
+import org.root.histogram.MultiIndex;
 import org.root.pad.TGCanvas;
 
 /**
@@ -16,22 +19,19 @@ import org.root.pad.TGCanvas;
  * @author Erin Kirby
  * @version 061714
  */
-public class MyH4S implements EvioWritableTree {
+public class MyH3S implements EvioWritableTree{
 
-	private String hName = "basic6D";
+	private String hName = "basic3D";
 	private Axis xAxis = new Axis();
 	private Axis yAxis = new Axis();
 	private Axis zAxis = new Axis();
-	private Axis aAxis = new Axis();
-	//private ArrayList<Short> hBuffer;
 	private short[] hBuffer;
-	private MyMultiIndex offset;
-    private Attributes attr = new Attributes(); 
-    private short     maximumBinValue = 0;
+	private MultiIndex offset;
+        private Attributes attr = new Attributes(); 
+        private short     maximumBinValue = 0;
         
-	public MyH4S() {
-		offset = new MyMultiIndex(xAxis.getNBins(), yAxis.getNBins(), 
-							      zAxis.getNBins(), aAxis.getNBins());
+	public MyH3S() {
+		offset = new MultiIndex(xAxis.getNBins(), yAxis.getNBins(), zAxis.getNBins());
 		
 		hBuffer = new short[offset.getArraySize()];
 		
@@ -39,7 +39,6 @@ public class MyH4S implements EvioWritableTree {
         this.attr.getProperties().setProperty("xtitle", "");
         this.attr.getProperties().setProperty("ytitle", "");
         this.attr.getProperties().setProperty("ztitle", "");
-        this.attr.getProperties().setProperty("atitle", "");
     }
 
     public void setName(String name){ this.hName = name;}
@@ -49,17 +48,16 @@ public class MyH4S implements EvioWritableTree {
 	 * @param name
 	 *            the desired name of the 3D Histogram
 	 */
-	public MyH4S(String name) {
+	public MyH3S(String name) {
 		hName = name;
-		offset = new MyMultiIndex(xAxis.getNBins(), yAxis.getNBins(), 
-				                  zAxis.getNBins(), aAxis.getNBins());
+		offset = new MultiIndex(xAxis.getNBins(), yAxis.getNBins(), zAxis.getNBins());
+		
 		hBuffer = new short[offset.getArraySize()];
 		
-		this.attr.getProperties().setProperty("title", "");
+        this.attr.getProperties().setProperty("title", "");
         this.attr.getProperties().setProperty("xtitle", "");
         this.attr.getProperties().setProperty("ytitle", "");
         this.attr.getProperties().setProperty("ztitle", "");
-        this.attr.getProperties().setProperty("atitle", "");
 	}
 
 	/**
@@ -80,47 +78,38 @@ public class MyH4S implements EvioWritableTree {
 	 * @param ymax
 	 *            the maximum y axis value
 	 */
-	public MyH4S(String name, int bx, double xmin, double xmax, 
-			                  int by, double ymin, double ymax,
-			                  int bz, double zmin, double zmax,
-			                  int ba, double amin, double amax) {
+	public MyH3S(String name, int bx, double xmin, double xmax, 
+			                int by, double ymin, double ymax,
+			                int bz, double zmin, double zmax) {
 		hName = name;
-		set(bx, xmin, xmax, by, ymin, ymax, 
-				 bz, zmin, zmax, ba, amin, amax);
-		//offset = new MyMultiIndex(bx, by, bz, ba);
-		//hBuffer = new ArrayList<Double>(offset.getArraySize());
+		this.set(bx, xmin, xmax, by, ymin, ymax, bz, zmin, zmax);
+		offset = new MultiIndex(bx, by, bz);
 		
-		this.attr.getProperties().setProperty("title", "");
-        this.attr.getProperties().setProperty("xtitle", "");
-        this.attr.getProperties().setProperty("ytitle", "");
-        this.attr.getProperties().setProperty("ztitle", "");
-        this.attr.getProperties().setProperty("atitle", "");
-      	
-      	//System.out.println("Offset size: "+ offset.getArraySize());
-        //System.out.println("Array size: "+ hBuffer.size());
-	}
-
-    public MyH4S(String name, String title, int bx, double xmin, double xmax, 
-    									    int by, double ymin, double ymax,
-    									    int bz, double zmin, double zmax,
-    						                int ba, double amin, double amax) {
-                
-		hName = name;
-        this.setTitle(title);
-        this.set(bx, xmin, xmax, by, ymin, ymax, 
-        		 bz, zmin, zmax, ba, amin, amax);
-        
-		//offset = new MyMultiIndex(bx, by, bz, ba);
-		//hBuffer = new ArrayList<Double>(offset.getArraySize());
-        
+		hBuffer = new short[offset.getArraySize()];
+		
         this.attr.getProperties().setProperty("title", "");
         this.attr.getProperties().setProperty("xtitle", "");
         this.attr.getProperties().setProperty("ytitle", "");
         this.attr.getProperties().setProperty("ztitle", "");
-        this.attr.getProperties().setProperty("atitle", "");
+	}
+
+    public MyH3S(String name, String title, int bx, double xmin, double xmax, 
+    									    int by, double ymin, double ymax,
+    									    int bz, double zmin, double zmax) {
                 
-        //System.out.println("Offset size: "+ offset.getArraySize());
-        //System.out.println("Array size: "+ hBuffer.size());
+		hName = name;
+                this.setTitle(title);
+		this.set(bx, xmin, xmax, by, ymin, ymax, bz, zmin, zmax);
+		offset = new MultiIndex(bx, by, bz);
+		
+		hBuffer = new short[offset.getArraySize()];
+		
+        this.attr.getProperties().setProperty("title", "");
+        this.attr.getProperties().setProperty("xtitle", "");
+        this.attr.getProperties().setProperty("ytitle", "");
+        this.attr.getProperties().setProperty("ztitle", "");
+                
+        //System.out.println("Array size: "+ offset.getArraySize());
 	}
 	/**
 	 * Sets the bins to the x and y axes and creates the buffer of the histogram
@@ -140,14 +129,13 @@ public class MyH4S implements EvioWritableTree {
 	 */
 	public final void set(int bx, double xmin, double xmax, 
 			              int by, double ymin, double ymax,
-			              int bz, double zmin, double zmax,
-			              int ba, double amin, double amax) {
+			              int bz, double zmin, double zmax) {
+		
 		xAxis.set(bx, xmin, xmax);
 		yAxis.set(by, ymin, ymax);
 		zAxis.set(bz, zmin, zmax);
-		aAxis.set(ba, amin, amax);
-
-		offset = new MyMultiIndex(bx, by, bz, ba);
+		
+		offset = new MultiIndex(bx, by, bz);
 		int buff = offset.getArraySize();
 		
 		hBuffer = new short[buff];
@@ -157,7 +145,7 @@ public class MyH4S implements EvioWritableTree {
 	 * 
 	 * @return the name of the Histogram
 	 */
-	public String getName(){
+	public String getName() {
 		return hName;
 	}
 
@@ -165,7 +153,7 @@ public class MyH4S implements EvioWritableTree {
 	 * 
 	 * @return the x-axis of the 3D Histogram
 	 */
-	public Axis getXAxis(){
+	public Axis getXAxis() {
 		return xAxis;
 	}
 
@@ -173,7 +161,7 @@ public class MyH4S implements EvioWritableTree {
 	 * 
 	 * @return the y-axis of the 3D Histogram
 	 */
-	public Axis getYAxis(){
+	public Axis getYAxis() {
 		return yAxis;
 	}
 	
@@ -181,18 +169,9 @@ public class MyH4S implements EvioWritableTree {
 	 * 
 	 * @return the z-axis of the 3D Histogram
 	 */
-	public Axis getZAxis(){
+	public Axis getZAxis() {
 		return zAxis;
 	}
-	
-	/**
-	 * 
-	 * @return the z-axis of the 3D Histogram
-	 */
-	public Axis getAAxis(){
-		return aAxis;
-	}
-	
 
     public short getMaximum(){
     	short maximum = 0;
@@ -216,11 +195,10 @@ public class MyH4S implements EvioWritableTree {
 	 *            The z coordinate of the bin
 	 * @return The truth value of the validity of that bin
 	 */
-	private boolean isValidBins(int bx, int by, int bz, int ba) {
+	private boolean isValidBins(int bx, int by, int bz) {
 		if ((bx >= 0) && (bx < xAxis.getNBins()) 
 		 && (by >= 0) && (by < yAxis.getNBins())
-		 && (bz >= 0) && (bz < zAxis.getNBins())
-		 && (ba >= 0) && (ba < aAxis.getNBins())){
+		 && (bz >= 0) && (bz < zAxis.getNBins())){
 			return true;
 		}
 		return false;
@@ -235,9 +213,9 @@ public class MyH4S implements EvioWritableTree {
 	 *            The y coordinate of the bin
 	 * @return The content at that bin
 	 */
-	public double getBinContent(int bx, int by, int bz, int ba) {
-		if (this.isValidBins(bx, by, bz, ba)) {
-			int buff = offset.getArrayIndex(bx, by, bz, ba);
+	public short getBinContent(int bx, int by, int bz) {
+		if (this.isValidBins(bx, by, bz)) {
+			int buff = offset.getArrayIndex(bx, by, bz);
             if(buff>=0 && buff< offset.getArraySize())
             {
             	return hBuffer[buff];
@@ -246,11 +224,10 @@ public class MyH4S implements EvioWritableTree {
             {
             	System.out.println("[Index] error for binx = "+ bx +
                                     " biny = " + by +
-                                    " binz = " + bz +
-                                    " bina = " + ba);
+                                    " binz = " + bz);
             }
 		}
-		return 0.0;
+		return 0;
 	}
 	
 	
@@ -258,7 +235,7 @@ public class MyH4S implements EvioWritableTree {
 	* Sets the x-axis title to the specified parameter
 	* @param xTitle		The desired title of the x-axis
 	*/
-	public final void setXTitle(String xTitle){
+	public final void setXTitle(String xTitle) {
 		//this.getXaxis().setTitle(xTitle);
 		this.attr.getProperties().setProperty("xtitle", xTitle);
 	}
@@ -268,7 +245,7 @@ public class MyH4S implements EvioWritableTree {
 	* 
 	* @param yTitle		The desired title of the y-axis
 	*/
-	public final void setYTitle(String yTitle){
+	public final void setYTitle(String yTitle) {
 		//this.getYaxis().setTitle(yTitle);
 		this.attr.getProperties().setProperty("ytitle", yTitle);
 	}
@@ -278,21 +255,10 @@ public class MyH4S implements EvioWritableTree {
 	* 
 	* @param zTitle		The desired title of the z-axis
 	*/
-	public final void setZTitle(String zTitle){
+	public final void setZTitle(String zTitle) {
 		//this.getYaxis().setTitle(zTitle);
 		this.attr.getProperties().setProperty("ztitle", zTitle);
 	}
-	
-	/**
-	* Sets the z-axis title to the specified parameter
-	* 
-	* @param zTitle		The desired title of the z-axis
-	*/
-	public final void setATitle(String aTitle){
-		//this.getYaxis().setTitle(aTitle);
-		this.attr.getProperties().setProperty("atitle", aTitle);
-	}
-	
         
 	/**
 	* The getter for the histogram title.
@@ -308,7 +274,7 @@ public class MyH4S implements EvioWritableTree {
 	* 
 	* @return		The title of the x-axis as a string
 	*/
-	public String getXTitle(){
+	public String getXTitle() {
 		return this.attr.getProperties().getProperty("xtitle", "");
 		//return this.getXaxis().getTitle();
 	}
@@ -318,7 +284,7 @@ public class MyH4S implements EvioWritableTree {
 	* 
 	* @return		The title of the y-axis as a string
 	*/
-	public String getYTitle(){
+	public String getYTitle() {
 		return this.attr.getProperties().getProperty("ytitle", "");
 		//return this.getYaxis().getTitle();
 	}
@@ -328,19 +294,9 @@ public class MyH4S implements EvioWritableTree {
 	* 
 	* @return		The title of the z-axis as a string
 	*/
-	public String getZTitle(){
+	public String getZTitle() {
 		return this.attr.getProperties().getProperty("ztitle", "");
 		//return this.getZaxis().getTitle();
-	}
-	
-	/**
-	* The getter for the z-axis title.
-	* 
-	* @return		The title of the z-axis as a string
-	*/
-	public String getATitle(){
-		return this.attr.getProperties().getProperty("atitle", "");
-		//return this.getAaxis().getTitle();
 	}
         
 	/**
@@ -348,7 +304,7 @@ public class MyH4S implements EvioWritableTree {
 	* 
 	* @param title		The desired title of the histogram
 	*/
-	public final void setTitle(String title){
+	public final void setTitle(String title) {
 		//histTitle = title;
 		this.attr.getProperties().setProperty("title", title);
 	}
@@ -365,9 +321,9 @@ public class MyH4S implements EvioWritableTree {
 	* @param w
 	*            The desired value to set the bin to
 	*/
-	public void setBinContent(int bx, int by, int bz, int ba, short w){
-		if (this.isValidBins(bx, by, bz, ba)) {
-			int buff = offset.getArrayIndex(bx, by, bz, ba);
+	public void setBinContent(int bx, int by, int bz, short w) {
+		if (this.isValidBins(bx, by, bz)) {
+			int buff = offset.getArrayIndex(bx, by, bz);
 			hBuffer[buff] = w;
 		}
 	}
@@ -382,14 +338,14 @@ public class MyH4S implements EvioWritableTree {
 	 * @param z
 	 *            the z coordinate value
 	 */
-	public void fill(double x, double y, double z, double a){
-		int bin = this.findBin(x, y, z, a);
+	public void fill(double x, double y, double z) {
+		int bin = this.findBin(x, y, z);
 		if (bin >= 0)
 			this.addBinContent(bin);
 	}
 
-	public void fill(double x, double y, double z, double a, short w){
-		int bin = this.findBin(x, y, z, a);
+	public void fill(double x, double y, double z , double w) {
+		int bin = this.findBin(x, y, z);
 		if (bin >= 0) {
 			this.addBinContent(bin, w);
 		}
@@ -403,8 +359,8 @@ public class MyH4S implements EvioWritableTree {
 	 */
 	private void addBinContent(int bin) {
 		hBuffer[bin] += 1;
-                if(hBuffer[bin]>this.maximumBinValue) 
-                    this.maximumBinValue = hBuffer[bin];
+        if(hBuffer[bin]>this.maximumBinValue) 
+            this.maximumBinValue = hBuffer[bin];
 	}
 
 	/**
@@ -415,10 +371,10 @@ public class MyH4S implements EvioWritableTree {
 	 * @param w
 	 *            the value to add to the bin content
 	 */
-	private void addBinContent(int bin, short w) {
+	private void addBinContent(int bin, double w) {
 		hBuffer[bin] += w;
-                if(hBuffer[bin]>this.maximumBinValue) 
-                    this.maximumBinValue = hBuffer[bin];
+        if(hBuffer[bin]>this.maximumBinValue) 
+            this.maximumBinValue = hBuffer[bin];
 	}
        /*
         public ArrayList<H1D>  getSlicesX(){
@@ -502,21 +458,50 @@ public class MyH4S implements EvioWritableTree {
 	 *            The y value to search for
 	 * @return The bin, in array indexing format, which holds that x-y value
 	 */
-	public int findBin(double x, double y, double z, double a) {
+	public int findBin(double x, double y, double z) {
 		int bx = xAxis.getBin(x);
 		int by = yAxis.getBin(y);
 		int bz = zAxis.getBin(z);
-		int ba = aAxis.getBin(a);
-		if (this.isValidBins(bx, by, bz, ba)) {
-			return (offset.getArrayIndex(bx, by, bz, ba));
+		if (this.isValidBins(bx, by, bz)) {
+			return (offset.getArrayIndex(bx, by, bz));
 		}
-		//else
-		//{
-		//	System.err.println("Invalid Bin");
-		//}
 		return -1;
 	}
 
+	/**
+	 * Generates a 3D array with the content in the histogram
+	 * 
+	 * @return a 3D array with each bin in its array index
+	 */
+	public double[][][] getContentBuffer() {
+		double[][][] buff = new double[xAxis.getNBins()][yAxis.getNBins()][zAxis.getNBins()];
+		for (int xloop = 0; xloop < xAxis.getNBins(); xloop++) {
+			for (int yloop = 0; yloop < yAxis.getNBins(); yloop++) {
+				for (int zloop = 0; zloop < zAxis.getNBins(); zloop++) {
+					buff[xloop][yloop][zloop] = this.getBinContent(xloop, yloop, zloop);
+				}
+			}
+		}
+		return buff;
+	}
+
+	/**
+	 * Creates an error buffer with each element being 0.0
+	 * 
+	 * @return a double 3D array with a size of xAxis * yAxis with each element
+	 *         being 0.0
+	 */
+	public double[][][] getErrorBuffer() {
+		double[][][] buff = new double[xAxis.getNBins()][yAxis.getNBins()][zAxis.getNBins()];
+		for (int xloop = 0; xloop < xAxis.getNBins(); xloop++) {
+			for (int yloop = 0; yloop < yAxis.getNBins(); yloop++) {
+				for (int zloop = 0; zloop < zAxis.getNBins(); zloop++) {
+					buff[xloop][yloop][zloop] = 0.0;
+				}
+			}
+		}
+		return buff;
+	}
 
 	/**
 	 * Specifies the region in the 2D histogram with those attributes
@@ -591,13 +576,10 @@ public class MyH4S implements EvioWritableTree {
 			height = 0.0;
 			for (int y = 0; y < yAxis.getNBins(); y++) {
 				for (int z = 0; z < zAxis.getNBins(); z++) {
-					for (int a = 0; a < aAxis.getNBins(); a++) {
-								height += this.getBinContent(x, y, z, a);
-					}
+					height += this.getBinContent(x, y, z);
 				}
 			}
 			projX.setBinContent(x, height);
-			projX.setBinError(x, Math.sqrt(height));
 		}
 
 		return projX;
@@ -610,8 +592,7 @@ public class MyH4S implements EvioWritableTree {
 	 * @return a H1D object that is a projection of the Histogram2D
 	 *         object onto the x-axis
 	 */
-	public MyH1D projectionX(String name, int bymin, int bymax, int bzmin, int bzmax,
-			                              int bamin, int bamax) {
+	public MyH1D projectionX(String name, int bymin, int bymax, int bzmin, int bzmax) {
 		//String name = "X Projection";
 		double xMin = xAxis.min();
 		double xMax = xAxis.max();
@@ -621,8 +602,6 @@ public class MyH4S implements EvioWritableTree {
 		if(bymax >= yAxis.getNBins()) bymax = yAxis.getNBins() - 1;
 		if(bzmin < 0) bzmin = 0;
 		if(bzmax >= zAxis.getNBins()) bzmax = zAxis.getNBins() - 1;
-		if(bamin < 0) bamin = 0;
-		if(bamax >= aAxis.getNBins()) bamax = aAxis.getNBins() - 1;
 		
 		MyH1D projX = new MyH1D(name, xNum, xMin, xMax);
 
@@ -631,13 +610,10 @@ public class MyH4S implements EvioWritableTree {
 			height = 0.0;
 			for (int y = bymin; y <= bymax; y++) {
 				for (int z = bzmin; z <= bzmax; z++) {
-					for (int a = bamin; a <= bamax; a++) {
-						height += this.getBinContent(x, y, z, a);
-					}
+					height += this.getBinContent(x, y, z);
 				}
 			}
 			projX.setBinContent(x, height);
-			projX.setBinError(x, Math.sqrt(height));
 		}
 
 		return projX;
@@ -650,7 +626,6 @@ public class MyH4S implements EvioWritableTree {
 	 * @return a H1D object that is a projection of the Histogram2D
 	 *         object onto the y-axis
 	 */
-	/*
 	public MyH1D projectionY() {
 		String name = "Y Projection";
 		double yMin = yAxis.min();
@@ -671,7 +646,6 @@ public class MyH4S implements EvioWritableTree {
 
 		return projY;
 	}
-	*/
 	
 	/**
 	 * Creates a projection of the 3D histogram onto the Y Axis, adding up all
@@ -680,7 +654,6 @@ public class MyH4S implements EvioWritableTree {
 	 * @return a H1D object that is a projection of the Histogram3D
 	 *         object onto the y-axis
 	 */
-	/*
 	public MyH1D projectionY(String name, int bxmin, int bxmax, int bzmin, int bzmax) {
 		//String name = "X Projection";
 		double yMin = yAxis.min();
@@ -707,7 +680,40 @@ public class MyH4S implements EvioWritableTree {
 
 		return projY;
 	}
-	*/
+	
+	/**
+	 * Creates a projection of the 3D histogram onto the Z Axis, adding up all
+	 * the x and y bins (in a range, inclusive) for each x bin
+	 * 
+	 * @return a H1D object that is a projection of the Histogram3D
+	 *         object onto the y-axis
+	 */
+	public MyH1D projectionZ(String name, int bxmin, int bxmax, int bymin, int bymax) {
+		//String name = "X Projection";
+		double zMin = zAxis.min();
+		double zMax = zAxis.max();
+		int zNum = zAxis.getNBins();
+		
+		if(bxmin < 0) bxmin = 0;
+		if(bxmax >= xAxis.getNBins()) bxmax = xAxis.getNBins() - 1;
+		if(bymin < 0) bymin = 0;
+		if(bymax >= yAxis.getNBins()) bymax = yAxis.getNBins() - 1;
+		
+		MyH1D projZ = new MyH1D(name, zNum, zMin, zMax);
+
+		double height = 0.0;
+		for (int z = 0; z < zAxis.getNBins(); z++) {
+			height = 0.0;
+			for (int x = bxmin; x <= bxmax; x++) {
+				for (int y = bymin; y <= bymax; y++) {
+					height += this.getBinContent(x, y, z);
+				}
+			}
+			projZ.setBinContent(z, height);
+		}
+
+		return projZ;
+	}
 
 	/**
 	 * Creates a 1-D Histogram slice of the specified y Bin
@@ -751,29 +757,32 @@ public class MyH4S implements EvioWritableTree {
 		return sliceY;
 	}
 */
-
+	/*
+	public double[] offset() {
+		return hBuffer;
+	}
+	*/
 	
 	/**
 	* Resets the content of the histogram, sets all bin contents to 0
 	*/
 	public void reset(){
-		for(int bin = 0; bin < offset.getArraySize(); bin++){
-			this.hBuffer[bin] =0;
+		for(int bin = 0; bin < this.hBuffer.length; bin++){
+			this.hBuffer[bin] = 0;
 		}
 	}
         
     @Override
     public TreeMap<Integer, Object> toTreeMap() {
         TreeMap<Integer, Object> hcontainer = new TreeMap<Integer, Object>();
-        hcontainer.put(1, new int[]{4});     
+        hcontainer.put(1, new int[]{3});     
         byte[] nameBytes = this.hName.getBytes();
         hcontainer.put(2, nameBytes);
-        hcontainer.put(3, new int[]{this.getXAxis().getNBins(),this.getYAxis().getNBins(),this.getZAxis().getNBins(),this.getAAxis().getNBins()});
+        hcontainer.put(3, new int[]{this.getXAxis().getNBins(),this.getYAxis().getNBins(),this.getZAxis().getNBins()});
         hcontainer.put(4, new double[]{
             this.getXAxis().min(),this.getXAxis().max(),
             this.getYAxis().min(),this.getYAxis().max(),
-            this.getZAxis().min(),this.getZAxis().max(),
-            this.getAAxis().min(),this.getAAxis().max(),
+            this.getZAxis().min(),this.getZAxis().max()
         });
         hcontainer.put(5, this.hBuffer);
         return hcontainer;
@@ -789,8 +798,7 @@ public class MyH4S implements EvioWritableTree {
                 hName = new String(name);                
                 this.set(nbins[0], binsrange[0],binsrange[1],
                          nbins[1], binsrange[2],binsrange[3],
-                         nbins[2], binsrange[4],binsrange[5],
-                         nbins[3], binsrange[6],binsrange[7]);
+                         nbins[2], binsrange[4],binsrange[5]);
                 
                 double[] binc = (double[]) map.get(5);
                 //double[] bine = (double[]) map.get(5);
@@ -798,6 +806,30 @@ public class MyH4S implements EvioWritableTree {
             }
         }
     }
+
+    /*
+    public DataRegion getDataRegion() {
+        DataRegion  region = new DataRegion();
+        region.MINIMUM_X = this.xAxis.getBinCenter(0)-this.xAxis.getBinWidth(0)/2.0;
+        region.MAXIMUM_X = this.xAxis.getBinCenter(this.xAxis.getNBins()-1)-
+                this.xAxis.getBinWidth(this.xAxis.getNBins()-1)/2.0;
+        region.MINIMUM_Y = this.yAxis.getBinCenter(0)-this.yAxis.getBinWidth(0)/2.0;
+        region.MAXIMUM_Y = this.yAxis.getBinCenter(this.yAxis.getNBins()-1)-
+                this.yAxis.getBinWidth(this.yAxis.getNBins()-1)/2.0;
+        
+        region.MINIMUM_Z = 0;
+        region.MAXIMUM_Z = 0;
+        for(int bin = 0; bin < this.hBuffer.length;bin++){
+            //region.MAXIMUM_Z = this.maximumBinValue;
+            if(this.hBuffer[bin]>region.MAXIMUM_Z) region.MAXIMUM_Z = this.hBuffer[bin];
+            if(this.hBuffer[bin]<region.MINIMUM_Z) region.MINIMUM_Z = this.hBuffer[bin];
+        }
+        if(region.MINIMUM_Z==region.MAXIMUM_Z){
+            region.MAXIMUM_Z = region.MINIMUM_Z + 1;
+        }
+        return region;
+    }
+    */
 
     public Integer getDataSize() {
         return this.xAxis.getNBins()*this.yAxis.getNBins()*this.zAxis.getNBins();
@@ -824,42 +856,38 @@ public class MyH4S implements EvioWritableTree {
         return this.attr;
     }
 
-    public Double getData(int x, int y, int z, int a) {
-        return this.getBinContent(x, y, z, a);
+    public short getData(int x, int y, int z) {
+        return this.getBinContent(x, y, z);
     }
 
     public Integer getDataSize(int axis) {
         if(axis==0) return this.getXAxis().getNBins();
         if(axis==1) return this.getYAxis().getNBins();
         if(axis==2) return this.getZAxis().getNBins();
-        if(axis==3) return this.getAAxis().getNBins();
         return 0;
     }
+
 	
 	public static void main(String[] args){ 
-		MyH4S testh4 = new MyH4S("test1", 7000, 0.0, 3000.0,
-					                      50, 0.5, 50.5,
-					                      50, 0.5, 50.5,
-					                      50, 0.5, 50.5);
+		MyH3S testh3 = new MyH3S("test1", 5, 0.0, 5.0, 
+					                      5, 0.0, 5.0,
+				                          5, 0.0, 5.0);
 		
-		
-		
-		testh4.fill(50, 1, 1, 1);
-		testh4.fill(50, 2, 2, 2);
-		testh4.fill(125.0, 3, 3, 3);
-		
-		testh4.fill(225, 4, 4, 4);
-		testh4.fill(225, 5, 5, 5);
-		
-		//System.out.println("bin: " + 0 + " content: " + testh3.getBinContent(0, 0, 0, 0));
-		//System.out.println("bin: " + 1 + " content: " + testh3.getZAxis().getBin(1.5));
+		testh3.fill(0.5, 0.5, 0.5);
+		testh3.fill(0.5, 0.5, 0.5);
+		testh3.fill(1.5, 1.5, 1.5);
+		testh3.fill(4.5, 4.5, 4.5);
+		testh3.fill(0.1, 4.5, 2.5);
+		//System.out.println("bin: " + 0 + " content: " + testh3.getBinContent(0, 1, 0));
+		//System.out.println("bin: " + 1 + " content: " + testh3.getBinContent(1, 1, 1));
 		TGCanvas testcanv = new TGCanvas();
 		MyH1D testh1 = new MyH1D();
 		
-		testh1 = testh4.projectionX("test",0,5,0,5,0,3).histClone("newtest");
+		testh1 = testh3.projectionY("test",0,1,0,2).histClone("newtest");
 		//testh1.fill(5.0);
 		testcanv.draw(testh1);
 		
 	}
+
 	
 }
