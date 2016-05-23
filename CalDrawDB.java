@@ -50,7 +50,8 @@ public class CalDrawDB{
 	private double slightshift;
 	private int unit; //PCAL ==0, ECinner ==1, ECouter==2 
 	private int[] numstrips = new int[3];
-	private int[][][] validoverlap; //first number if 0,1,2
+	private int[][][] validoverlap; // 3,68,62 first number is 0,1,2
+	private int[][][] validpixel; //68,62,62 for pcal
 
 	
 	//                                        [sector][u,v,w][strip number][vertex number]
@@ -68,12 +69,16 @@ public class CalDrawDB{
 			myInitVert();
 			validoverlap = new int[3][68][62];
 			//[0=uw,1=uv,2=vw][first layer strip][second layer strip]
+			validpixel = new int[68][62][62];
+			//[u strip #][v strip #][w strip #]
 		}
 		if(unit>0)   
 		{
 			initVert();
 			validoverlap = new int[3][36][36];
 			//[0=uw,1=uv,2=vw][first layer strip][second layer strip]
+			validpixel = new int[36][36][36];
+			//[u strip #][v strip #][w strip #]
 		}
 		
 		length = 4.5;
@@ -377,21 +382,22 @@ public class CalDrawDB{
 	// if so it is marked as true, else false
 	public Boolean isValidPixel(int sector, int uPaddle, int vPaddle, int wPaddle){
 		
-		
-		Object[] obj = getPixelVerticies(sector, uPaddle, vPaddle, wPaddle);
-		int numpoints = (int)obj[0];
-		
-        if(numpoints > 2) 
-        	return true;
-        else
-        	return false;	
-        	
-        /*
-		if(isValidOverlap(sector, 0, uPaddle,2,wPaddle) && isValidOverlap(sector, 0, uPaddle,1,vPaddle) && isValidOverlap(sector, 1, vPaddle,2,wPaddle))
-			return true;
+		if(validoverlap[0][uPaddle][wPaddle] == -1) return false;
+		else if(validoverlap[1][uPaddle][vPaddle] == -1) return false;
+		else if(validoverlap[2][vPaddle][wPaddle] == -1) return false;
+		else if(validpixel[uPaddle][vPaddle][wPaddle] == -1) return false;
 		else
-			return false;
-		*/
+		{
+		
+			Object[] obj = getPixelVerticies(sector, uPaddle, vPaddle, wPaddle);
+			int numpoints = (int)obj[0];
+			
+	        if(numpoints > 2) 
+	        	return true;
+	        else
+	        	return false;	
+		}
+        	
 	}
 	
 	//calls getPixelVerticies to check
@@ -491,7 +497,7 @@ public class CalDrawDB{
 	//                                     0-5         0-67         0-61          0-61
 	public Object[] getPixelVerticies(int sector, int uPaddle, int vPaddle, int wPaddle){
 		
-		if(isValidOverlap(sector, 0, uPaddle,2,wPaddle) && isValidOverlap(sector, 0, uPaddle,1,vPaddle) && isValidOverlap(sector, 1, vPaddle,2,wPaddle))
+		if(isValidOverlap(sector, 0, uPaddle,2,wPaddle))// && isValidOverlap(sector, 0, uPaddle,1,vPaddle) && isValidOverlap(sector, 1, vPaddle,2,wPaddle))
 		{
 			Object[] obj = getVerticies(getOverlapShape(sector, 0, uPaddle,2,wPaddle),getStripShape(sector, 1,vPaddle));
 			
@@ -500,10 +506,13 @@ public class CalDrawDB{
 			double[] y = new double[numpoints];
 			System.arraycopy( (double[])obj[1], 0, x, 0, numpoints);
 			System.arraycopy( (double[])obj[2], 0, y, 0, numpoints);
+			if(numpoints < 3) validpixel[uPaddle][vPaddle][wPaddle] = -1;
+			else validpixel[uPaddle][vPaddle][wPaddle] = 1;
 			return(new Object[]{numpoints, x, y});
 		}
 		else
 		{
+			validpixel[uPaddle][vPaddle][wPaddle] = -1;
 			return(new Object[]{0, 0.0, 0.0});
 		}
 		
@@ -1383,7 +1392,7 @@ public class CalDrawDB{
 
 	public static void main(String[] args){ 
 		
-		CalDrawDB pcaltest = new CalDrawDB("ECin");
+		CalDrawDB pcaltest = new CalDrawDB("PCAL");
 		TEmbeddedCanvas         shapeCanvas= new TEmbeddedCanvas();
 		DetectorShapeTabView  view= new DetectorShapeTabView();
 		
@@ -1541,11 +1550,11 @@ public class CalDrawDB{
     	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL Pixel");
     	 	for(int sector = 0; sector < 1; sector++)
 	    	{
-	    	for(int uPaddle = 0; uPaddle < 36; uPaddle++)
+	    	for(int uPaddle = 0; uPaddle < 68; uPaddle++)
 	    	{
-	    		for(int vPaddle = 0; vPaddle < 36; vPaddle++)
+	    		for(int vPaddle = 0; vPaddle < 62; vPaddle++)
 	            {
-		            for(int wPaddle = 0; wPaddle < 36; wPaddle++)
+		            for(int wPaddle = 0; wPaddle < 62; wPaddle++)
 		            {
 		            	//System.out.println("u: " + uPaddle + " v: " + vPaddle + " w: " + wPaddle);
 		            	if(pcaltest.isValidPixel(sector, uPaddle, vPaddle, wPaddle))
