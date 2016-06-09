@@ -415,11 +415,17 @@ public class CalDrawDB{
 			paddle1 = paddle2;
 			paddle2 = temp; 
 		}
+		
 		if(strip1 == 0 && strip2 == 2)
 		{
 			//UW
 			if(validoverlap[0][paddle1][paddle2] == 1) return true;
 			else if(validoverlap[0][paddle1][paddle2] == -1) return false;
+			else if(paddle1 <= 15 && paddle2 <= 15)
+			{
+				validoverlap[0][paddle1][paddle2] = -1;
+	        	return false;
+			}
 			else
 			{
 				Object[] obj = getOverlapVerticies(sector, strip1, paddle1, strip2, paddle2);
@@ -442,6 +448,11 @@ public class CalDrawDB{
 			//UV
 			if(validoverlap[1][paddle1][paddle2] == 1) return true;
 			else if(validoverlap[1][paddle1][paddle2] == -1) return false;
+			else if(paddle1 <= 15 && paddle2 <= 15)
+			{
+				validoverlap[1][paddle1][paddle2] = -1;
+	        	return false;
+			}
 			else
 			{
 				Object[] obj = getOverlapVerticies(sector, strip1, paddle1, strip2, paddle2);
@@ -464,6 +475,11 @@ public class CalDrawDB{
 			//VW
 			if(validoverlap[2][paddle1][paddle2] == 1) return true;
 			else if(validoverlap[2][paddle1][paddle2] == -1) return false;
+			else if(paddle1 <= 15 && paddle2 <= 15)
+			{
+				validoverlap[2][paddle1][paddle2] = -1;
+	        	return false;
+			}
 			else
 			{
 				Object[] obj = getOverlapVerticies(sector, strip1, paddle1, strip2, paddle2);
@@ -489,6 +505,423 @@ public class CalDrawDB{
 			
 	}
 
+	
+	//returns true if pixel is on very edge
+	//i.e. lots of corner clipping events
+	public Boolean isEdgePixel(int uPaddle, int vPaddle, int wPaddle)
+	{
+		Point2D tempp = null;
+		double[] xtemp = new double[20];
+		double[] ytemp = new double[20];
+		double b;
+		double slopeafter;
+		int numpoints = 0;
+		int ulaststrip,vlaststrip;
+		int i,j,k;
+		
+		if(unit == 0)
+		{
+			ulaststrip = 67;
+			vlaststrip = 61;
+		}
+		else
+		{
+			ulaststrip = 35;
+			vlaststrip = 35;
+		}
+		
+
+		if(uPaddle != 0 && uPaddle != ulaststrip && vPaddle != 0 && vPaddle != vlaststrip && wPaddle != 0 && wPaddle != vlaststrip)
+			return false;
+		else
+		{
+			Object[] obj = getPixelVerticies(0, uPaddle, vPaddle, wPaddle);
+			numpoints = (int)obj[0];
+			if (numpoints<3) 
+			{
+				numpoints = 0;
+				return true;
+			}
+			
+			System.arraycopy( (double[])obj[1], 0, xtemp, 0, numpoints);
+			System.arraycopy( (double[])obj[2], 0, ytemp, 0, numpoints);
+		}
+			
+		
+		if(uPaddle == 0)
+		{
+			Polygon2D ushape1 = new SimplePolygon2D();
+			Polygon2D ushape2 = new SimplePolygon2D();
+			for(i = 0; i < 4; ++i)
+			{
+				tempp = new Point2D(xPoint[0][0][0][i],yPoint[0][0][0][i]);
+				ushape1.addVertex(tempp);
+				tempp = new Point2D(xPoint[0][0][1][i],yPoint[0][0][1][i]);
+				ushape2.addVertex(tempp);	
+			}
+			ushape1 = Polygons2D.union(ushape1,ushape2);
+			
+			for(k = 0; k < numpoints; ++k)
+	        {
+	        	for(i = 0; i < ushape1.vertexNumber(); ++i)
+	        	{
+	        		if(i == (ushape1.vertexNumber() - 1))
+						j = 0;
+					else 
+						j = i + 1;
+	        		if(Math.abs(ushape1.vertex(i).x() - ushape1.vertex(j).x()) < 0.01)
+	        		{
+	        			slopeafter = 999.0;
+	        			if(Math.abs(xtemp[k] - ushape1.vertex(i).x()) < 0.06) return true;
+	        		}
+	        		else 
+	        		{
+	        			slopeafter = (ushape1.vertex(j).getY() - ushape1.vertex(i).getY())/(ushape1.vertex(j).getX() - ushape1.vertex(i).getX());
+	        			b = ushape1.vertex(i).getY() - (slopeafter * ushape1.vertex(i).getX());
+	        			if(Math.abs(ytemp[k] - (slopeafter * xtemp[k] + b)) < 0.06) return true;
+	        		}
+	        	}
+	        }
+			
+			ushape1 = null;
+			ushape2 = null;
+				
+		}
+		else if(uPaddle == ulaststrip)
+		{
+			Polygon2D ushape1 = new SimplePolygon2D();
+			Polygon2D ushape2 = new SimplePolygon2D();
+			for(i = 0; i < 4; ++i)
+			{
+				tempp = new Point2D(xPoint[0][0][ulaststrip][i],yPoint[0][0][ulaststrip][i]);
+				ushape1.addVertex(tempp);
+				tempp = new Point2D(xPoint[0][0][ulaststrip-1][i],yPoint[0][0][ulaststrip-1][i]);
+				ushape2.addVertex(tempp);	
+			}
+			ushape1 = Polygons2D.union(ushape1,ushape2);
+
+			for(k = 0; k < numpoints; ++k)
+	        {
+	        	for(i = 0; i < ushape1.vertexNumber(); ++i)
+	        	{
+	        		if(i == (ushape1.vertexNumber() - 1))
+						j = 0;
+					else 
+						j = i + 1;
+	        		if(Math.abs(ushape1.vertex(i).x() - ushape1.vertex(j).x()) < 0.01)
+	        		{
+	        			slopeafter = 999.0;
+	        			//double calcy = (slopeafter * xtemp[k] + b);
+	        			//System.out.println("slope: " + slopeafter + " y-int: " + b);
+	        			//System.out.println("x: " + xtemp[k] + " xvert: " + ushape1.vertex(i).x());
+	        			if(Math.abs(xtemp[k] - ushape1.vertex(i).x()) < 0.06) return true;
+	        			
+	        		}
+	        		else 
+	        		{
+	        			slopeafter = (ushape1.vertex(j).getY() - ushape1.vertex(i).getY())/(ushape1.vertex(j).getX() - ushape1.vertex(i).getX());
+	        			b = ushape1.vertex(i).getY() - (slopeafter * ushape1.vertex(i).getX());
+	        			//double calcy = (slopeafter * xtemp[k] + b);
+	        			//System.out.println("slope: " + slopeafter + " y-int: " + b);
+	        			//System.out.println("x: " + xtemp[k] + " y: " + ytemp[k] + " calculated y: " + calcy);
+	        			if(Math.abs(ytemp[k] - (slopeafter * xtemp[k] + b)) < 0.06) return true;
+	        		}
+	        	}
+	        }
+	        
+			ushape1 = null;
+			ushape2 = null;
+		}
+		
+		// test vstrips
+		if(vPaddle == 0)
+		{
+			Polygon2D vshape1 = new SimplePolygon2D();
+			Polygon2D vshape2 = new SimplePolygon2D();
+			for(i = 0; i < 4; ++i)
+			{
+				tempp = new Point2D(xPoint[0][1][0][i],yPoint[0][1][0][i]);
+				vshape1.addVertex(tempp);
+				tempp = new Point2D(xPoint[0][1][1][i],yPoint[0][1][1][i]);
+				vshape2.addVertex(tempp);	
+			}
+			vshape1 = Polygons2D.union(vshape1,vshape2);
+					
+			for(k = 0; k < numpoints; ++k)
+	        {
+	        	for(i = 0; i < vshape1.vertexNumber(); ++i)
+	        	{
+	        		if(i == (vshape1.vertexNumber() - 1))
+						j = 0;
+					else 
+						j = i + 1;
+	        		if(Math.abs(vshape1.vertex(i).x() - vshape1.vertex(j).x()) < 0.01)
+	        		{
+	        			slopeafter = 999.0;
+	        			if(Math.abs(xtemp[k] - vshape1.vertex(i).x()) < 0.06) return true;
+	        		}
+	        		else 
+	        		{
+	        			slopeafter = (vshape1.vertex(j).getY() - vshape1.vertex(i).getY())/(vshape1.vertex(j).getX() - vshape1.vertex(i).getX());
+	        			b = vshape1.vertex(i).getY() - (slopeafter * vshape1.vertex(i).getX());
+	        			if(Math.abs(ytemp[k] - (slopeafter * xtemp[k] + b)) < 0.06) return true;
+	        		}
+	        	}
+	        }
+	        
+			vshape1 = null;
+			vshape2 = null;
+				
+		}
+		else if(vPaddle == vlaststrip)
+		{
+			Polygon2D vshape1 = new SimplePolygon2D();
+			Polygon2D vshape2 = new SimplePolygon2D();
+			for(i = 0; i < 4; ++i)
+			{
+				tempp = new Point2D(xPoint[0][1][vlaststrip][i],yPoint[0][1][vlaststrip][i]);
+				vshape1.addVertex(tempp);
+				tempp = new Point2D(xPoint[0][1][vlaststrip-1][i],yPoint[0][1][vlaststrip-1][i]);
+				vshape2.addVertex(tempp);	
+			}
+			vshape1 = Polygons2D.union(vshape1,vshape2);
+			
+			for(k = 0; k < numpoints; ++k)
+	        {
+	        	for(i = 0; i < vshape1.vertexNumber(); ++i)
+	        	{
+	        		if(i == (vshape1.vertexNumber() - 1))
+						j = 0;
+					else 
+						j = i + 1;
+	        		if(Math.abs(vshape1.vertex(i).x() - vshape1.vertex(j).x()) < 0.01)
+	        		{
+	        			slopeafter = 999.0;
+	        			if(Math.abs(xtemp[k] - vshape1.vertex(i).x()) < 0.06) return true;
+	        		}
+	        		else 
+	        		{
+	        			slopeafter = (vshape1.vertex(j).getY() - vshape1.vertex(i).getY())/(vshape1.vertex(j).getX() - vshape1.vertex(i).getX());
+	        			b = vshape1.vertex(i).getY() - (slopeafter * vshape1.vertex(i).getX());
+	        			if(Math.abs(ytemp[k] - (slopeafter * xtemp[k] + b)) < 0.06) return true;
+	        		}
+	        	}
+	        }
+	        
+			vshape1 = null;
+			vshape2 = null;
+		}
+		
+		
+		//test w strips
+		if(wPaddle == 0)
+		{
+			Polygon2D wshape1 = new SimplePolygon2D();
+			Polygon2D wshape2 = new SimplePolygon2D();
+			for(i = 0; i < 4; ++i)
+			{
+				tempp = new Point2D(xPoint[0][2][0][i],yPoint[0][2][0][i]);
+				wshape1.addVertex(tempp);
+				tempp = new Point2D(xPoint[0][2][1][i],yPoint[0][2][1][i]);
+				wshape2.addVertex(tempp);	
+			}
+			wshape1 = Polygons2D.union(wshape1,wshape2);
+					
+			for(k = 0; k < numpoints; ++k)
+	        {
+	        	for(i = 0; i < wshape1.vertexNumber(); ++i)
+	        	{
+	        		if(i == (wshape1.vertexNumber() - 1))
+						j = 0;
+					else 
+						j = i + 1;
+	        		if(Math.abs(wshape1.vertex(i).x() - wshape1.vertex(j).x()) < 0.01)
+	        		{
+	        			slopeafter = 999.0;
+	        			if(Math.abs(xtemp[k] - wshape1.vertex(i).x()) < 0.06) return true;
+	        		}
+	        		else 
+	        		{
+	        			slopeafter = (wshape1.vertex(j).getY() - wshape1.vertex(i).getY())/(wshape1.vertex(j).getX() - wshape1.vertex(i).getX());
+	        			b = wshape1.vertex(i).getY() - (slopeafter * wshape1.vertex(i).getX());
+	        			if(Math.abs(ytemp[k] - (slopeafter * xtemp[k] + b)) < 0.06) return true;
+	        		}
+	        	}
+	        }
+	        
+			wshape1 = null;
+			wshape2 = null;
+				
+		}
+		else if(wPaddle == vlaststrip)
+		{
+			Polygon2D wshape1 = new SimplePolygon2D();
+			Polygon2D wshape2 = new SimplePolygon2D();
+			for(i = 0; i < 4; ++i)
+			{
+				tempp = new Point2D(xPoint[0][2][vlaststrip][i],yPoint[0][2][vlaststrip][i]);
+				wshape1.addVertex(tempp);
+				tempp = new Point2D(xPoint[0][2][vlaststrip-1][i],yPoint[0][2][vlaststrip-1][i]);
+				wshape2.addVertex(tempp);	
+			}
+			wshape1 = Polygons2D.union(wshape1,wshape2);
+
+			
+	        /*
+	        ///////////// Remove Duplicate Points /////////////////////////
+			i = 0;
+			j = 1;
+			//System.out.println("start vertex: "+ wshape1.vertexNumber());
+			while(i < wshape1.vertexNumber())
+			{
+				if(i == wshape1.vertexNumber() - 1)
+					j = 0;
+				else
+					j = i + 1;
+				if(Math.abs(wshape1.vertex(i).x() - wshape1.vertex(j).x()) < 0.001 && Math.abs(wshape1.vertex(i).y() - wshape1.vertex(j).y()) < 0.001)
+				{
+					wshape1.removeVertex(j);
+					i = 0;
+					j = 1;
+					//System.out.println("removed vertex: "+ wshape1.vertexNumber());
+				}
+				else
+				{
+					++i;
+				}
+			}
+			//System.out.println("final vertex: "+ wshape1.vertexNumber());
+			///////////// Remove Duplicate Points /////////////////////////
+			////////////Remove Redundant Co-linear Points ////////////////
+
+								
+			i = 0;
+			while(i < wshape1.vertexNumber())
+			{
+				if(i == 0)
+				{
+					j = 1;
+					k = wshape1.vertexNumber() - 1; 
+				}
+				else if(i == wshape1.vertexNumber() - 1)
+				{
+					k = i-1;
+					j = 0;
+				}
+				else 
+				{
+					j = i + 1;
+					k = i - 1;
+				}
+				//previous and current
+				if(Math.abs(wshape1.vertex(i).x() - wshape1.vertex(k).x()) < 0.001) slopebefore = 999.0;
+				else slopebefore = (wshape1.vertex(k).y() - wshape1.vertex(i).y())/(wshape1.vertex(k).x() - wshape1.vertex(i).x());
+				
+				//current and next
+				if(Math.abs(wshape1.vertex(i).x() - wshape1.vertex(j).x()) < 0.001) slopeafter = 999.0;
+				else slopeafter = (wshape1.vertex(j).y() - wshape1.vertex(i).y())/(wshape1.vertex(j).x() - wshape1.vertex(i).x());
+				
+				if(Math.abs(slopeafter - slopebefore) < 0.001)
+				{
+					wshape1.removeVertex(i);
+					i = 0;
+				}
+				else
+				{
+					++i;
+				}
+			}
+			
+			System.out.println("Last two w strips "+ wshape1.vertexNumber());
+			for(i = 0; i < wshape1.vertexNumber(); ++i)
+			{
+				System.out.println("x: "+ wshape1.vertex(i).x() + " y: " + wshape1.vertex(i).y());
+			}
+			
+			////////////Remove Redundant Co-linear Points ////////////////
+			*/
+	        for(k = 0; k < numpoints; ++k)
+	        {
+	        	//System.out.println(k);
+	        	for(i = 0; i < wshape1.vertexNumber(); ++i)
+	        	{
+	        		if(i == (wshape1.vertexNumber() - 1))
+						j = 0;
+					else 
+						j = i + 1;
+	        		
+	        		//System.out.println(wshape1.vertex(i).x());
+	        		//System.out.println(wshape1.vertex(j).x());
+	        		if(Math.abs(wshape1.vertex(i).x() - wshape1.vertex(j).x()) < 0.01)
+	        		{
+	        			slopeafter = 999.0;
+	        			if(Math.abs(xtemp[k] - wshape1.vertex(i).x()) < 0.06) return true;
+	        		}
+	        		else 
+	        		{
+	        			slopeafter = (wshape1.vertex(j).getY() - wshape1.vertex(i).getY())/(wshape1.vertex(j).getX() - wshape1.vertex(i).getX());
+	        			b = wshape1.vertex(i).getY() - (slopeafter * wshape1.vertex(i).getX());
+	        			//double calcy = (slopeafter * xtemp[k] + b);
+	        			//System.out.println("slope: " + slopeafter + " y-int: " + b);
+	        			//System.out.println("x: " + xtemp[k] + " y: " + ytemp[k] + " calculated y: " + calcy);
+	        			if(Math.abs(ytemp[k] - (slopeafter * xtemp[k] + b)) < 0.06) return true;
+	        		}
+	        	}//
+	        }
+	        
+			wshape1 = null;
+			wshape2 = null;
+		}
+				
+
+		return false;
+	}
+	
+	//returns true if pixel is on very edge
+	//i.e. lots of corner clipping events
+	//                             0,1,2      0-67 or 0-61  0,1,2     0-67 or 0-61
+	public Boolean isEdgeOverlap(int strip1, int paddle1, int strip2, int paddle2)
+	{
+		//make strip1 either u or v
+		if(strip1 > strip2)
+		{
+			int temp;
+			temp = strip1;
+			strip1 = strip2;
+			strip2 = temp;
+			
+			temp = paddle1;
+			paddle1 = paddle2;
+			paddle2 = temp; 
+		}
+		if(unit == 0) // pcal
+		{
+			if(strip1 == 0)
+			{
+				//u strip
+				if(paddle1 == 0 || paddle1 == 67)	
+					return true;
+			}
+			else
+			{
+				//v or w strip
+				if(paddle1 == 0 || paddle1 == 61)	
+					return true;
+			}
+			
+			//strip2 is either v or w
+			if(paddle2 == 0 || paddle2 == 61)	
+				return true;
+		}
+		else //ec
+		{
+			if(paddle1 == 0 || paddle1 == 35)	
+				return true;
+			if(paddle2 == 0 || paddle2 == 35)	
+				return true;
+		}
+		return false;
+	}
 	
 	//returns an Object array of size 3
 	//first element is the number of verticies (n) (int)
@@ -524,6 +957,7 @@ public class CalDrawDB{
 	//second element is an array x-coordinates (double[]) of size n
 	//third element is an array y-coordinates (double[]) of size n
 
+	
 	public Object[] getOverlapVerticies(int sector, int strip1, int paddle1, int strip2, int paddle2){
 	
 		if(strip1 > strip2)
@@ -558,6 +992,7 @@ public class CalDrawDB{
 		}
 	}
 
+
 	public Object[] getStripVerticies(int sector, int strip1, int paddle1){
 		int numpoints = 4;
 		int l = 0;
@@ -574,6 +1009,7 @@ public class CalDrawDB{
 	
 	//estimates the shape center by calculating average x, y, z
 	//from all verticies in the shape
+
 
 	public double[] getShapeCenter(DetectorShape2D shape){
 		double[] center = new double[3];
@@ -594,6 +1030,7 @@ public class CalDrawDB{
 	
 	//assuming PMT is right at edge of PCAL
 	//there is actually tens of centimeters of fibers between.
+
 
 	public double[] getPMTLocation(int strip1, int paddle1){
 		double[] center = new double[3];
@@ -720,6 +1157,7 @@ public class CalDrawDB{
 	
 	//get attenuation distance
 	
+
 	public double getUPixelDistance(int uPaddle, int vPaddle, int wPaddle){
 		double distance = 0;
 		double[] shapecenter = new double[3];
@@ -736,6 +1174,7 @@ public class CalDrawDB{
 	}
 	
 	//get attenuation distance
+
 	public double getVPixelDistance(int uPaddle, int vPaddle, int wPaddle){
 		double distance = 0;
 		double[] shapecenter = new double[3];
@@ -752,6 +1191,7 @@ public class CalDrawDB{
 	}
 	
 	//get attenuation distance
+
 
 	public double getWPixelDistance(int uPaddle, int vPaddle, int wPaddle){
 		double distance = 0;
@@ -774,6 +1214,7 @@ public class CalDrawDB{
 	//get attenuation distance
 	//                              main strip let,    main num, cross strip let, cross num
 	//                               0,1,2:u,v,w        0-67   0,1,2:u,v,w       0-61
+
 	public double getOverlapDistance(int strip1, int paddle1, int strip2, int paddle2){
 		double distance = 0;
 		double[] shapecenter = new double[3];
@@ -793,6 +1234,7 @@ public class CalDrawDB{
   	//crossstrip needs to be 1-62 or 1-68 not 0
 	//returns a strip number in element 0
 	// and half the strip bin 0.5 for singles and 1 for doubles in element 1
+
     public double[] CalcDistinStrips(char stripletter, int crossstrip)
     {
   	  double x=0;
@@ -833,6 +1275,7 @@ public class CalDrawDB{
     //xdistance needs to be 1-77 or 1-84 not 0
     //meant for use with the output of CalcDistinStrips
 
+
     public double[] CalcDistance(char stripletter, double xdistance, double xdistanceE)
     {
         
@@ -850,8 +1293,7 @@ public class CalDrawDB{
         }
         return new double[] {xdistance, xdistanceE};
     }
-    
-    
+      
 	public float uvw_dalitz(int ic, int ip, int il) {
 		float uvw=0;
 		switch (ic) {
@@ -874,6 +1316,7 @@ public class CalDrawDB{
 		
 	}
 	
+
 	public DetectorShape2D scaleShape(DetectorShape2D shape, double scalefactor)
 	{
 		double[] shapecenter = new double[3];
@@ -903,6 +1346,7 @@ public class CalDrawDB{
 		return shape;
 	}
 	
+
 	public DetectorShape2D trimShape(DetectorShape2D shapeA, DetectorShape2D shapeB)
 	{
 		DetectorShape2D shapeC = new DetectorShape2D();
@@ -933,6 +1377,31 @@ public class CalDrawDB{
 		
 	}
 	
+
+	public double shapeArea(DetectorShape2D inshape) 
+	{ 
+		int numPoints = inshape.getShapePath().size();
+		double[] xpoint = new double[numPoints];
+		double[] ypoint = new double[numPoints];
+		int i, j;
+		double area = 0;         // Accumulates area in the loop
+		j = numPoints-1;  // The last vertex is the 'previous' one to the first
+		
+		for(i=0; i<numPoints; i++)
+		{
+			xpoint[i] = inshape.getShapePath().point(i).x();
+			ypoint[i] = inshape.getShapePath().point(i).y();
+		}
+
+		for(i=0; i<numPoints; i++)
+		{
+			area = area + (xpoint[j]+xpoint[i]) * (ypoint[j]-ypoint[i]); 
+		    j = i;  //j is previous vertex to i
+		}
+		return area/2.0;
+	}
+	
+
 	private void myInitVert() {
 		ECLayer  ecLayer;
 		Point3D point1 = new Point3D();
@@ -960,6 +1429,7 @@ public class CalDrawDB{
         }
 	}
 		
+
 	private void initVert()
 	{
 		ECLayer  ecLayer;
@@ -987,6 +1457,7 @@ public class CalDrawDB{
         	//loop through u, v, w layers
 		    for(int l = 0; l <3; l++)
 		    {    	
+		    	
 	        	//	                                             PCAL ==0         u,v,w
 	        	ecLayer = detector.getSector(sector).getSuperlayer(suplay).getLayer(l);
 	        	
@@ -1012,6 +1483,7 @@ public class CalDrawDB{
 	        		point1.copy(paddle.getVolumePoint(1));
 	        		poly1.addVertex(new Point2D(point1.x(),  point1.y())); 
 	        		
+	        		//System.out.println("x: " + point1.x() + " y: " + point1.y() + " z: " + point1.z());
 	        		
 	        		//get whole triangle shape for l = 0
 	        		for(ScintillatorPaddle paddle1 : ecLayer.getAllComponents())
@@ -1036,7 +1508,7 @@ public class CalDrawDB{
 		            }
 	        		
 	        		//define triangle
-	        		for(i = 0; i < poly1.vertexNumber(); ++ i)
+	        		for(i = 0; i < poly1.vertexNumber(); ++i)
 	        		{
 	        			if(poly1.vertex(i).x() < minxpoint.x()) minxpoint = Point2D.create(poly1.vertex(i));
 	        			if(poly1.vertex(i).y() < minypoint.y()) minypoint = Point2D.create(poly1.vertex(i));
@@ -1047,6 +1519,12 @@ public class CalDrawDB{
 	        		shape2.getShapePath().addPoint(minxpoint.x(),minxpoint.y(), 0.0); 
 	        		shape2.getShapePath().addPoint(minypoint.x(),minypoint.y(), 0.0); 
 	        		shape2.getShapePath().addPoint(maxypoint.x(),maxypoint.y(), 0.0);
+	        		
+	        		//output triangle corners
+	        		//for(i = 0; i < shape2.getShapePath().size(); ++i)
+	        		//{
+	        		//	System.out.println("Point #: " + i + " x: " + shape2.getShapePath().point(i).x() + " y: " + shape2.getShapePath().point(i).y());
+	        		//}
 	        		
 	        		
 	        		//get triangle edge lengths 
@@ -1219,7 +1697,11 @@ public class CalDrawDB{
 	        		}
 	        		
 	        		DetectorShape2D shape3 = new DetectorShape2D();
-	        		shape3 = this.trimShape(shape, shape2);
+	        		//trim strip to outer triangle
+	        		//shape is strip of max length
+	        		//shape2 is triangle
+	        		shape3 = this.trimShape(shape, shape2); 
+	        		//add arbitrary/duplicate 4th point
 	        		if(shape3.getShapePath().size() < 4) shape3.getShapePath().addPoint(shape3.getShapePath().point(2));
 
 	        		for(int j = 0; j < shape3.getShapePath().size(); ++j)
@@ -1241,6 +1723,7 @@ public class CalDrawDB{
         }
 	}
 	
+
 	public Object[] getVerticies(DetectorShape2D shape1, DetectorShape2D shape2){
 		int nPoints = 0;
 		
@@ -1289,29 +1772,29 @@ public class CalDrawDB{
 		{			
 			if(i == 0)
 			{
-				x[count] = pol3.vertex(i).getX();
-				y[count] = pol3.vertex(i).getY();
+				x[count] = pol3.vertex(i).x();
+				y[count] = pol3.vertex(i).y();
 				++count;
 			}
 			else
 			{
 				for(int j = 0; j < i; ++j)
 				{
-					if(Math.abs(pol3.vertex(i).getX() - x[j]) < 0.000001 && Math.abs(pol3.vertex(i).getY() - y[j]) < 0.0001)
+					if(Math.abs(pol3.vertex(i).x() - x[j]) < 0.000001 && Math.abs(pol3.vertex(i).y() - y[j]) < 0.0001)
 					{
 						duplicate = true;
 					}
 				}
 				if(!duplicate)
 				{
-					x[count] = pol3.vertex(i).getX();
-					y[count] = pol3.vertex(i).getY();
+					x[count] = pol3.vertex(i).x();
+					y[count] = pol3.vertex(i).y();
 					++count;
 				}
 				duplicate = false;
 			}
 			
-			//System.out.println("x: " + pol3.vertex(i).getX() + " y: " + pol3.vertex(i).getY());
+			//System.out.println("x: " + pol3.vertex(i).getX() + " y: " + pol3.vertex(i).y());
 		}
 		
 		///////////////// Record number of points /////////////////////
@@ -1374,7 +1857,7 @@ public class CalDrawDB{
 					++count2;
 				}
 					
-				//System.out.println("x: " + pol3.vertex(i).getX() + " y: " + pol3.vertex(i).getY());
+				//System.out.println("x: " + pol3.vertex(i).x() + " y: " + pol3.vertex(i).y());
 			}
 		}
 		///////////////// Record number of points /////////////////////
@@ -1390,9 +1873,10 @@ public class CalDrawDB{
 	}
 	
 
+	
 	public static void main(String[] args){ 
 		
-		CalDrawDB pcaltest = new CalDrawDB("PCAL");
+		CalDrawDB pcaltest = new CalDrawDB("ECin");
 		TEmbeddedCanvas         shapeCanvas= new TEmbeddedCanvas();
 		DetectorShapeTabView  view= new DetectorShapeTabView();
 		
@@ -1542,19 +2026,17 @@ public class CalDrawDB{
 			e.printStackTrace();
 		}
 		int num1, num2, num3;
-		int pixel=0;
-		//double total;
-		
+		int pixel=0;	
 		
 		DetectorShape2D shape = new DetectorShape2D();
     	 	DetectorShapeView2D UWmap= new DetectorShapeView2D("PCAL Pixel");
     	 	for(int sector = 0; sector < 1; sector++)
 	    	{
-	    	for(int uPaddle = 0; uPaddle < 68; uPaddle++)
+	    	for(int uPaddle = 0; uPaddle < 36; uPaddle++)
 	    	{
-	    		for(int vPaddle = 0; vPaddle < 62; vPaddle++)
+	    		for(int vPaddle = 0; vPaddle < 36; vPaddle++)
 	            {
-		            for(int wPaddle = 0; wPaddle < 62; wPaddle++)
+		            for(int wPaddle = 0; wPaddle < 36; wPaddle++)
 		            {
 		            	//System.out.println("u: " + uPaddle + " v: " + vPaddle + " w: " + wPaddle);
 		            	if(pcaltest.isValidPixel(sector, uPaddle, vPaddle, wPaddle))
@@ -1580,12 +2062,17 @@ public class CalDrawDB{
 		            		SimplePolygon2D pol1 = new SimplePolygon2D(xtemp2,ytemp2);
 		            		/////////////////////////////////////////////////////////////
 		            		
-		            		
+		            		//if(uPaddle == 0 ) System.out.println("IsEdgePixel:  " + pcaltest.isEdgePixel(uPaddle,vPaddle,wPaddle));
 		            		num1 = uPaddle + 1;
 		            		num2 = vPaddle + 1;
 		            		num3 = wPaddle + 1;
-		            		//total = pcaltest.getUPixelDistance(uPaddle, vPaddle, wPaddle) + pcaltest.getVPixelDistance(uPaddle, vPaddle, wPaddle) + pcaltest.getWPixelDistance(uPaddle, vPaddle, wPaddle);
 		            		
+		            		//if(uPaddle == 15)
+		            		//{
+		            		//	total = pcaltest.getShapeCenter(shape);
+		            		//	System.out.println(num1  + "   " + num2 + "   " + num3);
+		            		//	System.out.println("x: " + total[0] + " y: " + total[1] + " z: " + total[2]);
+		            		//}
 		            		//if(pcaltest.unit != 0 && shape.getShapePath().size() == 4)
 		            		//	System.out.println("4 vertex: " + num1  + "   " + num2 + "   " + num3);
 		            		//if(pcaltest.unit != 0 && shape.getShapePath().size() == 5)
@@ -1606,6 +2093,8 @@ public class CalDrawDB{
 	                			//System.out.println("i,u,v,w,pix,x,y= "+i+" "+uPaddle+" "+vPaddle+" "+wPaddle+" "+pixel+" "+x+" "+y);
 	        				}
 		            		shape.setColor(130,(int)(255*vPaddle/62.),(int)(255*wPaddle/62.));
+		            		
+		            		//if(!(pcaltest.isEdgePixel(uPaddle,vPaddle,wPaddle))) UWmap.addShape(shape);
 		            		UWmap.addShape(shape);
 		            	}
 		            	//}
@@ -1618,6 +2107,8 @@ public class CalDrawDB{
 	    	
 	    	writer.close();
 	    	
+		
+			
 	    
 	    	
 	       // return UWmap;
@@ -1631,6 +2122,8 @@ public class CalDrawDB{
 		    hi.setVisible(true);
     	 
 	    	System.out.println("Done!");
+	    	  	
+	    	
 	
 	}
 

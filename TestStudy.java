@@ -59,12 +59,12 @@ import org.root.pad.TEmbeddedCanvas;
  * @author gavalian
  * @edited by N. Compton & Taya C.
  */
-public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorProcessor, ActionListener {
+public class TestStudy extends JFrame implements IDetectorListener, IDetectorProcessor, ActionListener {
 
     //public EventDecoder     decoder = new EventDecoder();
 	//FADCConfigLoader          fadc  = new FADCConfigLoader();
     
-	PCALDraw pcal = new PCALDraw();
+	CalDrawDB pcal = new CalDrawDB("PCAL");
     DetectorShapeTabView  view   = new DetectorShapeTabView();
     DetectorShapeView2D  dv2,dv3,dv4,dv5,dv6,dv7,dv8,dv9;
     public CanvasViewPanel        canvasView;
@@ -77,14 +77,16 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
     ColorPalette         palette   = new ColorPalette();
     int numsectors = 1;
     int numpaddles = 68 * 10000 + 62 * 100 + 62;
+    int numfiles = 2;
     
-    private String inputFileName = "/home/ncompton/Work/workspace/Calibration/data/fc-muon-3M-s2.evio";
+    private String inputFileName = "/home/ncompton/Work/workspace/Calibration/data/fc-muon-3M-s2-javageom.evio";
     //sector2_000251_mode7.evio.0
     //fc-muon-500k-s2-noatt.evio 
     //fc-muon-3M-s2.evio  "sector 2"
     //fc-muon-500k.evio "sector 5"
     //fc-muon-3M-s2-javageom.evio "sector 2" "using database geometry
     //private int RunNumber = 4284; 
+    private String inputFileName2 = "/home/ncompton/Work/workspace/Calibration/data/fcpc-muon2-3M-s2-javageom.evio";
     private int CurrentSector = 2; 
     private static int iteration = 0;
     private int numiterations = 1;
@@ -151,7 +153,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
     }
 
 	
-    public PCALcalibv2(){
+    public TestStudy(){
         super();
         //fadc.load("/test/fc/fadc",10,"default");
         this.initDetector();
@@ -221,6 +223,8 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
         				udpixel[upaddle][vpaddle][wpaddle] = pcal.getUPixelDistance(upaddle, vpaddle, wpaddle);
         				vdpixel[upaddle][vpaddle][wpaddle] = pcal.getVPixelDistance(upaddle, vpaddle, wpaddle);
         				wdpixel[upaddle][vpaddle][wpaddle] = pcal.getWPixelDistance(upaddle, vpaddle, wpaddle);
+        				
+        				//System.out.println(udpixel[upaddle][vpaddle][wpaddle]);
         			}
         			else
         			{
@@ -349,7 +353,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 		    namedir = String.format("crossStripHisto%02d", iteration - 1);
 		    name = String.format("adu_sig");
 			name2 = String.format("adu_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-	        h1  = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, w, w);
+	        h1  = (MyH1D)(((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, w, w));
 	        canvas.cd(1);
 	        canvas.draw(h1);
 	        
@@ -374,7 +378,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 		    namedir = String.format("crossStripHisto%02d", iteration - 1);
 		    name = String.format("adv_sig");
 			name2 = String.format("adv_%02d_%02d_%02d", u + 1, v + 1, w + 1);
-			h1 = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, w, w);
+			h1 = (MyH1D)(((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, u, u, v, v, w, w));
 	        canvas.cd(3);
 	        canvas.draw(h1);
 	        
@@ -1005,47 +1009,47 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
         			namedir = String.format("crossStripHisto%02d", iteration);
             		name = String.format("adu_sig");
             		pixelfilling4 = (MyH4S)getDir().getDirectory(namedir).getObject(name);
-            		//if(iteration != 0)
-            		//{
-	            		if(Math.abs(ad[1] - (vA[rs[1]-1]*Math.exp(vB[rs[1]-1] * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + vC[rs[1]-1])) < 20.0
-	            		&& Math.abs(ad[2] - (wA[rs[2]-1]*Math.exp(wB[rs[2]-1] * wdpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + wC[rs[2]-1])) < 20.0)
+            		if(iteration != 0)
+            		{
+	            		if(Math.abs(ad[1] - (100.0*Math.exp((-1.0/376.0) * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 20.0
+	            		&& Math.abs(ad[2] - (100.0*Math.exp((-1.0/376.0) * wdpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 20.0)
 	            			pixelfilling4.fill(ad[0], rs[0], rs[1], rs[2]);
-            		//}
-            		//else
-            		//{
-            		//	pixelfilling4.fill(ad[0], rs[0], rs[1], rs[2]);
-            		//}
+            		}
+            		else
+            		{
+            			pixelfilling4.fill(ad[0], rs[0], rs[1], rs[2]);
+            		}
             			
             		//adc on v strip
             		namedir = String.format("crossStripHisto%02d", iteration);
             		name = String.format("adv_sig");
             		pixelfilling4 = (MyH4S)getDir().getDirectory(namedir).getObject(name);
-            		//if(iteration != 0)
-            		//{
-	            		if(Math.abs(ad[0] - (uA[rs[0]-1]*Math.exp(uB[rs[0]-1] * udpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + uC[rs[0]-1])) < 20.0
-	            		&& Math.abs(ad[2] - (wA[rs[2]-1]*Math.exp(wB[rs[2]-1] * wdpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + wC[rs[2]-1])) < 20.0)
+            		if(iteration != 0)
+            		{
+	            		if(Math.abs(ad[0] - (100.0*Math.exp((-1.0/376.0) * udpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 20.0
+	            		&& Math.abs(ad[2] - (100.0*Math.exp((-1.0/376.0) * wdpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 20.0)
 	            			pixelfilling4.fill(ad[1], rs[0], rs[1], rs[2]);
-            		//}
-            		//else
-            		//{
-            		//	pixelfilling4.fill(ad[1], rs[0], rs[1], rs[2]);
-            		//}
+            		}
+            		else
+            		{
+            			pixelfilling4.fill(ad[1], rs[0], rs[1], rs[2]);
+            		}
             		
             		
             		//adc on w strip
             		namedir = String.format("crossStripHisto%02d", iteration);
             		name = String.format("adw_sig");
             		pixelfilling4 = (MyH4S)getDir().getDirectory(namedir).getObject(name);
-            		//if(iteration != 0)
-            		//{
-	            		if(Math.abs(ad[1] - (vA[rs[1]-1]*Math.exp(vB[rs[1]-1] * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + vC[rs[1]-1])) < 20.0
-	            		&& Math.abs(ad[0] - (uA[rs[0]-1]*Math.exp(uB[rs[0]-1] * udpixel[rs[0]-1][rs[1]-1][rs[2]-1]) + uC[rs[0]-1])) < 20.0)
+            		if(iteration != 0)
+            		{
+	            		if(Math.abs(ad[1] - (100.0*Math.exp((-1.0/376.0) * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 20.0
+	            		&& Math.abs(ad[0] - (100.0*Math.exp((-1.0/376.0) * udpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 20.0)
 	            			pixelfilling4.fill(ad[2], rs[0], rs[1], rs[2]);
-            		//}
-            		//else
-            		//{
-            		//	pixelfilling4.fill(ad[2], rs[0], rs[1], rs[2]);
-            		//}
+            		}
+            		else
+            		{
+            			pixelfilling4.fill(ad[2], rs[0], rs[1], rs[2]);
+            		}
             		
             			
             		//check if pixel is valid with hitmatrix
@@ -1111,6 +1115,27 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
     	       printout.setAsInteger("nevents", icounter);
     	       printout.updateStatus();
     	    }
+    	   reader.close();
+    	   if(numfiles == 2)
+    	   {
+    		   EvioSource  reader2 = new EvioSource();
+        	   reader2.open(this.inputFileName2);
+        	   while(reader2.hasEvent()){
+        	       icounter++;
+        	       EvioDataEvent event = (EvioDataEvent) reader2.getNextEvent();
+        	       try {
+        	           processEvent(event);
+        	       } catch (Exception e){
+        	           System.err.println("[PCAL Calibration] ----> error in event " + icounter);
+        	           e.printStackTrace();
+        	       }
+        	       
+        	       printout.setAsInteger("nevents", icounter);
+        	       printout.updateStatus();
+        	    }
+        	   reader2.close();
+    	   }
+    	   
     	   //this.analyze();
     	}
     
@@ -1125,30 +1150,30 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 		//RootCanvas canvas = new RootCanvas();
 		
 		MyH1D tempsignal;
-		//F1D myfunc1;
+		F1D myfunc1;
 		F1D myfunc2;
 		MyGraphErrors attengraph;
 		String name, name2;
 		String namedir;
 		
-		//double A, B;
-		//String fileName[] = {"/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/UattenCoeffpix.dat", 
-		//		 "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/VattenCoeffpix.dat", 
-		//		 "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/WattenCoeffpix.dat"};
+		double A, B;
+		String fileName[] = {"/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/UattenCoeffpix.dat", 
+				 "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/VattenCoeffpix.dat", 
+				 "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/WattenCoeffpix.dat"};
 		
 		namedir = String.format("attendir%02d", iteration);
 		TDirectory fitdir = new TDirectory(namedir); //creates directory
 		
-		//PrintWriter writer = null;
+		PrintWriter writer = null;
 		/////////////////// find u strip attenuation /////////////////////////////
-		/*
+		
 		try {
 			writer = new PrintWriter(fileName[0]);
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		*/
+		
 		counter = 0;
 		for(int ustrip = 0; ustrip < 68; ++ustrip)
 		{
@@ -1157,7 +1182,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 			{
 				for(int wstrip = 0; wstrip < 62; ++wstrip)
 				{
-					if(hit[ustrip][vstrip][wstrip] == 1)// && udpixel[ustrip][vstrip][wstrip] > 0.0 && vdpixel[ustrip][vstrip][wstrip] > 0.0  && wdpixel[ustrip][vstrip][wstrip] > 0.0
+					if(hit[ustrip][vstrip][wstrip] == 1 && !(pcal.isEdgePixel(ustrip,vstrip,wstrip)))
 					{
 						namedir = String.format("crossStripHisto%02d", iteration);
 						name = String.format("adu_sig");
@@ -1165,13 +1190,13 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 						tempsignal  = (MyH1D)((MyH4S)getDir().getDirectory(namedir).getObject(name)).projectionX(name2, ustrip, ustrip, vstrip, vstrip, wstrip, wstrip);
 
 						//centroids[counter] = myfunc.getParameter(1);
-						if(tempsignal.getMean() > 1 && tempsignal.getEntries() > 10)
+						if(tempsignal.getMean() > 1 && tempsignal.getEntries() > 2)
 						{
 							//Hpixcounts.fill(tempsignal.getEntries());
 							
 							centroids[counter] = tempsignal.getMean();
 							ey[counter] = tempsignal.getRMS()/tempsignal.getEntries(); 
-							
+							//System.out.println("Mean:  " + centroids[counter] +  "  Entries:  " + tempsignal.getEntries());
 							x[counter] = udpixel[ustrip][vstrip][wstrip];
 							ex[counter] = 0.0;
 							++counter;
@@ -1184,15 +1209,16 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 			name = String.format("attu_%02d", ustrip + 1);
 			attengraph = graphn(name,counter,x,centroids,ex,ey);
 			
-			/*
+			
 			myfunc1 = new F1D("exp",0.0,umaxX[ustrip]);
 			myfunc1.setParameter(0, 100.0);
+			myfunc1.parameter(0).setLimits(99.99, 100.01);
 			myfunc1.setParameter(1, -0.00265);
 			attengraph.fit(myfunc1);
 			A = myfunc1.getParameter(0);
 			B = myfunc1.getParameter(1);
 			writer.println(ustrip + "  " + umaxX[ustrip] + "  " + A + "  " + B);
-			*/
+			
 
 			
 			
@@ -1218,17 +1244,17 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 			fitdir.add(myfunc2);
 			fitdir.add(attengraph);
 		}
-		//writer.close();
+		writer.close();
 		
 		/////////////////// find v strip attenuation /////////////////////////////
-		/*
+		
 		try {
 			writer = new PrintWriter(fileName[1]);
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		*/
+		
 		for(int vstrip = 0; vstrip < 62; ++vstrip)
 		{
 			counter = 0;
@@ -1236,7 +1262,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 			{
 				for(int wstrip = 0; wstrip < 62; ++wstrip)
 				{
-					if(hit[ustrip][vstrip][wstrip] == 1)// && udpixel[ustrip][vstrip][wstrip] > 0.0 && vdpixel[ustrip][vstrip][wstrip] > 0.0  && wdpixel[ustrip][vstrip][wstrip] > 0.0
+					if(hit[ustrip][vstrip][wstrip] == 1 && !(pcal.isEdgePixel(ustrip,vstrip,wstrip)))
 					{
 						namedir = String.format("crossStripHisto%02d", iteration);
 						name = String.format("adv_sig");
@@ -1250,7 +1276,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 							ey[counter] = tempsignal.getRMS()/tempsignal.getEntries(); 
 							
 							x[counter] = vdpixel[ustrip][vstrip][wstrip];
-							ex[counter] = 1.0;
+							ex[counter] = 0.0;
 							++counter;
 						}
 						
@@ -1261,15 +1287,16 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 			name = String.format("attv_%02d", vstrip + 1);
 			attengraph = graphn(name,counter,x,centroids,ex,ey);
 			
-			/*
+			
 			myfunc1 = new F1D("exp",0.0,vmaxX[vstrip]);
 			myfunc1.setParameter(0, 100.0);
+			myfunc1.parameter(0).setLimits(99.99, 100.01);
 			myfunc1.setParameter(1, -0.00265);
 			attengraph.fit(myfunc1);
 			A = myfunc1.getParameter(0);
 			B = myfunc1.getParameter(1);
 			writer.println(vstrip + "  " + vmaxX[vstrip] + "  " + A + "  " + B);
-			*/
+			
 			
 			
 		
@@ -1283,16 +1310,16 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 			
 			fitdir.add(attengraph);
 		}
-		//writer.close();
+		writer.close();
 		/////////////////// find w strip attenuation /////////////////////////////
-		/*
+		
 		try {
 			writer = new PrintWriter(fileName[2]);
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		*/
+		
 		for(int wstrip = 0; wstrip < 62; ++wstrip)
 		{
 			counter = 0;
@@ -1300,7 +1327,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 			{
 				for(int ustrip = 0; ustrip < 68; ++ustrip)
 				{
-					if(hit[ustrip][vstrip][wstrip] == 1)// && udpixel[ustrip][vstrip][wstrip] > 0.0 && vdpixel[ustrip][vstrip][wstrip] > 0.0  && wdpixel[ustrip][vstrip][wstrip] > 0.0
+					if(hit[ustrip][vstrip][wstrip] == 1 && !(pcal.isEdgePixel(ustrip,vstrip,wstrip)))
 					{
 						namedir = String.format("crossStripHisto%02d", iteration);
 						name = String.format("adw_sig");
@@ -1314,7 +1341,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 							ey[counter] = tempsignal.getRMS()/tempsignal.getEntries(); 
 							
 							x[counter] = wdpixel[ustrip][vstrip][wstrip];
-							ex[counter] = 1.0;
+							ex[counter] = 0.0;
 							++counter;
 						}
 					}
@@ -1322,15 +1349,16 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 			}
 			name = String.format("attw_%02d", wstrip + 1);
 			attengraph = graphn(name,counter,x,centroids,ex,ey);
-			/*
+			
 			myfunc1 = new F1D("exp",0.0,wmaxX[wstrip]);
 			myfunc1.setParameter(0, 100.0);
+			myfunc1.parameter(0).setLimits(99.99, 100.01);
 			myfunc1.setParameter(1, -0.00265);
 			attengraph.fit(myfunc1);
 			A = myfunc1.getParameter(0);
 			B = myfunc1.getParameter(1);
 			writer.println(wstrip + "  " + wmaxX[wstrip] + "  " + A + "  " + B);
-			*/
+			
 		
 			//create function and fit
 			myfunc2 = new F1D("exp",0.0,500.0); //"mycustomfunc",
@@ -1342,7 +1370,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 			
 			fitdir.add(attengraph);
 		}
-		//writer.close();
+		writer.close();
 		getDir().addDirectory(fitdir);
 
 		
@@ -1617,11 +1645,14 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 
 		
 		PrintWriter writer = null;
+		PrintWriter writer2 = null;
 	
 		//U,V,W strip calibration
 		//int count = 0;
-		
+		double A, B;
 		char stripLetter[] = {'u','v','w'};
+		int stripNumber[] = {0,1,2};
+		int crossStripNumber[] = {2,0,0};
 		//char stripLetter2[] = {'w','u','u'};
 		//String cstring1, cstring2;
 		String histNameFormat[] = {"histU_%02d", "histV_%02d", "histW_%02d"};
@@ -1632,6 +1663,9 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 		String fileName[] = {"/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/UattenCoeff.dat", 
 							 "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/VattenCoeff.dat", 
 							 "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/WattenCoeff.dat"};
+		String fileName2[] = {"/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/UattenCoeffOver.dat", 
+				 "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/VattenCoeffOver.dat", 
+				 "/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/WattenCoeffOver.dat"};
 		
 		int stripMax[] = {68, 62, 62};//u, v, w
 		int crossStripMax[] = {62, 68, 68};//w, u, u
@@ -1643,6 +1677,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 			try 
 			{
 				writer = new PrintWriter(fileName[il]);
+				writer2 = new PrintWriter(fileName2[il]);
 			} 
 			catch (FileNotFoundException e) 
 			{
@@ -1716,14 +1751,22 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 						centroidsErr[counter] = (float)ProjHadc.getRMS()/Math.sqrt(ProjHadc.getEntries());
 						
 					}
+					centroids[counter] = ProjHadc.getMean();
+					centroidsErr[counter] = ProjHadc.getRMS()/ProjHadc.getEntries(); 
 					gausFit = null;
-					if(centroids[counter] >= 1.0)
+					if(centroids[counter] >= 1.0 && pcal.isValidOverlap(0, stripNumber[il], strip, crossStripNumber[il], crossStrip) && !(pcal.isEdgeOverlap(stripNumber[il],strip,crossStripNumber[il],crossStrip)))
 					{
-						xTemp[counter] = pcal.CalcDistinStrips(stripLetter[il], crossStrip+1)[0];//calcDistinStrips
-						xTempEr[counter] = pcal.CalcDistinStrips(stripLetter[il], crossStrip+1)[1];//calcDistinStrips
+						//xTemp[counter] = pcal.CalcDistinStrips(stripLetter[il], crossStrip+1)[0];//calcDistinStrips
+						//xTempEr[counter] = pcal.CalcDistinStrips(stripLetter[il], crossStrip+1)[1];//calcDistinStrips
 						
-						x[counter] = pcal.CalcDistance(stripLetter[il], xTemp[counter], xTempEr[counter])[0];
-						ex[counter] = pcal.CalcDistance(stripLetter[il], xTemp[counter], xTempEr[counter])[1];
+						//x[counter] = pcal.CalcDistance(stripLetter[il], xTemp[counter], xTempEr[counter])[0];
+						//ex[counter] = pcal.CalcDistance(stripLetter[il], xTemp[counter], xTempEr[counter])[1];
+						
+						x[counter] = pcal.getOverlapDistance(stripNumber[il], strip, crossStripNumber[il], crossStrip);
+						ex[counter] = 0.0;
+						
+						
+						
 						//centroids[counter] = ProjHadc[crossStrip].getMean();
 						if(stripLetter[il] == 'u' && x[counter] > umaxX[strip]) umaxX[strip] = x[counter] + 5;
 						if(stripLetter[il] == 'v' && x[counter] > vmaxX[strip]) vmaxX[strip] = x[counter] + 5;
@@ -1748,9 +1791,21 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 				//add to directories
 				graph.add(attengraph);
 				expofit.add(expfit);
+				
+				
 
 				//record parameters
 				int j = strip+1;
+				
+				F1D myfunc1 = new F1D("exp",0.0,400.0);
+				myfunc1.setParameter(0, 100.0);
+				myfunc1.parameter(0).setLimits(99.99, 100.01);
+				myfunc1.setParameter(1, -0.00265);
+				attengraph.fit(myfunc1);
+				A = myfunc1.getParameter(0);
+				B = myfunc1.getParameter(1);
+				writer2.println(j + "  " + 400.0 + "  " + A + "  " + B);
+				
 				if(counter < 4)
 				{
 					writer.println(j  + "   " + x[0] + "   "
@@ -1774,6 +1829,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
 				}
 			}
 			writer.close();
+			writer2.close();
 		}
 		//getDir().addDirectory(projection);
 		getDir().addDirectory(gausFitDir);
@@ -1927,7 +1983,7 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
     	//PCALcalib detview = new PCALcalib("/home/ncompton/Work/workspace/Calibration/src/org/jlab/calib/fc-muon-3M-s2.evio");
     	
     	//Draws detector views
-    	PCALcalibv2 detview = new PCALcalibv2();
+    	TestStudy detview = new TestStudy();
     	
     	for(iteration = 0; iteration < detview.numiterations; ++iteration)
     	{
