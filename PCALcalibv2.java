@@ -70,7 +70,6 @@ public class PCALcalibv2 extends JFrame implements IDetectorListener, IDetectorP
     public CanvasViewPanel        canvasView;
 	public TEmbeddedCanvas         canvas,canvas1,canshape;
 	
-    
     int nProcessed = 3000000;
 
     // ColorPalette class defines colors 

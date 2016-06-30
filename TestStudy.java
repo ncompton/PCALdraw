@@ -343,9 +343,9 @@ public class TestStudy extends JFrame implements IDetectorListener, IDetectorPro
 		    canvas.draw(exp,"same");
 		    
 		    genexp = new F1D("exp+p0",0.0,umaxX[u]);
-		    genexp.setParameter(0,genuA[u]);
-		    genexp.setParameter(1,genuB[u]);
-		    genexp.setParameter(2,genuC[u]);
+		    genexp.setParameter(0,100.0);
+		    genexp.setParameter(1,-1.0/376.0);
+		    genexp.setParameter(2,0.0);
 		    genexp.setLineColor(2);
 		    genexp.setLineStyle(2);
 		    canvas.draw(genexp,"same");
@@ -366,10 +366,14 @@ public class TestStudy extends JFrame implements IDetectorListener, IDetectorPro
 	        canvas.cd(2);
 	        canvas.draw(g1);
 	        
+	        name = String.format("attvfit_%02d", v + 1);
+		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
+		    canvas.draw(exp,"same");
+	        
 	        genexp1 = new F1D("exp+p0",0.0,vmaxX[v]);
-		    genexp1.setParameter(0,genvA[v]);
-		    genexp1.setParameter(1,genvB[v]);
-		    genexp1.setParameter(2,genvC[v]);
+		    genexp1.setParameter(0,100.0);
+		    genexp1.setParameter(1,-1.0/376.0);
+		    genexp1.setParameter(2,0.0);
 		    genexp1.setLineColor(2);
 		    genexp1.setLineStyle(2);
 		    canvas.draw(genexp1,"same");
@@ -390,10 +394,14 @@ public class TestStudy extends JFrame implements IDetectorListener, IDetectorPro
 	        canvas.cd(4);
 	        canvas.draw(g1);
 	        
+	        name = String.format("attwfit_%02d", w + 1);
+		    exp  = (F1D)getDir().getDirectory(namedir).getObject(name);
+		    canvas.draw(exp,"same");
+	        
 	        genexp2 = new F1D("exp+p0",0.0,wmaxX[w]);
-		    genexp2.setParameter(0,genwA[w]);
-		    genexp2.setParameter(1,genwB[w]);
-		    genexp2.setParameter(2,genwC[w]);
+		    genexp2.setParameter(0,100.0);
+		    genexp2.setParameter(1,-1.0/376.0);
+		    genexp2.setParameter(2,0.0);
 		    genexp2.setLineColor(2);
 		    genexp2.setLineStyle(2);
 		    canvas.draw(genexp2,"same");
@@ -455,7 +463,7 @@ public class TestStudy extends JFrame implements IDetectorListener, IDetectorPro
 	        canshape.cd(1);
 	        h1  = (MyH1D)this.Hpixarea;
 	        canshape.getPad().setAxisRange(0.0, 50.0, 0.0, 1.1 * h1.getBinContent(h1.getMaximumBin()));
-	        canshape.draw(h1);
+	        canshape.draw(h1,"same");
 	        hsum1  = new MyH1D("thisarea", 200, 0.0, 100.0);
 	        area = pcal.shapeArea(pixshape);
 	        //System.out.println("area: " + area);
@@ -1011,8 +1019,8 @@ public class TestStudy extends JFrame implements IDetectorListener, IDetectorPro
             		pixelfilling4 = (MyH4S)getDir().getDirectory(namedir).getObject(name);
             		if(iteration != 0)
             		{
-	            		if(Math.abs(ad[1] - (100.0*Math.exp((-1.0/376.0) * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 20.0
-	            		&& Math.abs(ad[2] - (100.0*Math.exp((-1.0/376.0) * wdpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 20.0)
+	            		if(Math.abs(ad[1] - (100.0*Math.exp((-1.0/376.0) * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 30.0
+	            		&& Math.abs(ad[2] - (100.0*Math.exp((-1.0/376.0) * wdpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 30.0)
 	            			pixelfilling4.fill(ad[0], rs[0], rs[1], rs[2]);
             		}
             		else
@@ -1026,8 +1034,8 @@ public class TestStudy extends JFrame implements IDetectorListener, IDetectorPro
             		pixelfilling4 = (MyH4S)getDir().getDirectory(namedir).getObject(name);
             		if(iteration != 0)
             		{
-	            		if(Math.abs(ad[0] - (100.0*Math.exp((-1.0/376.0) * udpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 20.0
-	            		&& Math.abs(ad[2] - (100.0*Math.exp((-1.0/376.0) * wdpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 20.0)
+	            		if(Math.abs(ad[0] - (100.0*Math.exp((-1.0/376.0) * udpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 30.0
+	            		&& Math.abs(ad[2] - (100.0*Math.exp((-1.0/376.0) * wdpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 30.0)
 	            			pixelfilling4.fill(ad[1], rs[0], rs[1], rs[2]);
             		}
             		else
@@ -1042,8 +1050,8 @@ public class TestStudy extends JFrame implements IDetectorListener, IDetectorPro
             		pixelfilling4 = (MyH4S)getDir().getDirectory(namedir).getObject(name);
             		if(iteration != 0)
             		{
-	            		if(Math.abs(ad[1] - (100.0*Math.exp((-1.0/376.0) * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 20.0
-	            		&& Math.abs(ad[0] - (100.0*Math.exp((-1.0/376.0) * udpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 20.0)
+	            		if(Math.abs(ad[1] - (100.0*Math.exp((-1.0/376.0) * vdpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 30.0
+	            		&& Math.abs(ad[0] - (100.0*Math.exp((-1.0/376.0) * udpixel[rs[0]-1][rs[1]-1][rs[2]-1]))) < 30.0)
 	            			pixelfilling4.fill(ad[2], rs[0], rs[1], rs[2]);
             		}
             		else
@@ -1211,8 +1219,10 @@ public class TestStudy extends JFrame implements IDetectorListener, IDetectorPro
 			
 			
 			myfunc1 = new F1D("exp",0.0,umaxX[ustrip]);
+			name = String.format("attufit_%02d", ustrip + 1);
+			myfunc1.setName(name);
 			myfunc1.setParameter(0, 100.0);
-			myfunc1.parameter(0).setLimits(99.99, 100.01);
+			myfunc1.parameter(0).setLimits(95.0, 105.0);
 			myfunc1.setParameter(1, -0.00265);
 			attengraph.fit(myfunc1);
 			A = myfunc1.getParameter(0);
@@ -1224,6 +1234,7 @@ public class TestStudy extends JFrame implements IDetectorListener, IDetectorPro
 			
 			
 			//create function and fit
+			/*
 			myfunc2 = new F1D("exp+p0",0.0,umaxX[ustrip]); //"mycustomfunc",
 			name = String.format("attufit_%02d", ustrip + 1);
 			myfunc2.setName(name);
@@ -1240,8 +1251,8 @@ public class TestStudy extends JFrame implements IDetectorListener, IDetectorPro
 				myfunc2.parameter(2).setValue(15.0);
 			myfunc2.setParLimits(2, 0.0, 105.0);
 			attengraph.fit(myfunc2);
-			
-			fitdir.add(myfunc2);
+			*/
+			fitdir.add(myfunc1);
 			fitdir.add(attengraph);
 		}
 		writer.close();
@@ -1289,25 +1300,17 @@ public class TestStudy extends JFrame implements IDetectorListener, IDetectorPro
 			
 			
 			myfunc1 = new F1D("exp",0.0,vmaxX[vstrip]);
+			name = String.format("attvfit_%02d", vstrip + 1);
+			myfunc1.setName(name);
 			myfunc1.setParameter(0, 100.0);
-			myfunc1.parameter(0).setLimits(99.99, 100.01);
+			myfunc1.parameter(0).setLimits(95.0, 105.0);
 			myfunc1.setParameter(1, -0.00265);
 			attengraph.fit(myfunc1);
 			A = myfunc1.getParameter(0);
 			B = myfunc1.getParameter(1);
 			writer.println(vstrip + "  " + vmaxX[vstrip] + "  " + A + "  " + B);
-			
-			
-			
-		
-			//create function and fit
-			myfunc2 = new F1D("exp",0.0,500.0); //"mycustomfunc",
-			myfunc2.parameter(0).setValue(100.0);
-			//myfunc2.setParLimits(0, 0.0, 200.0);
-			myfunc2.parameter(1).setValue(-0.002659574468);
-			//myfunc2.setParLimits(1, 0.0, 105.0);
-			//attengraph.fit(myfunc2);
-			
+
+			fitdir.add(myfunc1);
 			fitdir.add(attengraph);
 		}
 		writer.close();
@@ -1351,23 +1354,17 @@ public class TestStudy extends JFrame implements IDetectorListener, IDetectorPro
 			attengraph = graphn(name,counter,x,centroids,ex,ey);
 			
 			myfunc1 = new F1D("exp",0.0,wmaxX[wstrip]);
+			name = String.format("attwfit_%02d", wstrip + 1);
+			myfunc1.setName(name);
 			myfunc1.setParameter(0, 100.0);
-			myfunc1.parameter(0).setLimits(99.99, 100.01);
+			myfunc1.parameter(0).setLimits(95.0, 105.0);
 			myfunc1.setParameter(1, -0.00265);
 			attengraph.fit(myfunc1);
 			A = myfunc1.getParameter(0);
 			B = myfunc1.getParameter(1);
 			writer.println(wstrip + "  " + wmaxX[wstrip] + "  " + A + "  " + B);
 			
-		
-			//create function and fit
-			myfunc2 = new F1D("exp",0.0,500.0); //"mycustomfunc",
-			myfunc2.parameter(0).setValue(100.0);
-			//myfunc2.setParLimits(0, 0.0, 200.0);
-			myfunc2.parameter(1).setValue(-0.002659574468);
-			//myfunc2.setParLimits(1, 0.0, 105.0);
-			//attengraph.fit(myfunc2);
-			
+			fitdir.add(myfunc1);
 			fitdir.add(attengraph);
 		}
 		writer.close();
@@ -1799,7 +1796,7 @@ public class TestStudy extends JFrame implements IDetectorListener, IDetectorPro
 				
 				F1D myfunc1 = new F1D("exp",0.0,400.0);
 				myfunc1.setParameter(0, 100.0);
-				myfunc1.parameter(0).setLimits(99.99, 100.01);
+				myfunc1.parameter(0).setLimits(95.0, 105.0);
 				myfunc1.setParameter(1, -0.00265);
 				attengraph.fit(myfunc1);
 				A = myfunc1.getParameter(0);
